@@ -242,3 +242,36 @@ def test_random_games_finish(seed):
     assert g.result()["reason"] in ("last_king", "repetition")
     s = g.state
     assert sum(1 for row in s.board for p in row if p and p[1] == "K") == len(s.active_players())
+
+
+# --- scoring rules observed on chess.com ----------------------------------------------
+
+def test_dead_king_capture_worth_three():
+    from chaturaji.game import eliminate
+    s = make_state({"a1": "RR", "a5": "BK", "e8": "YK", "h1": "GK", "e1": "RK"}, turn=1)
+    s = eliminate(s, "B")  # Blue resigns on its turn: king becomes XK
+    assert s.board[3][0] == "XK" and s.current_player() == "Y"
+    s.turn = 4  # Red to move
+    s2, info = play(s, "a1a5")
+    assert info.points == 3 and s2.scores["R"] == 3
+
+
+def test_last_standing_collects_dead_kings():
+    from chaturaji.game import eliminate
+    s = make_state({"a1": "RR", "a5": "BK", "e8": "YK", "h1": "GK", "e1": "RK"})
+    s = eliminate(s, "B")
+    s = eliminate(s, "Y")
+    assert s.scores["R"] == 0 and s.scores["G"] == 0
+    s = eliminate(s, "G")  # Red is last: +3 for each of the 3 dead kings
+    assert game_over_reason(s) == "last_king"
+    assert s.scores["R"] == 9
+    assert eliminate(s, "R").scores == s.scores  # nothing happens after the game ends
+
+
+def test_repetition_gives_remaining_players_two():
+    s = make_state({"a1": "RK", "h8": "YK"}, eliminated={"B", "G"})
+    for _ in range(2):
+        for uci in ("a1a2", "h8h7", "a2a1", "h7h8"):
+            s, info = play(s, uci)
+    assert game_over_reason(s) == "repetition"
+    assert s.scores == {"R": 2, "B": 0, "Y": 2, "G": 0}  # both remaining players +2

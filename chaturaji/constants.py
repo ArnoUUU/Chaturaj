@@ -13,8 +13,18 @@ PIECE_TYPES = ("K", "B", "N", "R", "P")
 DEAD = "X"
 OWNERS = COLORS + (DEAD,)
 
-# Points for capturing an *active* piece. Dead pieces are worth 0.
+# Points for capturing an *active* piece. Dead pieces are worth 0, except a dead king.
 PIECE_POINTS = {"P": 1, "N": 3, "K": 3, "B": 5, "R": 5}
+
+# Scoring rules observed in real chess.com games (see PLAN.md):
+# - A player who resigns / times out / claims the win leaves a dead king ("XK") on the
+#   board. Capturing it is still worth 3 points.
+# - When the game ends with one player left, that player gets 3 points for every dead
+#   king still on the board.
+# - Threefold repetition gives every remaining player 2 points (seen in one game so far).
+DEAD_KING_POINTS = 3
+LAST_STANDING_POINTS_PER_DEAD_KING = 3
+REPETITION_POINTS = 2
 
 # Bonus for a move that gives check and leaves the mover attacking this many active
 # enemy kings at once. Check never forces a king to move; it only scores.

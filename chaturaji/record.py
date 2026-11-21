@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from .game import MoveInfo, apply_move, game_over_reason, winners
+from .game import MoveInfo, apply_move, eliminate, game_over_reason, winners
 from .moves import Move
 from .notation import move_table, to_san
 from .state import ChaturajiState
@@ -40,6 +40,23 @@ class Game:
     def play_uci(self, text: str) -> MoveInfo:
         return self.play(Move.from_uci(text, self.state.board))
 
+    def eliminate(self, color: str, reason: str = "resign") -> None:
+        """Record a resignation/timeout ("R"/"T" in the move table, like chess.com)."""
+        self.history.append({
+            "turn": self.state.turn,
+            "color": color,
+            "uci": None,
+            "event": reason,
+            "san": "T" if reason == "timeout" else "R",
+            "points": 0,
+        })
+        self.state = eliminate(self.state, color)
+
+    def _replay(self, entry: dict, state: ChaturajiState) -> ChaturajiState:
+        if entry.get("uci") is None:
+            return eliminate(state, entry["color"])
+        return apply_move(state, Move.from_uci(entry["uci"], state.board))[0]
+
     def result(self) -> dict:
         return {
             "reason": game_over_reason(self.state),
@@ -55,7 +72,7 @@ class Game:
         out = [self.initial.copy()]
         s = self.initial
         for h in self.history:
-            s, _ = apply_move(s, Move.from_uci(h["uci"], s.board))
+            s = self._replay(h, s)
             out.append(s)
         return out
 
@@ -74,7 +91,10 @@ class Game:
     def from_dict(cls, data: dict) -> "Game":
         game = cls(ChaturajiState.from_dict(data["initial"]), data.get("metadata"))
         for h in data["moves"]:
-            game.play_uci(h["uci"])
+            if h.get("uci") is None:
+                game.eliminate(h["color"], h.get("event", "resign"))
+            else:
+                game.play_uci(h["uci"])
         return game
 
     def save(self, path: str | Path) -> None:

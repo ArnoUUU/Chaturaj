@@ -4,7 +4,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .constants import BOARD_SIZE, CHECK_BONUS, DEAD, PIECE_POINTS, TURN_ORDER
+from .constants import (
+    BOARD_SIZE,
+    CHECK_BONUS,
+    DEAD,
+    DEAD_KING_POINTS,
+    LAST_STANDING_POINTS_PER_DEAD_KING,
+    PIECE_POINTS,
+    REPETITION_POINTS,
+    TURN_ORDER,
+)
 from .moves import Move, kings_attacked_by, legal_moves
 from .state import ChaturajiState, board_key
 
@@ -19,6 +28,7 @@ class MoveInfo:
     check_bonus: int
     checked: frozenset[str]    # active enemy kings the mover attacks after the move
     eliminated: str | None     # color eliminated by this move (king captured)
+    end_bonus: tuple[tuple[str, int], ...] = ()  # (color, points) awarded because the game ended
 
 
 def apply_move(state: ChaturajiState, move: Move) -> tuple[ChaturajiState, MoveInfo]:
@@ -39,7 +49,9 @@ def apply_move(state: ChaturajiState, move: Move) -> tuple[ChaturajiState, MoveI
 
     points = 0
     eliminated = None
-    if captured is not None and captured[0] != DEAD:
+    if captured == DEAD + "K":  # king of a player who resigned / timed out
+        points += DEAD_KING_POINTS
+    elif captured is not None and captured[0] != DEAD:
         points += PIECE_POINTS[captured[1]]
         if captured[1] == "K":
             eliminated = captured[0]
@@ -61,8 +73,51 @@ def apply_move(state: ChaturajiState, move: Move) -> tuple[ChaturajiState, MoveI
     key = board_key(board)
     new.position_counts[key] = new.position_counts.get(key, 0) + 1
 
-    info = MoveInfo(color, piece, captured, points, bonus, frozenset(checked_after), eliminated)
+    end = _award_end_bonus(new)
+    points += dict(end).get(color, 0)
+    info = MoveInfo(color, piece, captured, points, bonus, frozenset(checked_after), eliminated, end)
     return new, info
+
+
+def _award_end_bonus(state: ChaturajiState) -> tuple[tuple[str, int], ...]:
+    """Add end-of-game points if `state` just ended the game. Call once per transition
+    (after a move or an elimination on a state where the game was still running)."""
+    reason = game_over_reason(state)
+    awards: dict[str, int] = {}
+    if reason == "last_king":
+        dead_kings = sum(row.count(DEAD + "K") for row in state.board)
+        for color in state.active_players():
+            awards[color] = LAST_STANDING_POINTS_PER_DEAD_KING * dead_kings
+    elif reason == "repetition":
+        for color in state.active_players():
+            awards[color] = REPETITION_POINTS
+    out = tuple((c, p) for c, p in awards.items() if p)
+    for c, p in out:
+        state.scores[c] += p
+    return out
+
+
+def eliminate(state: ChaturajiState, color: str) -> ChaturajiState:
+    """Remove `color` without a king capture (resignation / timeout in real games).
+
+    All of that color's pieces, king included, become dead (X). The dead king is still
+    worth 3 to whoever captures it, and to the last player standing if it is never
+    captured. If it was that color's turn, play passes to the next active player.
+    Returns a new state.
+    """
+    if color in state.eliminated or is_game_over(state):
+        return state.copy()
+    new = state.copy()
+    new.eliminated.add(color)
+    for r in range(BOARD_SIZE):
+        for c in range(BOARD_SIZE):
+            p = new.board[r][c]
+            if p is not None and p[0] == color:
+                new.board[r][c] = DEAD + p[1]
+    if new.current_player() == color:
+        _advance_turn(new)
+    _award_end_bonus(new)
+    return new
 
 
 def _advance_turn(state: ChaturajiState) -> None:

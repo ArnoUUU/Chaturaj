@@ -66,7 +66,9 @@ def move_table(history: list[dict], col_width: int = 10) -> str:
     `history` entries need "turn", "color" and "san" keys. Turns that were skipped
     (eliminated players) show "--".
     """
-    by_turn = {h["turn"]: h["san"] for h in history}
+    by_turn: dict[int, str] = {}
+    for h in history:  # an off-turn resignation can share a slot with a move
+        by_turn[h["turn"]] = (by_turn[h["turn"]] + " " + h["san"]) if h["turn"] in by_turn else h["san"]
     if not by_turn:
         return ""
     last_round = max(by_turn) // 4

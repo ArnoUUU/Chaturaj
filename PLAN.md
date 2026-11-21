@@ -24,6 +24,13 @@ Source: https://www.chess.com/terms/chaturaji, plus rules confirmed by the user.
 - **Check bonuses:** a move that gives check and leaves the mover attacking 2 active enemy
   kings at once scores +1. Three kings at once scores +5. Holding an existing double check
   while making a quiet move elsewhere does not score again.
+- **Resign / timeout / claim win** (`R`/`T` in PGN4): that player is out and all their
+  pieces become dead, but their **dead king is still worth 3** to whoever captures it.
+- **End-of-game points** (checked against 7 real chess.com games, all final scores match):
+  - Last player standing gets **+3 for every dead king still on the board**
+    (chess.com shows this as e.g. "(Red +6)").
+  - **Threefold repetition: +2 to each remaining player.** This is based on one game so
+    far, and the value is `REPETITION_POINTS` in `constants.py`.
 - **Elimination:** when a king is captured, that player can no longer move and their turns
   are skipped. Their remaining pieces become **colorless dead pieces** (`X` + type): they
   stay on the board, block, can be captured by anyone, and are worth **0** points.
