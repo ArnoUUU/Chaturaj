@@ -19,6 +19,9 @@ Source: https://www.chess.com/terms/chaturaji, plus rules confirmed by the user.
 - **Promotion:** a pawn reaching the 8th rank relative to its own side (the far edge in its
   direction) always becomes a Rook/Boat.
 - **No check restriction:** kings may walk into attack, and are captured like any piece.
+- **Checkmate = king capture.** In Chaturaji a "checkmate" is when a king is captured.
+  chess.com's "3-point checkmate" (`PointsForMate=3`) is the +3 for capturing a king, and
+  chat lines like "X checkmated!" mean X's king was taken. Notation marks it with `#`.
   There is always at least one legal move.
 - **Capture points (active pieces only):** P +1, N +3, K +3, B +5, R +5.
 - **Check bonuses:** a move that gives check and leaves the mover attacking 2 active enemy
