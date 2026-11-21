@@ -1,0 +1,169 @@
+"""Multi-player (max^n) PUCT Monte Carlo Tree Search.
+
+Values are 4-vectors in absolute seat order (R, B, Y, G), each in [0, 1]: the estimated
+share of "finishes with the top score". At each node the player to move picks the child
+that maximises its own entry.
+"""
+
+from __future__ import annotations
+
+import math
+
+import numpy as np
+import torch
+
+from chaturaji.constants import TURN_ORDER
+from chaturaji.game import apply_move, is_game_over
+from chaturaji.moves import Move
+from chaturaji.state import ChaturajiState
+
+from .features import encode, legal_canonical, mover_index, outcome_vectors, to_absolute
+
+
+class UniformEvaluator:
+    """No network: uniform priors and a neutral value. Useful for tests and baselines."""
+
+    def __call__(self, state: ChaturajiState):
+        moves, idx = legal_canonical(state)
+        priors = np.full(len(moves), 1.0 / len(moves), dtype=np.float32)
+        return moves, idx, priors, np.full(4, 0.25, dtype=np.float32)
+
+
+class NetEvaluator:
+    def __init__(self, model: torch.nn.Module, device: str = "cpu"):
+        self.model = model
+        self.device = device
+
+    @torch.no_grad()
+    def __call__(self, state: ChaturajiState):
+        moves, idx = legal_canonical(state)
+        x = torch.from_numpy(encode(state)).unsqueeze(0).to(self.device)
+        logits, value_logits, _ = self.model(x)
+        legal_logits = logits[0, torch.from_numpy(idx).to(self.device)]
+        priors = torch.softmax(legal_logits, 0).cpu().numpy()
+        v_rel = torch.softmax(value_logits[0], 0).cpu().numpy()
+        return moves, idx, priors, to_absolute(v_rel, mover_index(state))
+
+
+class Node:
+    __slots__ = ("state", "mover", "moves", "actions", "priors", "children",
+                 "child_n", "child_w", "value", "terminal")
+
+    def __init__(self, state: ChaturajiState):
+        self.state = state
+        self.mover = TURN_ORDER.index(state.current_player())
+        self.moves: list[Move] | None = None
+        self.actions: np.ndarray | None = None
+        self.priors: np.ndarray | None = None
+        self.children: list[Node | None] = []
+        self.child_n: np.ndarray | None = None
+        self.child_w: np.ndarray | None = None
+        self.value: np.ndarray | None = None
+        self.terminal = False
+
+    @property
+    def expanded(self) -> bool:
+        return self.moves is not None
+
+
+SELECTIONS = ("puct", "ucb1")
+
+
+class MCTS:
+    """Tree search with a choice of selection rule.
+
+    selection="puct": AlphaZero rule, Q + c_puct * P * sqrt(N) / (1 + n). Uses the
+                      network's move priors P.
+    selection="ucb1": classic Upper Confidence Bound, Q + c_ucb * sqrt(ln N / n). Every
+                      child is tried once first (highest prior first), so priors only
+                      break ties. Works with a value-only evaluator.
+    Q is always the value for the player to move at that node (max^n).
+    """
+
+    def __init__(self, evaluator, num_simulations: int = 100, c_puct: float = 1.5,
+                 dirichlet_alpha: float = 0.3, noise_eps: float = 0.25,
+                 max_turn: int | None = 400, rng: np.random.Generator | None = None,
+                 selection: str = "puct", c_ucb: float = math.sqrt(2)):
+        if selection not in SELECTIONS:
+            raise ValueError(f"selection must be one of {SELECTIONS}")
+        self.evaluator = evaluator
+        self.num_simulations = num_simulations
+        self.selection = selection
+        self.c_ucb = c_ucb
+        self.c_puct = c_puct
+        self.dirichlet_alpha = dirichlet_alpha
+        self.noise_eps = noise_eps
+        self.max_turn = max_turn
+        self.rng = rng or np.random.default_rng()
+
+    def is_terminal(self, state: ChaturajiState) -> bool:
+        return is_game_over(state) or (self.max_turn is not None and state.turn >= self.max_turn)
+
+    def _evaluate(self, node: Node) -> np.ndarray:
+        if self.is_terminal(node.state):
+            node.terminal = True
+            node.value = outcome_vectors(node.state)[0]
+            return node.value
+        moves, actions, priors, value = self.evaluator(node.state)
+        node.moves, node.actions, node.priors = moves, actions, priors.astype(np.float64)
+        node.children = [None] * len(moves)
+        node.child_n = np.zeros(len(moves), dtype=np.float64)
+        node.child_w = np.zeros((len(moves), 4), dtype=np.float64)
+        node.value = value
+        return value
+
+    def _select(self, node: Node) -> int:
+        if self.selection == "ucb1":
+            return self._select_ucb1(node)
+        return self._select_puct(node)
+
+    def _select_ucb1(self, node: Node) -> int:
+        unvisited = np.flatnonzero(node.child_n == 0)
+        if len(unvisited):
+            return int(unvisited[np.argmax(node.priors[unvisited])])
+        n_total = node.child_n.sum()
+        q = node.child_w[:, node.mover] / node.child_n
+        u = self.c_ucb * np.sqrt(math.log(n_total) / node.child_n)
+        return int(np.argmax(q + u))
+
+    def _select_puct(self, node: Node) -> int:
+        n_total = node.child_n.sum()
+        visited = node.child_n > 0
+        q = np.where(visited, node.child_w[:, node.mover] / np.maximum(node.child_n, 1),
+                     node.value[node.mover])  # first-play urgency = parent estimate
+        u = self.c_puct * node.priors * math.sqrt(n_total + 1) / (1 + node.child_n)
+        return int(np.argmax(q + u))
+
+    def search(self, root: Node, add_noise: bool = False) -> Node:
+        if not root.expanded and not root.terminal:
+            self._evaluate(root)
+        if root.terminal:
+            return root
+        if add_noise:
+            noise = self.rng.dirichlet([self.dirichlet_alpha] * len(root.priors))
+            root.priors = (1 - self.noise_eps) * root.priors + self.noise_eps * noise
+        for _ in range(self.num_simulations):
+            node, path = root, []
+            while node.expanded and not node.terminal:
+                i = self._select(node)
+                path.append((node, i))
+                child = node.children[i]
+                if child is None:
+                    child = Node(apply_move(node.state, node.moves[i])[0])
+                    node.children[i] = child
+                node = child
+            value = node.value if node.terminal else self._evaluate(node)
+            for n, i in path:
+                n.child_n[i] += 1
+                n.child_w[i] += value
+        return root
+
+    @staticmethod
+    def visit_policy(root: Node) -> np.ndarray:
+        return root.child_n / root.child_n.sum()
+
+    def choose(self, root: Node, temperature: float = 0.0) -> int:
+        if temperature <= 1e-6:
+            return int(np.argmax(root.child_n))
+        p = root.child_n ** (1.0 / temperature)
+        return int(self.rng.choice(len(p), p=p / p.sum()))
