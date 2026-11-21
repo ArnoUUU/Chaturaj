@@ -1,3 +1,11 @@
 __pycache__/
 .pytest_cache/
 games/
+bot/runs/
+*.pt
+# saved, labelled models are kept in git (see models/README.md)
+!models/**/model.pt
+# run logs and Slurm output stay local (they can get large)
+logs/
+scraper/.selenium-profile/
+scraper/data/
