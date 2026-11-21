@@ -1,0 +1,16 @@
+# Conda environment for GPU runs (Miniforge / conda-forge).
+# PyTorch no longer publishes conda packages, so torch comes from its official CUDA
+# wheels via pip inside this env. cu128 = CUDA 12.8 runtime, bundled in the wheel
+# (only an NVIDIA driver is needed on the node).
+name: chaturaji
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - numpy
+  - pytest
+  - pip
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu128
+      - torch
+      - selenium
