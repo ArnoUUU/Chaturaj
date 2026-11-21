@@ -93,8 +93,11 @@ def train(args) -> str:
         start_iter = (ckpt.get("iteration") or -1) + 1
         step = ckpt.get("step", 0)
     else:
-        kind, config = args.model, model_config(args)
-        model = registry.build_model(kind, config).to(device)
+        if args.init:  # new run starting from an existing model's weights (e.g. supervised)
+            model, kind, config, _ = registry.load_model(args.init, device)
+        else:
+            kind, config = args.model, model_config(args)
+            model = registry.build_model(kind, config).to(device)
         label = registry.make_label(kind, config, args.selection, args.sims, args.iterations,
                                     device, args.tag)
         ckpt, start_iter, step = None, 0, 0
@@ -167,6 +170,8 @@ def parse_args(argv=None):
     ap.add_argument("--tag", default=None, help="short run name used in the label, e.g. smoke-cpu")
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     ap.add_argument("--resume", default=None, help="models/<label> folder or model.pt to continue")
+    ap.add_argument("--init", default=None,
+                    help="start a NEW run (new label) from models/<label> weights, e.g. a supervised model")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--model", choices=registry.KINDS, default="mlp")
     ap.add_argument("--embed", type=int, help="mlp: encoding width (default 512)")

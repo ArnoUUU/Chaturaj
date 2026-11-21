@@ -172,3 +172,37 @@ def test_training_run_saves_labelled_model(tmp_path, monkeypatch, kind, selectio
     assert meta["status"] == "complete" and meta["evaluation"]["games"] == 1
     assert (tmp_path / "logs" / label / "log_0000.jsonl").exists()
     assert list((tmp_path / "logs" / label / "games").glob("*.json"))
+
+
+def test_supervised_on_records(tmp_path, monkeypatch):
+    from bot import registry, supervised
+    from chaturaji.simulate import random_game
+    monkeypatch.setattr(registry, "MODELS_DIR", tmp_path / "models")
+    monkeypatch.setattr(registry, "LOGS_DIR", tmp_path / "logs")
+    rec = tmp_path / "records"
+    rec.mkdir()
+    for seed in range(3):
+        g = random_game(seed, max_plies=40)
+        g.metadata["seats"] = {"Red": {"name": "me"}, "Blue": {"name": "b"},
+                               "Yellow": {"name": "y"}, "Green": {"name": "g"}}
+        g.save(rec / f"{seed}.json")
+    game = supervised.Game.load(rec / "0.json")
+    samples = supervised.samples_from_game(game, registry.encoder("mlp"))
+    assert len(samples) == sum(1 for h in game.history if h["uci"])
+    assert all(np.isclose(s.policy.sum(), 1.0) and s.policy.max() > 0.8 for s in samples)
+    mine = supervised.samples_from_game(game, registry.encoder("mlp"), only_player="me")
+    assert 0 < len(mine) < len(samples)
+    label = supervised.run(supervised.parse_args([
+        "--records", str(rec), "--tag", "unit", "--device", "cpu", "--embed", "16",
+        "--widths", "32", "16", "8", "--epochs", "2", "--batch", "16", "--eval-games", "1",
+        "--eval-sims", "4"]))
+    meta = json.loads((tmp_path / "models" / label / "meta.json").read_text())
+    assert meta["status"] == "complete" and meta["data"]["games"] == 3
+    assert "top1" in meta["history"][-1]["val"]
+    # self-play can start from it under a new label
+    from bot import train as train_mod
+    new = train_mod.train(train_mod.parse_args([
+        "--init", str(tmp_path / "models" / label), "--tag", "rl", "--device", "cpu",
+        "--iterations", "1", "--games", "1", "--sims", "4", "--max-plies", "20",
+        "--steps", "1", "--batch", "8", "--eval-games", "0"]))
+    assert new != label and (tmp_path / "models" / label / "model.pt").exists()
