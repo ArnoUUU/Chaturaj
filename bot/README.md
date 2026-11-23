@@ -28,10 +28,18 @@ iterations, device), for example
 `2026-11-21_1552_smoke-cpu_mlp-e64-w128x64x32_ucb1-s16_it2_cpu`, and writes:
 
 ```
-models/<label>/model.pt, meta.json   model + run details + evaluation vs random (see models/README.md)
+models/<label>/model.pt, meta.json   model + run details + final evaluation (see models/README.md)
 models/index.jsonl                   one line per finished run
 logs/<label>/log_0000.jsonl, ...     chunked JSON-lines log (--log-chunk lines per file)
 logs/<label>/games/*.json            sample self-play games
+```
+
+The final evaluation puts the `--init` model (e.g. the supervised warm start) in the three
+other seats; without `--init` it uses random movers, and `--eval-opponent` picks any saved
+model. Compare past models and snapshots directly (seats rotate; use multiples of 4 games):
+```powershell
+python -m bot.evaluate models/<new> --opponent models/<supervised> --games 40
+python -m bot.evaluate models/<new> --opponent models/<new>/snapshots/<snap>.pt random --games 40
 ```
 
 Watch a self-play game, or continue a run:
@@ -56,7 +64,7 @@ python -m bot.gpu_check
 | `registry.py` | model kinds, labels, save/load to `models/`, chunked logger for `logs/` |
 | `mcts.py` | 4-player search with PUCT or UCB1 selection (each player maximizes its own value) |
 | `selfplay.py` | plays one game and returns training samples and a game record |
-| `evaluate.py` | test-run evaluation against random players (each seat in turn) |
+| `evaluate.py` | evaluation: the bot in one seat vs random movers or a saved model in the other 3 (seats rotate); CLI for comparing past models |
 | `train.py` | replay buffer, loss, training loop, CLI |
 | `gpu_check.py` | GPU/CPU check and timings; reports go to `logs/gpu_check/` |
 

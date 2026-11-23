@@ -234,3 +234,25 @@ def test_supervised_on_records(tmp_path, monkeypatch):
         "--iterations", "1", "--games", "1", "--sims", "4", "--max-plies", "20",
         "--steps", "1", "--batch", "8", "--eval-games", "0"]))
     assert new != label and (tmp_path / "models" / label / "model.pt").exists()
+
+
+def test_evaluate_against_saved_model_and_resolve_opponent(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    from bot import evaluate, registry, train
+    from bot.mcts import UniformEvaluator
+
+    res = evaluate.evaluate(UniformEvaluator(), games=4, sims=2, opponent=UniformEvaluator(),
+                            opponent_name="old", max_plies=12)
+    assert res["opponent"] == "old" and res["games"] == 4 and 0 <= res["score_share"] <= 1
+    assert evaluate.model_name("models/run_a/snapshots/snap_001.pt") == "run_a/snap_001"
+    assert evaluate.model_name("models/run_a/model.pt") == "run_a"
+
+    monkeypatch.setattr(registry, "MODELS_DIR", tmp_path)
+    args = lambda **kw: SimpleNamespace(**{"eval_opponent": None, "init": None, "resume": None, **kw})
+    assert train.resolve_eval_opponent(args(init="models/sup"), "x") == "models/sup"
+    assert train.resolve_eval_opponent(args(init="models/sup", eval_opponent="random"), "x") == "random"
+    assert train.resolve_eval_opponent(args(), "x") == "random"
+    (tmp_path / "run").mkdir()
+    (tmp_path / "run" / "meta.json").write_text('{"eval_opponent": "models/sup"}')
+    assert train.resolve_eval_opponent(args(resume="models/run"), "run") == "models/sup"

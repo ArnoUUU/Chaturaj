@@ -4,6 +4,7 @@
 #   sbatch cluster/selftrain.slurm                                        # new run, 24h
 #   sbatch --time=48:00:00 cluster/selftrain.slurm                        # longer run
 #   sbatch --export=ALL,INIT=models/<supervised-label> cluster/selftrain.slurm   # start from a model
+#                                  (the final evaluation then puts that model in the 3 other seats)
 #   sbatch --export=ALL,RESUME=models/<label> cluster/selftrain.slurm     # continue a run
 #   sbatch --export=ALL,RESUME=models/<label>/snapshots/<snap>.pt cluster/selftrain.slurm
 #
@@ -62,6 +63,9 @@ COMMON=(--device cuda --iterations 0 --hours "$HOURS" --snapshot-every "$SNAPSHO
         --selection "$SELECTION" --eval-games "$EVAL_GAMES"
         --quiet --print-every "$PRINT_EVERY" --keep-snapshots "$KEEP_SNAPSHOTS"
         --save-games-every "$SAVE_GAMES_EVERY")
+# Final evaluation opponent (3 seats): defaults to the INIT model (the supervised warm start),
+# carried over on RESUME. Set EVAL_OPPONENT=models/<label> or "random" to change it.
+if [ -n "${EVAL_OPPONENT:-}" ]; then COMMON+=(--eval-opponent "$EVAL_OPPONENT"); fi
 
 if [ -n "${RESUME:-}" ]; then
   python -m bot.train --resume "$RESUME" "${COMMON[@]}"

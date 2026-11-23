@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import itertools
+import json
 import random
 import time
 from collections import Counter, deque
@@ -33,7 +34,7 @@ import torch
 import torch.nn.functional as F
 
 from . import registry
-from .evaluate import evaluate_vs_random
+from .evaluate import evaluate_vs
 from .features import NUM_ACTIONS
 from .mcts import MCTS, SELECTIONS
 from .selfplay import Sample, play_game
@@ -116,12 +117,14 @@ def train(args) -> str:
         opt.load_state_dict(ckpt["optimizer"])
 
     # full records go to the log files; stdout (Slurm .out) only gets short lines
+    eval_opponent = resolve_eval_opponent(args, label)
     log = registry.ChunkedLogger(label, args.log_chunk, echo=not args.quiet)
     games_dir = log.dir / "games"
     games_dir.mkdir(exist_ok=True)
     meta = {"label": label, "kind": kind, "config": config, "params": registry.param_count(model),
             "args": vars(args), "environment": registry.environment_info(device),
-            "status": "running", "history": [], "evaluation": None}
+            "status": "running", "history": [], "evaluation": None,
+            "eval_opponent": eval_opponent}
     log.log("start", label=label, kind=kind, params=meta["params"], device=device,
             environment=meta["environment"])
     if args.quiet:
@@ -213,9 +216,9 @@ def train(args) -> str:
 
     if args.eval_games:
         model.eval()
-        meta["evaluation"] = evaluate_vs_random(registry.evaluator(kind, model, device),
-                                                args.eval_games, args.sims, args.selection,
-                                                seed=args.seed)
+        meta["evaluation"] = evaluate_vs(registry.evaluator(kind, model, device), eval_opponent,
+                                         device, games=args.eval_games, sims=args.sims,
+                                         selection=args.selection, seed=args.seed)
         log.log("evaluation", **meta["evaluation"])
         if args.quiet:
             print("evaluation", {k: v for k, v in meta["evaluation"].items() if not isinstance(v, (list, dict))}, flush=True)
@@ -226,6 +229,21 @@ def train(args) -> str:
     if args.quiet:
         print(f"done {label}", flush=True)
     return label
+
+
+def resolve_eval_opponent(args, label: str) -> str:
+    """Who fills the three other seats in the end-of-run evaluation: --eval-opponent if
+    given, else the model this run started from (--init, e.g. the supervised warm start),
+    kept across --resume via meta.json, else random movers."""
+    if args.eval_opponent:
+        return args.eval_opponent
+    if args.init:
+        return str(args.init)
+    meta_path = registry.model_dir(label) / "meta.json"
+    if args.resume and meta_path.exists():
+        prev = json.loads(meta_path.read_text(encoding="utf-8"))
+        return prev.get("eval_opponent") or (prev.get("args") or {}).get("init") or "random"
+    return "random"
 
 
 def parse_args(argv=None):
@@ -265,7 +283,10 @@ def parse_args(argv=None):
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--weight-decay", type=float, default=1e-4)
     ap.add_argument("--score-weight", type=float, default=0.5)
-    ap.add_argument("--eval-games", type=int, default=4, help="games vs random after training (0 = skip)")
+    ap.add_argument("--eval-games", type=int, default=4, help="evaluation games after training (0 = skip)")
+    ap.add_argument("--eval-opponent", default=None,
+                    help='model in the 3 other seats for the final evaluation: models/<label>, a snapshot '
+                         '.pt, or "random" (default: the --init model, else random)')
     ap.add_argument("--log-chunk", type=int, default=200, help="log lines per chunk file")
     return ap.parse_args(argv)
 

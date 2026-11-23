@@ -62,6 +62,8 @@ sbatch --time=08:00:00 --export=ALL,TAG=mlp-ucb1,SELECTION=ucb1,ITERS=100 cluste
 ### Long self-training with hourly snapshots
 `selftrain.slurm` self-plays and trains until 20 minutes before the job's time limit, then
 saves and evaluates. Every hour it keeps a copy in `models/<label>/snapshots/`.
+With `INIT`, the final evaluation puts that model (the supervised warm start) in the three
+other seats, also after `RESUME`; set `EVAL_OPPONENT=models/<label>` or `random` to change it.
 ```bash
 sbatch --time=24:00:00 cluster/selftrain.slurm
 sbatch --export=ALL,INIT=models/<supervised-label> cluster/selftrain.slurm    # start from a model
@@ -89,7 +91,7 @@ source cluster/activate.sh && python -m bot.gpu_check --require-gpu
 | Path | Contents |
 |---|---|
 | `models/<label>/model.pt` | weights, optimizer, model kind and config (resumable) |
-| `models/<label>/meta.json` | run arguments, GPU/torch/git info, Slurm job id, per-iteration losses, evaluation vs random |
+| `models/<label>/meta.json` | run arguments, GPU/torch/git info, Slurm job id, per-iteration losses, final evaluation |
 | `models/index.jsonl` | one line per finished run |
 | `logs/<label>/log_0000.jsonl …` | the run's log, split into chunks of `--log-chunk` lines |
 | `logs/<label>/games/` | sample self-play games (open with `python -m chaturaji.viewer`) |
