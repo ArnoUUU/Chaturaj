@@ -40,7 +40,8 @@ from collections import defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-PROFILE = HERE / ".selenium-profile"
+PROFILE = HERE / ".selenium-profile"          # Chrome profile (--browser chrome)
+FIREFOX_PROFILE = HERE / ".firefox-profile"   # Firefox profile (default browser)
 DATA = HERE / "data"
 ARCHIVE_URL = "https://www.chess.com/variants/chaturaji/archive"
 GAME_URL = "https://www.chess.com/variants/chaturaji/game/{id}"
@@ -224,15 +225,62 @@ def align_chat(chat: list[dict], moves: list[dict]) -> list[dict]:
 
 # --- browser -----------------------------------------------------------------------------
 
-def make_driver(headless: bool = False):
+def make_driver(headless: bool = False, browser: str = "firefox"):
+    """Firefox (default) or Chrome, each with its own saved profile so the login persists."""
     from selenium import webdriver
-    opts = webdriver.ChromeOptions()
-    PROFILE.mkdir(parents=True, exist_ok=True)
-    opts.add_argument(f"--user-data-dir={PROFILE}")
-    opts.add_argument("--window-size=1400,1000")
+    if browser == "chrome":
+        opts = webdriver.ChromeOptions()
+        PROFILE.mkdir(parents=True, exist_ok=True)
+        opts.add_argument(f"--user-data-dir={PROFILE}")
+        opts.add_argument("--window-size=1400,1000")
+        if headless:
+            opts.add_argument("--headless=new")
+        return webdriver.Chrome(options=opts)
+    opts = webdriver.FirefoxOptions()
+    FIREFOX_PROFILE.mkdir(parents=True, exist_ok=True)
+    opts.add_argument("-profile")
+    opts.add_argument(str(FIREFOX_PROFILE))
     if headless:
-        opts.add_argument("--headless=new")
-    return webdriver.Chrome(options=opts)
+        opts.add_argument("-headless")
+    driver = webdriver.Firefox(options=opts)
+    driver.set_window_size(1400, 1000)
+    load_cookies(driver)
+    return driver
+
+
+COOKIES = HERE / ".firefox-profile" / "chesscom-cookies.json"   # gitignored with the profile
+
+
+def save_cookies(driver) -> None:
+    """chess.com's login cookie is session-only, so Firefox drops it on exit; keep a copy."""
+    COOKIES.parent.mkdir(parents=True, exist_ok=True)
+    COOKIES.write_text(json.dumps(driver.get_cookies()), encoding="utf-8")
+
+
+def load_cookies(driver) -> None:
+    if not COOKIES.exists():
+        return
+    driver.get("https://www.chess.com/robots.txt")   # must be on the domain to add its cookies
+    for c in json.loads(COOKIES.read_text(encoding="utf-8")):
+        c.pop("sameSite", None) if c.get("sameSite") not in ("Strict", "Lax", "None") else None
+        try:
+            driver.add_cookie(c)
+        except Exception:
+            pass
+
+
+def wait_for_login(driver, timeout: float = 600) -> bool:
+    """Open the login page and wait until chess.com redirects away from it (logged in)."""
+    driver.get("https://www.chess.com/login")
+    end = time.time() + timeout
+    while time.time() < end:
+        url = driver.current_url
+        if "chess.com" in url and "/login" not in url:
+            time.sleep(3)  # let cookies settle
+            save_cookies(driver)
+            return True
+        time.sleep(1)
+    return False
 
 
 def wait_for(driver, js_condition: str, timeout: float = 20.0, poll: float = 0.4) -> bool:
@@ -432,16 +480,29 @@ def _run_archive_search(driver, username: str) -> None:
     """The archive search only runs when a username suggestion is clicked."""
     from selenium.webdriver.common.by import By
     from selenium.webdriver.common.keys import Keys
-    box = driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Username or Game #"]')
-    box.click()
+    boxes = driver.find_elements(By.CSS_SELECTOR, 'input[placeholder="Username or Game #"]')
+    shown = [b for b in boxes if b.is_displayed()]
+    if not shown:
+        raise RuntimeError("archive search box not visible (logged out?)")
+    box = shown[0]
+    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", box)
+    for attempt in range(3):
+        try:
+            box.click()
+            break
+        except Exception:   # the how-to-play popup can appear late and cover the page
+            _dismiss_how_to_play(driver)
+            time.sleep(1)
+    else:
+        driver.execute_script("arguments[0].focus();", box)
     box.send_keys(Keys.CONTROL, "a")
     box.send_keys(username)
     target = re.compile(rf"^{re.escape(username)} \(\d+\)$", re.I)
     end = time.time() + 10
     while time.time() < end:
-        for el in driver.find_elements(By.XPATH, "//*[not(*)][contains(text(), '(')]"):
+        for el in driver.find_elements(By.CSS_SELECTOR, ".archive-search-auto-complete-username"):
             try:
-                if target.match(el.text.strip()) and el.is_displayed():
+                if target.match(" ".join(el.text.split())) and el.is_displayed():
                     el.click()
                     return
             except Exception:
@@ -450,13 +511,26 @@ def _run_archive_search(driver, username: str) -> None:
     raise TimeoutError(f"no archive suggestion appeared for {username!r}")
 
 
-def _set_date_window(driver, window: str) -> None:
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.support.ui import Select
-    for el in driver.find_elements(By.CSS_SELECTOR, "select.archive-search-small, .archive-search-days select"):
-        if window in [o.get_attribute("value") for o in Select(el).options]:
-            Select(el).select_by_value(window)
-            return
+def _dismiss_how_to_play(driver) -> None:
+    """Close the 'how to play Chaturaji' popup that covers the archive on some loads."""
+    wait_for(driver, "document.querySelector('.how-to-play-modal')", 4)
+    driver.execute_script(
+        "const m=document.querySelector('.how-to-play-modal');"
+        "if(m){const b=m.closest('.modal-base-container,.cc-modal-component')||document;"
+        " (b.querySelector('.close-button-component')||{click(){}}).click();}")
+    wait_for(driver, "!document.querySelector('.modal-base-backdropOverlay')", 5)
+
+
+def _set_date_window(driver, window: str) -> bool:
+    """Set the archive's date-range select. It can sit in a collapsed panel, so set it with
+    JS and fire the change event instead of clicking the option."""
+    return bool(driver.execute_script(
+        "const w=arguments[0];"
+        "for(const s of document.querySelectorAll('select')){"
+        "  if([...s.options].some(o=>o.value===w)){"
+        "    s.value=w; s.dispatchEvent(new Event('input',{bubbles:true}));"
+        "    s.dispatchEvent(new Event('change',{bubbles:true})); return true;}}"
+        "return false;", window))
 
 
 def _click_show_more(driver, times: int) -> None:
@@ -469,9 +543,8 @@ def _click_show_more(driver, times: int) -> None:
         before = driver.execute_script("return document.querySelectorAll('.archive-results-game-container').length;")
         driver.execute_script("arguments[0].scrollIntoView({block:'center'});", buttons[-1])
         buttons[-1].click()
-        time.sleep(2.0)
-        after = driver.execute_script("return document.querySelectorAll('.archive-results-game-container').length;")
-        if after <= before:
+        # later pages load slower; wait for the rows to grow instead of a fixed pause
+        if not wait_for(driver, f"document.querySelectorAll('.archive-results-game-container').length > {before}", 15):
             return
 
 
@@ -480,6 +553,7 @@ def open_archive(driver, username: str, window: str = "0-9999", show_more: int =
     driver.get(ARCHIVE_URL)
     if not wait_for(driver, "document.querySelector('input[placeholder=\"Username or Game #\"]')", 20):
         raise TimeoutError("archive page did not load (logged in?)")
+    _dismiss_how_to_play(driver)
     _set_date_window(driver, window)
     _run_archive_search(driver, username)
     # wait for results, or for the counter to settle on 0 (empty window)
@@ -491,11 +565,11 @@ def open_archive(driver, username: str, window: str = "0-9999", show_more: int =
     return [r for r in rows if (r.get("variant") or "").lower() == "chaturaji"]
 
 
-def _open_row(driver, index: int) -> None:
-    driver.execute_script(
+def _open_row(driver, index: int) -> bool:
+    return bool(driver.execute_script(
         "const c=document.querySelectorAll('.archive-results-game-container')[arguments[0]];"
-        " c.scrollIntoView({block:'center'});"
-        " (c.querySelector('.archive-results-game-title')||c).click();", index)
+        " if(!c) return false; c.scrollIntoView({block:'center'});"
+        " (c.querySelector('.archive-results-game-title')||c).click(); return true;", index))
 
 
 # --- scraping entry points --------------------------------------------------------------
@@ -526,21 +600,28 @@ def scrape_player(driver, name: str, time_controls: list[str] | None = None,
             tc = row["time_control"]
             if full(tc):
                 continue
-            present = driver.execute_script(
-                "return document.querySelectorAll('.archive-results-game-container').length;")
-            if present <= row["index"]:
-                open_archive(driver, name, window, show_more)
-            _open_row(driver, row["index"])
+            # Back from a game keeps the expanded list; re-expand only if it was lost.
+            need = f"document.querySelectorAll('.archive-results-game-container').length > {row['index']}"
+            if "/archive" not in driver.current_url or not wait_for(driver, need, 10):
+                open_archive(driver, name, window, max(show_more, row["index"] // 20 + 1))
+            if not _open_row(driver, row["index"]):
+                open_archive(driver, name, window, max(show_more, row["index"] // 20 + 1))
+                if not _open_row(driver, row["index"]):
+                    log_failure(None, f"{name} {window} row {row['index']}: row missing after re-expanding")
+                    continue
             try:
                 data = scrape_game_page(driver)
             except TimeoutError as e:
                 log_failure(None, f"{name} {window} row {row['index']}: {e}")
+                driver.back()
                 continue
             status = store_game(data, row, player=name)
             seen.add(row_signature(row))
             saved[tc] += 1
-            print(f"  {tc_slug(tc)}: {data['game_id']} ({len(data['moves'])} plies) {status}")
+            print(f"  {tc_slug(tc)}: {data['game_id']} ({len(data['moves'])} plies) {status}"
+                  f" [{saved[tc]}/{max_per_tc}]", flush=True)
             _pause(delay)
+            driver.back()
         if time_controls and all(full(tc) for tc in time_controls):
             break
     return dict(saved)
@@ -603,17 +684,20 @@ def main(argv=None) -> None:
         sp.add_argument("--delay", type=float, default=4.0, help="seconds between games")
         sp.add_argument("--refetch", action="store_true")
         sp.add_argument("--headless", action="store_true")
+    ap.add_argument("--browser", choices=("firefox", "chrome"), default="firefox",
+                    help="browser to drive (each keeps its own saved login)")
 
     args = ap.parse_args(argv)
     if args.cmd == "convert":
         ok, total = convert_all()
         print(f"converted {ok}/{total}")
         return
-    driver = make_driver(getattr(args, "headless", False))
+    driver = make_driver(getattr(args, "headless", False), args.browser)
     try:
         if args.cmd == "login":
-            driver.get("https://www.chess.com/login")
-            input("Log in to chess.com in the Chrome window, then press Enter here... ")
+            print("Log in to chess.com in the browser window that opened (waiting up to 10 minutes)...")
+            print("Logged in, session saved." if wait_for_login(driver)
+                  else "Timed out waiting for login.")
         elif args.cmd == "player":
             print(scrape_player(driver, args.name, args.time_controls, args.max_per_tc,
                                 args.windows, args.show_more, args.delay, args.refetch))
