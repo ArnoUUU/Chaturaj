@@ -11,3 +11,4 @@ scraper/.selenium-profile/
 scraper/.firefox-profile/
 gui/.cache/
 scraper/data/
+cluster/site.env

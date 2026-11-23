@@ -102,12 +102,14 @@ def size_tag(kind: str, config: dict) -> str:
 
 def make_label(kind: str, config: dict, selection: str, sims: int, iterations: int,
                device: str, tag: str | None = None, when: datetime | None = None) -> str:
-    """e.g. 2026-11-21_1530_smoke-cpu_mlp-e64-w128x64x32_ucb1-s16_it2_cpu"""
+    """e.g. 2026-11-21_1530_smoke-cpu_mlp-e64-w128x64x32_ucb1-s16_it2_cpu
+    (iterations=0 means a time-budgeted run and is labelled "timed")."""
     when = when or datetime.now()
     parts = [when.strftime("%Y-%m-%d_%H%M")]
     if tag:
         parts.append(tag)
-    parts += [f"{kind}-{size_tag(kind, config)}", f"{selection}-s{sims}", f"it{iterations}",
+    parts += [f"{kind}-{size_tag(kind, config)}", f"{selection}-s{sims}",
+              f"it{iterations}" if iterations else "timed",
               "gpu" if str(device).startswith("cuda") else "cpu"]
     return "_".join(parts)
 
@@ -134,16 +136,36 @@ def model_dir(label: str, root: Path | None = None) -> Path:
     return (root or MODELS_DIR) / label
 
 
+def _checkpoint(model, kind: str, config: dict, label: str, meta: dict, optimizer=None) -> dict:
+    return {"kind": kind, "config": config, "model": model.state_dict(),
+            "optimizer": optimizer.state_dict() if optimizer else None,
+            "label": label, "step": meta.get("step", 0), "iteration": meta.get("iteration")}
+
+
+def _atomic_save(obj, path: Path) -> None:
+    """Write to a temp file then rename, so a job killed mid-save never leaves a broken file."""
+    tmp = path.with_name(path.name + ".tmp")
+    torch.save(obj, tmp)
+    tmp.replace(path)
+
+
 def save_model(model, kind: str, config: dict, label: str, meta: dict,
                optimizer=None, root: Path | None = None) -> Path:
     folder = model_dir(label, root)
     folder.mkdir(parents=True, exist_ok=True)
-    torch.save({"kind": kind, "config": config, "model": model.state_dict(),
-                "optimizer": optimizer.state_dict() if optimizer else None,
-                "label": label, "step": meta.get("step", 0),
-                "iteration": meta.get("iteration")}, folder / "model.pt")
+    _atomic_save(_checkpoint(model, kind, config, label, meta, optimizer), folder / "model.pt")
     (folder / "meta.json").write_text(json.dumps(meta, indent=1, default=str), encoding="utf-8")
     return folder / "model.pt"
+
+
+def save_snapshot(model, kind: str, config: dict, label: str, meta: dict, name: str,
+                  optimizer=None, root: Path | None = None) -> Path:
+    """Keep a copy as models/<label>/snapshots/<name>.pt (loadable with load_model / --resume)."""
+    folder = model_dir(label, root) / "snapshots"
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / f"{name}.pt"
+    _atomic_save(_checkpoint(model, kind, config, label, meta, optimizer), path)
+    return path
 
 
 def register(label: str, meta: dict, root: Path | None = None) -> None:

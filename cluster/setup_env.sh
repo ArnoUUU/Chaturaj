@@ -5,14 +5,19 @@
 #   bash cluster/setup_env.sh
 #
 # Optional environment variables:
-#   MINIFORGE_DIR   where Miniforge lives          (default: $HOME/miniforge3)
-#   ENV_PREFIX      put the env at this path instead of inside Miniforge, e.g. a project or
-#                   scratch directory with more quota than $HOME
-#   CONDA_PKGS_DIRS package cache location         (default: $MINIFORGE_DIR/pkgs)
+#   MINIFORGE_DIR   where Miniforge lives   (default: /gpfs/scrubbed/$USER/miniforge3 if that
+#                   directory exists, else $HOME/miniforge3). The env with CUDA torch is ~6 GB,
+#                   too much for a 10 GB home, so scrubbed storage is the default.
+#   ENV_PREFIX      put the env at this path instead of inside Miniforge
+#   CONDA_PKGS_DIRS package cache location  (default: $MINIFORGE_DIR/pkgs, emptied at the end)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-MINIFORGE_DIR=${MINIFORGE_DIR:-$HOME/miniforge3}
+SCRUB=/gpfs/scrubbed/$USER
+if [ -z "${MINIFORGE_DIR:-}" ]; then
+  if [ -d "$SCRUB" ]; then MINIFORGE_DIR=$SCRUB/miniforge3; else MINIFORGE_DIR=$HOME/miniforge3; fi
+fi
+export PIP_NO_CACHE_DIR=1   # don't keep a copy of the ~3 GB torch wheel
 if [ ! -x "$MINIFORGE_DIR/bin/conda" ]; then
   echo "Installing Miniforge into $MINIFORGE_DIR"
   installer="Miniforge3-$(uname)-$(uname -m).sh"
@@ -40,4 +45,8 @@ import torch
 print("torch", torch.__version__, "| built for CUDA", torch.version.cuda,
       "| GPU visible here:", torch.cuda.is_available(), "(login nodes usually have none)")
 EOF
+conda clean -afy > /dev/null   # drop downloaded package archives
+echo "MINIFORGE_DIR=$MINIFORGE_DIR" > cluster/site.env
+if [ -n "${ENV_PREFIX:-}" ]; then echo "ENV_PREFIX=$ENV_PREFIX" >> cluster/site.env; fi
+echo "Env location saved to cluster/site.env (read by cluster/activate.sh)."
 echo "Done. In jobs, use: source cluster/activate.sh"

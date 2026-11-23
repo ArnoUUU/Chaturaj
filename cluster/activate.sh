@@ -1,6 +1,10 @@
 #!/bin/bash
 # Activate the chaturaji env inside a job or an interactive session:
 #   source cluster/activate.sh
+# where setup_env.sh put Miniforge and the env (written by setup_env.sh)
+SITE_ENV="$(dirname "${BASH_SOURCE[0]}")/site.env"
+# shellcheck disable=SC1090
+[ -f "$SITE_ENV" ] && source "$SITE_ENV"
 MINIFORGE_DIR=${MINIFORGE_DIR:-$HOME/miniforge3}
 # shellcheck disable=SC1091
 source "$MINIFORGE_DIR/etc/profile.d/conda.sh"

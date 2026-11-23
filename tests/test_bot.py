@@ -174,6 +174,34 @@ def test_training_run_saves_labelled_model(tmp_path, monkeypatch, kind, selectio
     assert list((tmp_path / "logs" / label / "games").glob("*.json"))
 
 
+def test_timed_run_stops_on_budget_and_keeps_snapshots(tmp_path, monkeypatch):
+    import types
+    from bot import registry, train as train_mod
+    monkeypatch.setattr(registry, "MODELS_DIR", tmp_path / "models")
+    monkeypatch.setattr(registry, "LOGS_DIR", tmp_path / "logs")
+    clock = {"t": 1_000_000.0}
+
+    def fake_time():  # every clock read moves time on by one minute
+        clock["t"] += 60
+        return clock["t"]
+    monkeypatch.setattr(train_mod, "time", types.SimpleNamespace(time=fake_time))
+    label = train_mod.train(train_mod.parse_args([
+        "--tag", "unit", "--device", "cpu", "--embed", "16", "--widths", "32", "16", "8",
+        "--iterations", "0", "--hours", "1", "--snapshot-every", "10",
+        "--games", "1", "--sims", "4", "--max-plies", "16", "--steps", "3", "--batch", "8",
+        "--eval-games", "0"]))
+    assert "_timed_" in label
+    meta = json.loads((tmp_path / "models" / label / "meta.json").read_text())
+    assert meta["status"] == "complete" and meta["history"]
+    snaps = sorted((tmp_path / "models" / label / "snapshots").glob("snap_*.pt"))
+    assert len(snaps) >= 2 and len(snaps) == len(meta["snapshots"])
+    assert snaps[0].name.startswith("snap_001_")
+    _, kind, _, ckpt = registry.load_model(snaps[-1])  # snapshots load / resume like model.pt
+    assert kind == "mlp" and ckpt["label"] == label
+    with pytest.raises(SystemExit):  # unlimited iterations need a time budget
+        train_mod.train(train_mod.parse_args(["--device", "cpu", "--iterations", "0"]))
+
+
 def test_supervised_on_records(tmp_path, monkeypatch):
     from bot import registry, supervised
     from chaturaji.simulate import random_game

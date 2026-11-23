@@ -4,15 +4,15 @@
 #
 #   mkdir -p logs/slurm && sbatch cluster/gpu_test.slurm
 #
-# Fill in the account/partition lines with your Tillicum values (see cluster/README.md).
+# Runs on the debug QOS (30 min, 1 GPU) per the Tillicum Slurm guide.
 #SBATCH --job-name=chaturaji-gputest
-#SBATCH --account=CHANGE_ME
-#SBATCH --partition=CHANGE_ME
+#SBATCH --qos=debug
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=32G
+#SBATCH --mem=200G
 #SBATCH --time=00:30:00
-#SBATCH --output=logs/slurm/%x-%j.out
+#SBATCH --output=logs/slurm/%x_%j.out
+##SBATCH --account=CHANGE_ME   # optional: Slurm uses your default account (remove one # to set it)
 
 set -euo pipefail
 cd "${SLURM_SUBMIT_DIR:-$(pwd)}"

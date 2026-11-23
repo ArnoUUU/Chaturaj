@@ -14,31 +14,74 @@ from its official CUDA wheels with pip inside that env.
   - `uv` + a plain venv also works and is lighter, but you asked for conda, and conda
     handles non-Python packages better if you need them later.
 
+## Copy the repo to Tillicum (from Windows PowerShell)
+The archive leaves out the scraper's browser profiles (they hold your chess.com login),
+scraped data, logs and caches. Replace `NETID` with your UW NetID.
+```powershell
+cd C:\Users\Arnav\Downloads
+tar -czf chaturaj.tgz --exclude=Chaturaj/scraper/.firefox-profile --exclude=Chaturaj/scraper/.selenium-profile --exclude=Chaturaj/scraper/data --exclude=Chaturaj/logs --exclude=Chaturaj/gui/.cache --exclude=__pycache__ --exclude=.pytest_cache --exclude=Chaturaj/.claude Chaturaj
+scp chaturaj.tgz NETID@tillicum.hyak.uw.edu:~/
+ssh NETID@tillicum.hyak.uw.edu "tar -xzf chaturaj.tgz && rm chaturaj.tgz && mkdir -p Chaturaj/logs/slurm"
+```
+
+## Copy results back (no git)
+On Tillicum, `ls -t ~/Chaturaj/models | head` shows the newest run label. Then on Windows:
+```powershell
+cd C:\Users\Arnav\Downloads\Chaturaj
+scp -r NETID@tillicum.hyak.uw.edu:~/Chaturaj/models/LABEL models/
+scp -r NETID@tillicum.hyak.uw.edu:~/Chaturaj/logs/LABEL logs/
+scp -r NETID@tillicum.hyak.uw.edu:~/Chaturaj/logs/slurm logs/
+```
+`models/index.jsonl` isn't copied so your local list isn't overwritten; the run's
+`meta.json` has the same information.
+
 ## One-time setup (login node)
 ```bash
-git clone <this repo> && cd Chaturaj
-bash cluster/setup_env.sh                                  # Miniforge in ~/miniforge3, env "chaturaji"
-ENV_PREFIX=/path/with/more/quota/envs/chaturaji bash cluster/setup_env.sh   # optional: env outside $HOME
+cd ~/Chaturaj
+bash cluster/setup_env.sh      # Miniforge + env in /gpfs/scrubbed/$USER (falls back to ~/miniforge3)
 ```
-Home directories on clusters are usually small, so if Tillicum gives you a project or
-scratch directory, point `ENV_PREFIX` (and `CONDA_PKGS_DIRS`) there.
+The env with CUDA PyTorch is about 6 GB, too much for the 10 GB home quota, so it goes to
+`/gpfs/scrubbed/$USER` and the package caches are emptied. Scrubbed storage can be purged
+when unused; if `source cluster/activate.sh` fails later, rerun `setup_env.sh`. The chosen
+location is saved in `cluster/site.env` so jobs find it.
 
-Then edit `#SBATCH --account=CHANGE_ME` and `#SBATCH --partition=CHANGE_ME` in
-`gpu_test.slurm` and `train.slurm` to your Tillicum account and GPU partition. `sinfo`
-and Tillicum's documentation list them. If Tillicum uses `--gres=gpu:1` instead of
-`--gpus=1`, change that line too.
+The scripts follow Tillicum's Slurm guide: `--qos` (no partition), 1 GPU with its
+8 CPUs and 200 GB RAM, `debug` QOS (30 min) for `gpu_test.slurm` and `normal` (24 h max)
+for training. No account line is needed; Slurm uses your default (uncomment
+`##SBATCH --account=` to pick one). Cost is $0.90 per GPU-hour: a full 24 h
+`selftrain.slurm` job is about $21.60, the GPU test about $0.45.
 
 ## Run
 ```bash
-mkdir -p logs/slurm
+mkdir -p logs/slurm             # Slurm needs this before it can write the .out file
 sbatch cluster/gpu_test.slurm          # tests + GPU check + short GPU training run
 squeue -u $USER                        # watch the queue
-tail -f logs/slurm/chaturaji-gputest-<jobid>.out
+tail -f logs/slurm/chaturaji-gputest_<jobid>.out
 sbatch --time=08:00:00 --export=ALL,TAG=mlp-ucb1,SELECTION=ucb1,ITERS=100 cluster/train.slurm
 ```
-Interactive debugging on a GPU node (same account/partition):
+### Long self-training with hourly snapshots
+`selftrain.slurm` self-plays and trains until 20 minutes before the job's time limit, then
+saves and evaluates. Every hour it keeps a copy in `models/<label>/snapshots/`.
 ```bash
-salloc --account=CHANGE_ME --partition=CHANGE_ME --gpus=1 --cpus-per-task=8 --time=00:30:00
+sbatch --time=24:00:00 cluster/selftrain.slurm
+sbatch --export=ALL,INIT=models/<supervised-label> cluster/selftrain.slurm    # start from a model
+sbatch --export=ALL,RESUME=models/<label> cluster/selftrain.slurm             # next job of the same run
+sbatch --export=ALL,SNAPSHOT_MIN=30,SIMS=400 cluster/selftrain.slurm          # other settings
+```
+Settings (pass with `--export=ALL,NAME=value`): `TAG`, `MODEL`, `SELECTION`, `GAMES`, `SIMS`,
+`STEPS`, `BATCH`, `EVAL_GAMES`, `SNAPSHOT_MIN` (default 60), `MARGIN_MIN` (default 20), `HOURS`
+(override the budget), `KEEP_SNAPSHOTS` (default 6), `PRINT_EVERY` (default 10),
+`SAVE_GAMES_EVERY` (default 50).
+
+Logging is kept small for the 10 GB quota: the Slurm `.out` file gets one short line every
+`PRINT_EVERY` iterations, the full per-iteration record goes to `logs/<label>/log_*.jsonl`
+(a few hundred bytes per iteration), one sample game is saved every `SAVE_GAMES_EVERY`
+iterations, and snapshots are weights only (~12 MB each, newest 6 kept). A 24 h run uses
+roughly 150 MB. The replay buffer isn't saved, so a resumed job refills it from fresh games.
+
+Interactive debugging on a GPU node:
+```bash
+salloc --qos=interactive --gpus=1 --time=01:00:00
 source cluster/activate.sh && python -m bot.gpu_check --require-gpu
 ```
 

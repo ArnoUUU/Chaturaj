@@ -4,13 +4,13 @@
 # Resume a run:
 #   sbatch --export=ALL,RESUME=models/<label> cluster/train.slurm
 #SBATCH --job-name=chaturaji-train
-#SBATCH --account=CHANGE_ME
-#SBATCH --partition=CHANGE_ME
+#SBATCH --qos=normal
 #SBATCH --gpus=1
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=64G
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=200G
 #SBATCH --time=04:00:00
-#SBATCH --output=logs/slurm/%x-%j.out
+#SBATCH --output=logs/slurm/%x_%j.out
+##SBATCH --account=CHANGE_ME   # optional: Slurm uses your default account (remove one # to set it)
 
 set -euo pipefail
 cd "${SLURM_SUBMIT_DIR:-$(pwd)}"
