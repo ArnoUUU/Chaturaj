@@ -1,6 +1,10 @@
-"""Scrape chess.com Chaturaji games with Selenium, by player and by time control.
+"""Scrape chess.com Chaturaji games, by player and by time control.
 
-Main entry point: `scrape_player(driver, name, time_controls=...)`. It opens the variants
+The CLI uses the variants WebSocket by default (scraper/ws.py, no browser; `login` still
+opens Firefox once to save the cookies it needs). `--selenium` uses the browser scraper
+below instead.
+
+Selenium entry point: `scrape_player(driver, name, time_controls=...)`. It opens the variants
 archive, searches the player, walks through date ranges (the archive shows at most ~20
 games per search), and for each game in the requested time controls:
   - opens the game page and records the PGN4, players, seats, ratings, rating changes,
@@ -23,6 +27,7 @@ Usage (from the repo root):
   python -m scraper.game_scraping games 113032695 113031547
   python -m scraper.game_scraping archive --url "<archive URL with p=<username>>"
   python -m scraper.game_scraping convert                          # rebuild records/
+  python -m scraper.game_scraping player arnav2007 --selenium      # drive a browser instead
 
 Chess.com's Terms of Service restrict automated access, so use your own account and keep
 the default delays.
@@ -659,15 +664,15 @@ def convert_all() -> tuple[int, int]:
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("login", help="open Chrome to log in; the session is kept")
+    sub.add_parser("login", help="open a browser to log in; the cookies are saved for the scraper")
 
     p = sub.add_parser("player", help="scrape a player's games, saved per time control")
     p.add_argument("name")
     p.add_argument("--time-control", action="append", dest="time_controls",
                    help='as shown in the archive, e.g. "1 | 5" (repeatable; default: all)')
     p.add_argument("--max-per-tc", type=int, default=20)
-    p.add_argument("--windows", nargs="+", default=list(DATE_WINDOWS))
-    p.add_argument("--show-more", type=int, default=3)
+    p.add_argument("--windows", nargs="+", default=list(DATE_WINDOWS), help="(--selenium only)")
+    p.add_argument("--show-more", type=int, default=3, help="(--selenium only)")
 
     g = sub.add_parser("games", help="scrape specific games by URL or id")
     g.add_argument("games", nargs="+")
@@ -681,17 +686,25 @@ def main(argv=None) -> None:
     sub.add_parser("convert", help="rebuild engine records from saved games")
 
     for sp in (p, g, a):
-        sp.add_argument("--delay", type=float, default=4.0, help="seconds between games")
+        sp.add_argument("--delay", type=float, default=None,
+                        help="seconds between game downloads (default 1 over the WebSocket, 4 with --selenium)")
         sp.add_argument("--refetch", action="store_true")
-        sp.add_argument("--headless", action="store_true")
+        sp.add_argument("--selenium", action="store_true",
+                        help="drive a browser instead of using the variants WebSocket")
+        sp.add_argument("--headless", action="store_true", help="(--selenium only)")
+    p.add_argument("--days", default="0-9999", help='archive range in days back, e.g. "0-30" (WebSocket only)')
     ap.add_argument("--browser", choices=("firefox", "chrome"), default="firefox",
-                    help="browser to drive (each keeps its own saved login)")
+                    help="browser for login / --selenium (each keeps its own saved login)")
 
     args = ap.parse_args(argv)
     if args.cmd == "convert":
         ok, total = convert_all()
         print(f"converted {ok}/{total}")
         return
+    if args.cmd != "login" and not args.selenium:
+        return _main_ws(args)
+    if args.cmd != "login" and args.delay is None:
+        args.delay = 4.0
     driver = make_driver(getattr(args, "headless", False), args.browser)
     try:
         if args.cmd == "login":
@@ -713,6 +726,32 @@ def main(argv=None) -> None:
                                 (window,), delay=args.delay, refetch=args.refetch))
     finally:
         driver.quit()
+
+
+def _main_ws(args) -> None:
+    """player / games / archive over the variants WebSocket (no browser)."""
+    from . import ws
+    delay = 1.0 if args.delay is None else args.delay
+    try:
+        sock = ws.VariantsSocket().connect()
+    except ws.NotLoggedIn as e:
+        raise SystemExit(str(e))
+    try:
+        if args.cmd == "player":
+            print(ws.scrape_player(sock, args.name, args.time_controls, args.max_per_tc,
+                                   args.days, delay, args.refetch))
+        elif args.cmd == "games":
+            ids = [m.group(1) for m in map(GAME_ID_RE.search, args.games) if m]
+            ws.scrape_games(sock, ids, delay, args.refetch, args.player)
+        elif args.cmd == "archive":
+            m = re.search(r"[?&]p=([^&]+)", args.url)
+            if not m:
+                raise SystemExit("the archive URL must contain p=<username>")
+            days = (re.search(r"daysBack=([\d-]+)", args.url) or [None, "0-9999"])[1]
+            print(ws.scrape_player(sock, m.group(1), args.time_controls, args.max_per_tc,
+                                   days, delay, args.refetch))
+    finally:
+        sock.close()
 
 
 if __name__ == "__main__":
