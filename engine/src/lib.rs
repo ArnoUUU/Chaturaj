@@ -7,10 +7,12 @@
 //!   end, the network's global features), exposed as `chaturaji_engine.Position`.
 //!   `bot/rules_core.py` converts to and from the Python rules engine and checks the two
 //!   agree on every scraped game.
-//! Next: the max^n search loop itself, on top of both.
+//! - `search.rs`: the max^n search over both (a port of bot/maxn.py), exposed as
+//!   `chaturaji_engine.MaxN`. bot/maxn.py uses it automatically.
 
 pub mod nnue;
 pub mod rules;
+pub mod search;
 
 #[cfg(feature = "python")]
 mod python {
@@ -22,6 +24,7 @@ mod python {
 
     use crate::nnue::{AccStack, Layer, Net, NUM_GLOBALS};
     use crate::rules::{self, GameOver, Position};
+    use crate::search::Searcher;
 
     fn vec1(a: &PyReadonlyArray1<f32>) -> Vec<f32> {
         a.as_array().iter().copied().collect()
@@ -347,11 +350,43 @@ mod python {
         }
     }
 
+    /// max^n search (engine/src/search.rs). Give `time_ms` (iterative deepening until the
+    /// time runs out) or a fixed `depth`. The transposition table persists across moves.
+    #[pyclass(name = "MaxN", module = "chaturaji_engine")]
+    pub struct PyMaxN {
+        s: Searcher,
+    }
+
+    #[pymethods]
+    impl PyMaxN {
+        #[new]
+        #[pyo3(signature = (net, time_ms=None, depth=None, max_depth=12, qdepth=2, tt_size=200_000))]
+        fn new(net: &PyNnue, time_ms: Option<f64>, depth: Option<u32>, max_depth: u32, qdepth: u32, tt_size: usize) -> PyResult<Self> {
+            Ok(PyMaxN { s: Searcher::new(net.net.clone(), time_ms, depth, max_depth, qdepth, tt_size).map_err(err)? })
+        }
+
+        /// Search a position: returns (move, depth reached, nodes, root utilities R B Y G or
+        /// None, forced, seconds). The position is left unchanged.
+        #[allow(clippy::type_complexity)]
+        fn best_move(&mut self, py: Python<'_>, position: &PyPosition)
+                     -> PyResult<(u16, u32, u64, Option<Vec<f64>>, bool, f64)> {
+            let mut pos = position.pos.clone();
+            let s = &mut self.s;
+            let r = py.detach(move || s.best_move(&mut pos)).map_err(err)?;
+            Ok((r.best, r.depth, r.nodes, r.value.map(|v| v.to_vec()), r.forced, r.seconds))
+        }
+
+        fn clear(&mut self) {
+            self.s.clear();
+        }
+    }
+
     #[pymodule]
     fn chaturaji_engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
         m.add_class::<PyNnue>()?;
         m.add_class::<PyAccumulator>()?;
         m.add_class::<PyPosition>()?;
+        m.add_class::<PyMaxN>()?;
         m.add("__version__", env!("CARGO_PKG_VERSION"))?;
         Ok(())
     }

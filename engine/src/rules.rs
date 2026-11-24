@@ -216,7 +216,7 @@ fn kings_attacked_by(board: &[u8; 64], color: usize, eliminated: u8) -> u8 {
 
 // --- Zobrist hashing (board only, for repetition) ---------------------------------------
 
-const fn splitmix(mut x: u64) -> u64 {
+pub const fn splitmix(mut x: u64) -> u64 {
     x = x.wrapping_add(0x9E3779B97F4A7C15);
     let mut z = x;
     z = (z ^ (z >> 30)).wrapping_mul(0xBF58476D1CE4E5B9);

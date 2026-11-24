@@ -56,3 +56,47 @@ def test_mid_game_state_round_trip_and_unmake():
         assert differences(s, pos) == []
     with pytest.raises(IndexError):
         pos.pop()
+
+
+# --- the compiled max^n search ------------------------------------------------------------
+
+import torch
+
+from bot.maxn import MaxN
+from bot.nnue import NNUE, NumpyNNUE
+
+
+def _positions(seed, n=80, every=8):
+    rng = np.random.default_rng(seed)
+    s, out = ChaturajiState.initial(), []
+    for ply in range(n):
+        if is_game_over(s):
+            break
+        if ply % every == every - 2:
+            out.append(s)
+        ms = legal_moves(s)
+        s, _ = apply_move(s, ms[rng.integers(len(ms))])
+    return out
+
+
+@pytest.mark.parametrize("depth,qdepth", [(1, 2), (2, 1), (3, 1)])
+def test_compiled_search_matches_python(depth, qdepth):
+    torch.manual_seed(5)
+    net = NumpyNNUE.from_model(NNUE().eval())
+    py = MaxN(net, time_ms=None, depth=depth, qdepth=qdepth, backend="python")
+    rs = MaxN(net, time_ms=None, depth=depth, qdepth=qdepth, backend="rust")
+    for s in _positions(17) + _positions(23):
+        assert py.best_move(s) == rs.best_move(s)
+        assert np.allclose(py.stats["value"], rs.stats["value"], atol=2e-3)
+
+
+def test_compiled_search_time_budget_and_deeper():
+    torch.manual_seed(1)
+    net = NumpyNNUE.from_model(NNUE().eval())
+    rs = MaxN(net, time_ms=200, backend="rust")
+    py = MaxN(net, time_ms=200, backend="python")
+    s = _positions(5)[3]
+    m = rs.best_move(s)
+    assert m in legal_moves(s) and rs.stats["seconds"] < 0.4
+    py.best_move(s)
+    assert rs.stats["depth"] >= py.stats["depth"] and rs.stats["nodes"] > 5 * py.stats["nodes"]

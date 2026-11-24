@@ -10,7 +10,8 @@ the same either way; the tests check that.
 |---|---|
 | `src/nnue.rs` | NNUE inference, the same network as `bot/nnue.py`: the feature table, accumulators from scratch (`refresh`), incremental updates from a board difference (`apply_diff`), a push/pop stack for search (`AccStack`), the forward pass for any depth (residual layers too), and a batched forward pass split across threads (`forward_batch`, `child_logits`) |
 | `src/rules.rs` | the game rules, ported from `chaturaji/` (which stays the reference): move generation in the same order as Python, make/unmake (`push`/`pop`), scoring and check bonuses, king captures and eliminations, resignations/timeouts (`eliminate`), turn order, last-king and threefold-repetition endings with their bonuses, board-only Zobrist hashes for repetition, and the network's 16 global features |
-| `src/lib.rs` | Python bindings: `Nnue(ft_w, ft_b, layer_w, layer_b, residual, out_w, out_b)` with `.accumulator(board_codes)`, `.refresh`, `.forward`; `Accumulator` with `.push`, `.pop`, `.acc()`, `.logits(k, globals)`, `.child_logits(boards, ks, globals)`; `Position` with `.initial()`, `.from_parts(...)`, `.legal_moves()`, `.push(move)`, `.pop()`, `.eliminate(seat)`, `.globals(k)`, `.board`, `.scores`, `.turn`, `.game_over`, ... |
+| `src/search.rs` | the max^n search, a port of `bot/maxn.py`: iterative deepening in a time budget, quiescence on point-scoring captures, a transposition table, capture-first ordering, immediate pruning, batched evaluation of sibling leaves, with the position and accumulators made and unmade together. At a fixed depth it picks the same moves as the Python search (tested) |
+| `src/lib.rs` | Python bindings: `Nnue(ft_w, ft_b, layer_w, layer_b, residual, out_w, out_b)` with `.accumulator(board_codes)`, `.refresh`, `.forward`; `Accumulator` with `.push`, `.pop`, `.acc()`, `.logits(k, globals)`, `.child_logits(boards, ks, globals)`; `Position` with `.initial()`, `.from_parts(...)`, `.legal_moves()`, `.push(move)`, `.pop()`, `.eliminate(seat)`, `.globals(k)`, `.board`, `.scores`, `.turn`, `.game_over`, ...; `MaxN(net, time_ms=, depth=, max_depth=12, qdepth=2)` with `.best_move(position)` |
 
 `bot/rules_core.py` converts between the two engines (`position_from_state`, `move_code`,
 `move_from_code`) and checks them against each other:
@@ -23,8 +24,9 @@ python -m bot.rules_core bench     # random playouts, Python vs compiled
 Moves are integers `from_square * 64 + to_square` (square = row * 8 + col, row 0 = rank 8).
 Promotion is forced, so it isn't encoded.
 
-Next: the max^n search loop in Rust, on top of `Position` and the accumulators, so a whole
-search runs in compiled code.
+`bot.maxn.MaxN` uses the compiled search automatically (`backend="auto"`; `"python"` forces
+the reference implementation), so `python -m bot.maxn` and `cluster/maxn_match.slurm` get it
+without changes once the module is installed.
 
 ## Build on Windows
 
@@ -55,6 +57,21 @@ bash cluster/build_engine.sh      # installs Rust into /gpfs/scrubbed/$USER if n
 
 Rules, random playouts (list the legal moves, make one): 7.7 µs a ply compiled, called from
 Python one move at a time (mostly call overhead), vs 264 µs in Python, 34x faster.
+
+max^n search, 12 game positions per row, time per move (one thread gives the same numbers
+for the small network, so the 8 single-threaded Tillicum shards lose nothing):
+
+| Network | Search | Positions/s | Mean depth at 250 ms | at 1 s |
+|---|---|---:|---:|---:|
+| small (nnue-v1) | Python | 17,000 | 1.3 | |
+| small (nnue-v1) | Rust | 354,000-389,000 | 2.2 (max 3) | 2.8 (max 4) |
+| medium | Rust | 12,000 | 1.2 | 1.8 |
+| large | Rust | 5,200 | 1.2 | 1.4 |
+| xl | Rust | 1,000 | 0.8 | 1.2 |
+
+Depth counts single moves (one player each), and max^n branches about 15 ways per move, so
+20x more positions buys about one more move of lookahead. The large networks see much less
+in the same time: whether their better evaluation makes up for it is for the matches to say.
 
 NNUE:
 

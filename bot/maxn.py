@@ -1,4 +1,8 @@
-"""max^n search over the NNUE (Python prototype, phase 0 of logs/nnue_alphabeta_plan.md).
+"""max^n search over the NNUE (see logs/nnue_alphabeta_plan.md).
+
+Two implementations of the same search: this Python one (the reference), and the compiled
+one in engine/src/search.rs (`chaturaji_engine.MaxN`), which MaxN uses automatically when
+the compiled core is installed and the network has a core copy (backend="auto").
 
 Every player picks the move that maximizes their own utility: their expected chess.com FFA
 score (mean of P(finish above each opponent), ties half), as the NNUE estimates it at the
@@ -11,8 +15,10 @@ attack or turning on a partner happen exactly when the utilities say they pay.
     reads each weight once per batch, which large networks need)
   - a transposition table (position, side to move, scores, eliminated seats)
   - move ordering: the table's best move, then captures by points gained
+  - if the time runs out before depth 1 finishes, the best child by one batched
+    evaluation is played (depth 0 in the stats)
   - immediate pruning only: a utility of 1 (finishing above all three) can't be beaten.
-    max^n allows little else; the compiled core is what will make depth affordable.
+    max^n allows little else, so depth comes from speed (the compiled search).
 
 Utilities are in absolute seat order (R, B, Y, G) and always sum to 2.
 
@@ -62,17 +68,35 @@ def capture_points(board, move: Move) -> int:
 
 class MaxN:
     def __init__(self, net: NumpyNNUE, time_ms: float | None = 250, depth: int | None = None,
-                 max_depth: int = 12, qdepth: int = 2, tt_size: int = 200_000):
+                 max_depth: int = 12, qdepth: int = 2, tt_size: int = 200_000, backend: str = "auto"):
+        """backend: "auto" (compiled when available), "rust" (require it) or "python"."""
         if time_ms is None and depth is None:
             raise ValueError("give a time budget or a fixed depth")
         self.net, self.time_ms, self.depth = net, time_ms, depth
         self.max_depth, self.qdepth, self.tt_size = max_depth, qdepth, tt_size
         self.tt: dict = {}
         self.stats: dict = {}
+        self.fast = None
+        if backend not in ("auto", "rust", "python"):
+            raise ValueError(f"unknown backend {backend!r}")
+        if backend != "python" and getattr(net, "core", None) is not None:
+            import chaturaji_engine
+            self.fast = chaturaji_engine.MaxN(net.core, time_ms=time_ms, depth=depth, max_depth=max_depth,
+                                              qdepth=qdepth, tt_size=tt_size)
+        elif backend == "rust":
+            raise RuntimeError("backend='rust' needs the compiled core (engine/README.md)")
+        self.backend = "rust" if self.fast is not None else "python"
 
     # --- public ------------------------------------------------------------------------
 
     def best_move(self, state: ChaturajiState) -> Move:
+        if self.fast is not None:
+            from .rules_core import move_from_code, position_from_state
+            code, depth, nodes, value, forced, secs = self.fast.best_move(position_from_state(state))
+            self.stats = {"depth": depth, "nodes": nodes, "seconds": round(secs, 4),
+                          "value": None if value is None else np.round(value, 3).tolist(),
+                          **({"forced": True} if forced else {})}
+            return move_from_code(code, state.board)
         moves = legal_moves(state)
         if len(moves) == 1:
             self.stats = {"depth": 0, "nodes": 0, "forced": True}
@@ -91,6 +115,15 @@ class MaxN:
             best, value, reached = m, v, d
             if v[_SEAT[state.current_player()]] >= 1.0 - 1e-9:
                 break                                   # already finishes above everyone
+        if value is None:       # out of time before depth 1 finished: best child, no quiescence
+            me = _SEAT[state.current_player()]
+            kids = [apply_move(state, m)[0] for m in moves]
+            vals = [exact_utilities(c) if is_game_over(c) else None for c in kids]
+            live = [i for i, v in enumerate(vals) if v is None]
+            for i, v in zip(live, acc.evaluate_children([kids[i] for i in live])):
+                vals[i] = v
+            i = max(range(len(moves)), key=lambda i: (vals[i][me], -i))
+            best, value = moves[i], vals[i]
         self.stats = {"depth": reached, "nodes": self.nodes,
                       "value": None if value is None else np.round(value, 3).tolist()}
         return best
