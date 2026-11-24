@@ -6,7 +6,10 @@ seats; each seat searches for itself, so the three don't cooperate.
 
 The bot takes each seat in turn (game g -> seat g % 4) so no seat advantage leaks in.
 Reported numbers:
-  score_share : bot's points / all points (fair = 0.25)
+  pairwise    : chess.com's FFA rule. Each game is three 1v1 results against the other
+                seats by final points: win 1, draw 0.5, loss 0. pairwise = the mean over
+                all those results (fair = 0.5). This is the headline number.
+  score_share : bot's points / all points (fair = 0.25), for reference only
   win_rate    : fraction of games where the bot had the top score (ties count)
   avg_place   : 1 (best) to 4
 
@@ -24,7 +27,7 @@ from pathlib import Path
 import numpy as np
 
 from chaturaji.constants import TURN_ORDER
-from chaturaji.game import apply_move, is_game_over, require_moves
+from chaturaji.game import apply_move, game_over_reason, is_game_over, require_moves
 from chaturaji.state import ChaturajiState
 
 from .mcts import MCTS, Node
@@ -32,27 +35,57 @@ from .mcts import MCTS, Node
 
 def evaluate(evaluator, games: int = 4, sims: int = 16, selection: str = "puct",
              opponent=None, opponent_name: str = "random", max_plies: int = 300,
-             seed: int = 0) -> dict:
-    """`opponent` is an MCTS evaluator for the three other seats, or None for random moves."""
+             seed: int = 0, opening_plies: int = 0, pool: list | None = None,
+             record: bool = False) -> dict:
+    """`opponent` is an MCTS evaluator for the three other seats, or None for random moves.
+
+    `pool` (a list of (name, evaluator)) replaces `opponent` with a mixed field: each block
+    of 4 games draws three pool members (repeats allowed) for the other seats, and the bot
+    plays that lineup from every seat. With `record`, every game (seat, opponents, scores,
+    result, moves) is returned under "records".
+
+    Model-vs-model games are deterministic (argmax search, no noise), so with
+    `opening_plies` > 0 each block of 4 games shares one random opening of that many
+    plies (seeded by the block number) and the bot plays it from each seat in turn.
+    """
     rng = np.random.default_rng(seed)
     mcts = MCTS(evaluator, num_simulations=sims, selection=selection, max_turn=None, rng=rng)
     opp = (MCTS(opponent, num_simulations=sims, selection=selection, max_turn=None, rng=rng)
            if opponent is not None else None)
-    shares, wins, places = [], [], []
+    pool_mcts = [(name, MCTS(ev, num_simulations=sims, selection=selection, max_turn=None, rng=rng))
+                 for name, ev in (pool or [])]
+    shares, wins, places, seats, pair, records = [], [], [], [], [], []
+    wdl = [0, 0, 0]
     for g in range(games):
         bot = TURN_ORDER[g % 4]
+        others = [c for c in TURN_ORDER if c != bot]
+        if pool_mcts:   # one lineup per block of 4, same draw for every seat rotation
+            picks = np.random.default_rng([seed, g // 4, 7]).integers(len(pool_mcts), size=3)
+            seat_opp = {c: pool_mcts[i] for c, i in zip(others, picks)}
+        else:
+            seat_opp = {c: (opponent_name, opp) for c in others}
+        moves_played = []
         state = ChaturajiState.initial()
         plies = 0
+        opening_rng = np.random.default_rng([seed, g // 4])
+        while not is_game_over(state) and plies < opening_plies:
+            moves = require_moves(state)
+            move = moves[opening_rng.integers(len(moves))]
+            moves_played.append(move.uci)
+            state, _ = apply_move(state, move)
+            plies += 1
         while not is_game_over(state) and plies < max_plies:
             if state.current_player() == bot:
                 root = mcts.search(Node(state))
                 move = root.moves[mcts.choose(root)]
-            elif opp is not None:
-                root = opp.search(Node(state))
-                move = root.moves[opp.choose(root)]
+            elif seat_opp[state.current_player()][1] is not None:
+                m = seat_opp[state.current_player()][1]
+                root = m.search(Node(state))
+                move = root.moves[m.choose(root)]
             else:
                 moves = require_moves(state)
                 move = moves[rng.integers(len(moves))]
+            moves_played.append(move.uci)
             state, _ = apply_move(state, move)
             plies += 1
         scores = state.scores
@@ -60,10 +93,38 @@ def evaluate(evaluator, games: int = 4, sims: int = 16, selection: str = "puct",
         shares.append(scores[bot] / total if total else 0.25)
         wins.append(scores[bot] == max(scores.values()))
         places.append(1 + sum(1 for c in TURN_ORDER if scores[c] > scores[bot]))
+        res = [1.0 if scores[bot] > scores[c] else 0.5 if scores[bot] == scores[c] else 0.0
+               for c in TURN_ORDER if c != bot]
+        pair.append(sum(res) / 3)
+        for r in res:
+            wdl[0 if r == 1 else 1 if r == 0.5 else 2] += 1
+        seats.append(bot)
+        if record:
+            records.append({"game": g, "seat": bot, "opponents": {c: n for c, (n, _) in seat_opp.items()},
+                            "scores": dict(scores), "pairwise": round(sum(res) / 3, 3),
+                            "results": {c: r for c, r in zip(others, res)},
+                            "reason": game_over_reason(state) or "ply_cap", "plies": plies,
+                            "opening_plies": min(opening_plies, plies), "moves": moves_played})
+    per_seat = {c: round(float(np.mean([s for s, b in zip(shares, seats) if b == c])), 3)
+                for c in TURN_ORDER if c in seats}
+    per_seat_pair = {c: round(float(np.mean([s for s, b in zip(pair, seats) if b == c])), 3)
+                     for c in TURN_ORDER if c in seats}
     return {"opponent": opponent_name, "games": games, "sims": sims, "selection": selection,
+            "opening_plies": opening_plies,
+            "pairwise": round(float(np.mean(pair)), 3),
+            "pairwise_se": round(float(np.std(pair, ddof=1) / np.sqrt(len(pair))), 3)
+            if len(pair) > 1 else None,
+            "per_seat_pairwise": per_seat_pair,
+            "wins_draws_losses": wdl,
+            "game_pairwise": [round(float(x), 3) for x in pair],
             "score_share": round(float(np.mean(shares)), 3),
+            "score_share_se": round(float(np.std(shares, ddof=1) / np.sqrt(len(shares))), 3)
+            if len(shares) > 1 else None,
+            "per_seat_share": per_seat,
+            "game_shares": [round(float(x), 3) for x in shares],
             "win_rate": round(float(np.mean(wins)), 3),
-            "avg_place": round(float(np.mean(places)), 2)}
+            "avg_place": round(float(np.mean(places)), 2),
+            **({"records": records} if record else {})}
 
 
 def evaluate_vs_random(evaluator, games: int = 4, sims: int = 16, selection: str = "puct",
@@ -78,7 +139,7 @@ def model_name(path: str | Path) -> str:
         p = p.parent
     if p.parent.name == "snapshots":
         return f"{p.parent.parent.name}/{p.stem}"
-    return p.name
+    return p.stem if p.suffix == ".pt" else p.name
 
 
 def load_evaluator(path: str | Path, device: str = "cpu"):
@@ -89,7 +150,16 @@ def load_evaluator(path: str | Path, device: str = "cpu"):
 
 
 def evaluate_vs(evaluator, opponent: str | Path, device: str = "cpu", **kw) -> dict:
-    """Evaluate against "random" or a saved model (models/<label>, model.pt or a snapshot)."""
+    """Evaluate against "random", "benchmark" (the current benchmark model) or a saved model
+    (any model reference: see registry.find_model)."""
+    if str(opponent) == "benchmark":
+        from . import benchmark
+        bench = benchmark.current()
+        if bench is None:
+            opponent = "random"
+        else:
+            opponent = benchmark.model_file(bench)
+            kw.setdefault("opening_plies", 4)
     if str(opponent) == "random":
         return evaluate(evaluator, opponent=None, opponent_name="random", **kw)
     return evaluate(evaluator, opponent=load_evaluator(opponent, device),

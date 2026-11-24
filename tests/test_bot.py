@@ -252,7 +252,152 @@ def test_evaluate_against_saved_model_and_resolve_opponent(tmp_path, monkeypatch
     args = lambda **kw: SimpleNamespace(**{"eval_opponent": None, "init": None, "resume": None, **kw})
     assert train.resolve_eval_opponent(args(init="models/sup"), "x") == "models/sup"
     assert train.resolve_eval_opponent(args(init="models/sup", eval_opponent="random"), "x") == "random"
-    assert train.resolve_eval_opponent(args(), "x") == "random"
+    assert train.resolve_eval_opponent(args(), "x") == "benchmark"
     (tmp_path / "run").mkdir()
     (tmp_path / "run" / "meta.json").write_text('{"eval_opponent": "models/sup"}')
     assert train.resolve_eval_opponent(args(resume="models/run"), "run") == "models/sup"
+
+
+def test_supervised_plays_in_checks_seats():
+    from bot.supervised import plays_in
+    from chaturaji.record import Game
+    g = Game(metadata={"seats": {"Red": {"name": "Ihavethesauce"}, "Blue": {"name": "taran0915"}}})
+    assert plays_in(g, "ihavethesauce") and plays_in(g, "TARAN0915")
+    assert not plays_in(g, "arnav2007") and not plays_in(Game(metadata={}), "x")
+
+
+def test_evaluate_paired_openings_and_per_seat():
+    from bot import evaluate
+    from bot.mcts import UniformEvaluator
+    res = evaluate.evaluate(UniformEvaluator(), games=8, sims=2, opponent=UniformEvaluator(),
+                            max_plies=16, opening_plies=4)
+    assert set(res["per_seat_share"]) == {"R", "B", "Y", "G"} and len(res["game_shares"]) == 8
+    assert res["score_share_se"] is not None
+    assert sum(res["wins_draws_losses"]) == 8 * 3 and 0 <= res["pairwise"] <= 1
+    w, d, l = res["wins_draws_losses"]
+    assert abs(res["pairwise"] - (w + 0.5 * d) / 24) < 1e-3
+
+
+def test_benchmark_verdict_and_ladder(tmp_path, monkeypatch):
+    from bot import benchmark, evaluate, registry
+    monkeypatch.setattr(registry, "MODELS_DIR", tmp_path)
+    good = {"games": 40, "pairwise": 0.62, "pairwise_se": 0.04,
+            "per_seat_pairwise": {"R": 0.6, "B": 0.7, "Y": 0.66, "G": 0.45}}
+    assert benchmark.verdict(good)[0]
+    assert not benchmark.verdict({**good, "pairwise_se": 0.07})[0]              # within noise
+    assert not benchmark.verdict({**good, "per_seat_pairwise": {"R": 0.9, "B": 0.9, "Y": 0.4, "G": 0.4}})[0]
+    assert not benchmark.verdict({**good, "games": 20})[0]
+
+    for name in ("a", "b"):
+        (tmp_path / name).mkdir()
+        (tmp_path / name / "model.pt").write_bytes(b"x")
+        (tmp_path / name / "meta.json").write_text("{}")
+    assert benchmark.challenge("models/a")["promoted"]          # first model becomes benchmark
+    assert benchmark.current()["label"] == "a"
+    monkeypatch.setattr(benchmark, "load_evaluator", lambda path, device="cpu": None)
+    monkeypatch.setattr(benchmark, "evaluate", lambda *a, **k: {**good, "games": 40})
+    out = benchmark.challenge("models/b/model.pt")
+    assert out["promoted"] and benchmark.current() == {**benchmark.current(), "label": "b", "previous": "a"}
+    assert json.loads((tmp_path / "b" / "meta.json").read_text()) == {}          # model files untouched
+    assert benchmark.challenge("models/a", promote=False)["promoted"] is False
+    assert len((tmp_path / "benchmark_history.jsonl").read_text().splitlines()) == 4
+    assert benchmark.current()["label"] == "b"                              # not promoted
+
+
+def test_league_game_trains_only_on_learner_moves():
+    import numpy as np
+    from bot.mcts import MCTS, UniformEvaluator
+    from bot.selfplay import play_league_game
+    rng = np.random.default_rng(0)
+    mk = lambda: MCTS(UniformEvaluator(), num_simulations=2, max_turn=None, rng=rng)
+    samples, game = play_league_game(mk(), {c: mk() for c in "RYG"}, "B", temp_plies=4,
+                                     max_plies=20, metadata={"learner_seat": "B"})
+    blue_moves = sum(1 for h in game.history if h["color"] == "B" and h.get("uci"))
+    assert len(samples) == blue_moves > 0 and game.metadata["learner_seat"] == "B"
+
+
+def test_league_training_with_hourly_checks(tmp_path, monkeypatch):
+    import types
+    from bot import registry, train as train_mod
+    monkeypatch.setattr(registry, "MODELS_DIR", tmp_path / "models")
+    monkeypatch.setattr(registry, "LOGS_DIR", tmp_path / "logs")
+    tiny = ["--device", "cpu", "--embed", "16", "--widths", "32", "16", "8", "--sims", "2",
+            "--max-plies", "16", "--steps", "2", "--batch", "8", "--eval-games", "0"]
+    opp = train_mod.train(train_mod.parse_args(["--tag", "opp", "--iterations", "1", "--games", "1"] + tiny))
+    clock = {"t": 1_000_000.0}
+
+    def fake_time():
+        clock["t"] += 60
+        return clock["t"]
+    monkeypatch.setattr(train_mod, "time", types.SimpleNamespace(time=fake_time))
+    label = train_mod.train(train_mod.parse_args([
+        "--tag", "league", "--init", str(tmp_path / "models" / opp), "--iterations", "0",
+        "--hours", "1", "--snapshot-every", "20", "--games", "2",
+        "--opponents", str(tmp_path / "models" / opp), str(tmp_path / "models" / opp),
+        "--check-games", "4", "--check-sims", "2", "--check-opponent", str(tmp_path / "models" / opp)]
+        + tiny))
+    meta = json.loads((tmp_path / "models" / label / "meta.json").read_text())
+    assert meta["opponents"] and meta["history"][0]["league_games"] == 2
+    checks = meta["checks"]
+    assert checks[0]["snapshot"] == "start" and "vs_yardstick" in checks[0]
+    assert len(checks) == len(meta["snapshots"]) + 1 >= 2
+    assert all("decision" in c and "vs_best" in c for c in checks[1:])
+    assert meta["best_snapshot"] in ["start"] + [s["name"] for s in meta["snapshots"]]
+    assert checks[-1]["snapshot"].startswith("final") and "vs_pool" in checks[0]
+    games = [json.loads(l) for l in (tmp_path / "logs" / label / "games.jsonl").read_text().splitlines()]
+    train_games = [g for g in games if g["type"] == "train"]
+    assert train_games and all(g["moves"] and g["opponents"] and len(g["results"]) == 3 for g in train_games)
+    seats = [g["learner_seat"] for g in train_games]
+    for i in range(0, len(seats) - len(seats) % 4, 4):   # every block of 4 uses each seat once
+        assert sorted(seats[i:i + 4]) == sorted("RBYG")
+    assert {g["check"] for g in games if g["type"] == "check"} >= {"vs_pool", "vs_yardstick"}
+
+
+def test_league_pool_grows_once_learner_beats_it(tmp_path, monkeypatch):
+    import types
+    from bot import benchmark, registry, train as train_mod
+    monkeypatch.setattr(registry, "MODELS_DIR", tmp_path / "models")
+    monkeypatch.setattr(registry, "LOGS_DIR", tmp_path / "logs")
+    tiny = ["--device", "cpu", "--embed", "16", "--widths", "32", "16", "8", "--sims", "2",
+            "--max-plies", "16", "--steps", "2", "--batch", "8", "--eval-games", "0"]
+    opp = train_mod.train(train_mod.parse_args(["--tag", "opp", "--iterations", "1", "--games", "1"] + tiny))
+    clock = {"t": 1_000_000.0}
+
+    def fake_time():
+        clock["t"] += 60
+        return clock["t"]
+    monkeypatch.setattr(train_mod, "time", types.SimpleNamespace(time=fake_time))
+    monkeypatch.setattr(benchmark, "verdict", lambda r, min_games=40: (True, "forced"))
+    label = train_mod.train(train_mod.parse_args([
+        "--tag", "grow", "--init", str(tmp_path / "models" / opp), "--iterations", "0",
+        "--hours", "1", "--snapshot-every", "20", "--games", "2",
+        "--opponents", str(tmp_path / "models" / opp), "--check-games", "4", "--check-sims", "2",
+        "--check-opponent", "none", "--no-revert"] + tiny))
+    meta = json.loads((tmp_path / "models" / label / "meta.json").read_text())
+    assert meta["pool_open"] and meta["pool_added"]
+    later = [c for c in meta["checks"] if c.get("added_to_pool")]
+    assert later and len(later[-1]["vs_pool"]["pool"]) >= 2
+
+
+def test_model_references_resolve_pool_and_archive(tmp_path, monkeypatch):
+    from bot import benchmark, registry
+    monkeypatch.setattr(registry, "MODELS_DIR", tmp_path / "models")
+    monkeypatch.setattr(registry, "LOGS_DIR", tmp_path / "logs")
+    pool = tmp_path / "models" / "opponent_pool"
+    pool.mkdir(parents=True)
+    (pool / "BEST_x_model.pt").write_bytes(b"x")
+    (pool / "BEST_x_model.meta.json").write_text(json.dumps({"label": "2026_x_run"}))
+    (tmp_path / "logs" / "models" / "old_run").mkdir(parents=True)
+    (tmp_path / "logs" / "models" / "old_run" / "model.pt").write_bytes(b"x")
+
+    assert registry.find_model("opponent_pool/BEST_x_model.pt") == pool / "BEST_x_model.pt"
+    assert registry.find_model("opponent_pool/x_model.pt") == pool / "BEST_x_model.pt"  # BEST_ optional
+    assert registry.find_model("models/old_run") == tmp_path / "logs" / "models" / "old_run" / "model.pt"
+    assert registry.label_for(pool / "BEST_x_model.pt") == "2026_x_run"
+    with pytest.raises(FileNotFoundError):
+        registry.find_model("nope")
+
+    benchmark.set_benchmark(pool / "BEST_x_model.pt", "test")
+    bench = benchmark.current()
+    assert bench["model"] == "opponent_pool/BEST_x_model.pt" and bench["label"] == "2026_x_run"
+    assert benchmark.model_file() == pool / "BEST_x_model.pt"

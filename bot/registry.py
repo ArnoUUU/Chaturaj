@@ -11,6 +11,11 @@ Each saved model lives in its own folder, named by a label built from the run:
                               per-iteration losses, evaluation results, status
   models/index.jsonl          one line per saved model (label, kind, metrics)
 
+Opponent pool and archive (see models/README.md):
+  models/opponent_pool/<name>.pt + .meta.json   league opponents; BEST_ in the name marks the best
+  logs/models/<label>/                          retired model folders (weights, meta, snapshots)
+find_model() turns any of these references into a weights file.
+
 Logs for the same run go to logs/<label>/, split into numbered chunks.
 """
 
@@ -134,6 +139,35 @@ def environment_info(device: str) -> dict:
 
 def model_dir(label: str, root: Path | None = None) -> Path:
     return (root or MODELS_DIR) / label
+
+
+def label_for(path: str | Path) -> str:
+    """The run label of a model file: models/<label>/model.pt, a pool file (its meta.json
+    holds the label) or a snapshot (named by its file)."""
+    p = Path(path)
+    if p.name == "model.pt":
+        return p.parent.name
+    meta = p.with_name(p.stem + ".meta.json")
+    if meta.is_file():
+        return json.loads(meta.read_text(encoding="utf-8")).get("label") or p.stem
+    return p.stem
+
+
+def find_model(ref: str | Path) -> Path:
+    """Resolve a model reference to its weights file. Accepts a .pt file (model.pt, a pool
+    file or a snapshot), a folder, a label, or a pool name with or without BEST_. Searches
+    models/, models/opponent_pool/, logs/models/ (retired models) and the repo root."""
+    p = Path(ref)
+    if p.is_file():
+        return p
+    if p.is_dir() and (p / "model.pt").is_file():
+        return p / "model.pt"
+    stem = p.parent.name if p.name == "model.pt" else (p.name[:-3] if p.name.endswith(".pt") else p.name)
+    for base in (MODELS_DIR, MODELS_DIR / "opponent_pool", LOGS_DIR / "models", ROOT):
+        for c in (base / p, base / stem / "model.pt", base / f"{stem}.pt", base / f"BEST_{stem}.pt"):
+            if c.is_file():
+                return c
+    raise FileNotFoundError(f"no model for {str(ref)!r} in models/, models/opponent_pool/ or logs/models/")
 
 
 def _checkpoint(model, kind: str, config: dict, label: str, meta: dict, optimizer=None) -> dict:

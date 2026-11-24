@@ -33,7 +33,6 @@ from chaturaji.moves import Move
 from chaturaji.record import Game
 
 from . import registry
-from .evaluate import evaluate_vs_random
 from .features import canonical_action, legal_canonical, mover_index, outcome_vectors, to_relative
 from .selfplay import Sample
 from .train import ReplayBuffer
@@ -44,8 +43,11 @@ PLAYERS = ROOT / "scraper" / "data" / "players"
 
 
 def record_paths(records_dir: Path = RECORDS, player: str | None = None,
-                 time_controls: list[str] | None = None) -> list[Path]:
-    """Engine records to train on: all of them, or one player's games (optionally per control)."""
+                 time_controls: list[str] | None = None, tc_types: list[str] | None = None,
+                 min_opp_rating: int | None = None) -> list[Path]:
+    """Engine records to train on: all of them, or one player's games, optionally only some
+    time controls, chess.com time-control types (rapid, blitz, ...) or opponent strength
+    (all three opponents rated at least `min_opp_rating`), read from the player index."""
     if not player:
         return sorted(records_dir.glob("*.json"))
     from scraper.game_scraping import tc_slug
@@ -55,7 +57,15 @@ def record_paths(records_dir: Path = RECORDS, player: str | None = None,
     for idx in sorted(base.glob("*/index.jsonl")):
         if slugs and idx.parent.name not in slugs:
             continue
-        ids += [json.loads(l)["game_id"] for l in idx.read_text(encoding="utf-8").splitlines() if l.strip()]
+        for line in idx.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            e = json.loads(line)
+            if tc_types and (e.get("tc_type") or "").lower() not in {t.lower() for t in tc_types}:
+                continue
+            if min_opp_rating is not None and (e.get("min_opponent_rating") or 0) < min_opp_rating:
+                continue
+            ids.append(e["game_id"])
     return [records_dir / f"{gid}.json" for gid in dict.fromkeys(ids) if (records_dir / f"{gid}.json").exists()]
 
 
@@ -83,6 +93,11 @@ def samples_from_game(game: Game, encoder, smoothing: float = 0.1,
                           to_relative(share, k).astype(np.float32),
                           to_relative(margin, k).astype(np.float32)))
     return out
+
+
+def plays_in(game: Game, player: str) -> bool:
+    seats = game.metadata.get("seats") or {}
+    return any((s.get("name") or "").lower() == player.lower() for s in seats.values())
 
 
 @torch.no_grad()
@@ -113,7 +128,8 @@ def validate(model, samples: list[Sample], kind: str, device: str, batch: int = 
 def run(args) -> str:
     random.seed(args.seed)
     torch.manual_seed(args.seed)
-    paths = record_paths(Path(args.records), args.player, args.time_controls)
+    paths = record_paths(Path(args.records), args.player, args.time_controls,
+                         args.tc_types, args.min_opponent_rating)
     if not paths:
         raise SystemExit("no scraped game records found. Run scraper.game_scraping first.")
     games = []
@@ -122,6 +138,13 @@ def run(args) -> str:
             games.append(Game.load(p))
         except Exception as e:  # a record that no longer replays (e.g. rules changed)
             print(f"skip {p.name}: {e}")
+    if args.player:   # a per-player warm start must only see games that player sat in
+        others = [g for g in games if not plays_in(g, args.player)]
+        if others:
+            print(f"dropping {len(others)} records without {args.player} in a seat")
+            games = [g for g in games if plays_in(g, args.player)]
+    if not games:
+        raise SystemExit("no usable game records for this selection")
     random.shuffle(games)
     n_val = max(1, int(len(games) * args.val_fraction)) if len(games) > 1 else 0
     val_games, train_games = games[:n_val], games[n_val:]
@@ -146,7 +169,9 @@ def run(args) -> str:
     meta = {"label": label, "kind": kind, "config": config, "params": registry.param_count(model),
             "args": vars(args), "environment": registry.environment_info(args.device),
             "training": "supervised", "status": "running", "history": [], "evaluation": None,
-            "data": {"games": len(games), "train_games": len(train_games), "val_games": len(val_games),
+            "data": {"player": args.player, "time_controls": args.time_controls,
+                     "tc_types": args.tc_types, "min_opponent_rating": args.min_opponent_rating,
+                     "games": len(games), "train_games": len(train_games), "val_games": len(val_games),
                      "train_positions": len(train_s), "val_positions": len(val_s),
                      "game_ids": [g.metadata.get("chesscom_id") for g in games]}}
     log.log("start", **{k: meta[k] for k in ("label", "kind", "params")}, data={
@@ -158,6 +183,7 @@ def run(args) -> str:
     buf = ReplayBuffer(len(train_s) + 1)
     buf.extend(train_s)
     best = None
+    stale = 0
     for epoch in range(args.epochs):
         model.train()
         losses = []
@@ -184,18 +210,29 @@ def run(args) -> str:
         if val and (best is None or val["policy_loss"] < best):
             best = val["policy_loss"]
             meta["best_epoch"] = epoch
+            stale = 0
             registry.save_model(model, kind, config, label, meta, opt)
+        else:
+            stale += 1
+            if args.patience and stale >= args.patience:
+                log.log("early_stop", epoch=epoch, best_epoch=meta.get("best_epoch"))
+                break
     if best is None:
         registry.save_model(model, kind, config, label, meta, opt)
 
     model, _, _, _ = registry.load_model(registry.model_dir(label), args.device)  # best epoch
-    if args.eval_games:
-        meta["evaluation"] = evaluate_vs_random(registry.evaluator(kind, model, args.device),
-                                                args.eval_games, args.eval_sims, "puct", seed=args.seed)
-        log.log("evaluation", **meta["evaluation"])
     meta["status"] = "complete"
-    meta["history"] = meta["history"]
     registry.save_model(model, kind, config, label, meta)
+    if args.eval_games:   # against the benchmark model, not random movers (see bot.benchmark)
+        from . import benchmark
+        out = benchmark.challenge(label, games=args.eval_games, sims=args.eval_sims,
+                                  seed=args.seed, device=args.device,
+                                  promote=not args.no_promote)
+        log.log("benchmark", **{k: v for k, v in out.items() if k != "result"},
+                **{k: v for k, v in (out.get("result") or {}).items() if k not in ("game_shares", "game_pairwise")})
+        meta["evaluation"] = out.get("result")
+        meta["benchmark_eval"] = {k: v for k, v in out.items() if k != "result"}
+        registry.save_model(model, kind, config, label, meta)
     registry.register(label, meta)
     log.log("done", label=label)
     return label
@@ -207,6 +244,10 @@ def parse_args(argv=None):
     ap.add_argument("--player", help="train on this player's scraped games")
     ap.add_argument("--time-control", action="append", dest="time_controls",
                     help='only these controls, e.g. "1 | 5" (repeatable)')
+    ap.add_argument("--tc-type", action="append", dest="tc_types",
+                    help="only these chess.com time-control types, e.g. rapid (repeatable)")
+    ap.add_argument("--min-opponent-rating", type=int,
+                    help="only games where all three opponents were rated at least this")
     ap.add_argument("--player-moves-only", action="store_true",
                     help="policy/value targets only from the player's own moves")
     ap.add_argument("--tag", default="sup")
@@ -223,8 +264,13 @@ def parse_args(argv=None):
     ap.add_argument("--value-weight", type=float, default=1.0)
     ap.add_argument("--score-weight", type=float, default=0.5)
     ap.add_argument("--val-fraction", type=float, default=0.15)
-    ap.add_argument("--eval-games", type=int, default=8)
+    ap.add_argument("--patience", type=int, default=0,
+                    help="stop after this many epochs without a better validation loss (0 = off)")
+    ap.add_argument("--eval-games", type=int, default=40,
+                    help="games against the benchmark model after training (multiple of 4; 0 = skip)")
     ap.add_argument("--eval-sims", type=int, default=32)
+    ap.add_argument("--no-promote", action="store_true",
+                    help="evaluate against the benchmark without replacing it")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--log-chunk", type=int, default=200)
     return ap.parse_args(argv)
