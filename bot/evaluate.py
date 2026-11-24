@@ -36,12 +36,13 @@ from .mcts import MCTS, Node
 def evaluate(evaluator, games: int = 4, sims: int = 16, selection: str = "puct",
              opponent=None, opponent_name: str = "random", max_plies: int = 300,
              seed: int = 0, opening_plies: int = 0, pool: list | None = None,
-             record: bool = False) -> dict:
+             record: bool = False, bot_player=None) -> dict:
     """`opponent` is an MCTS evaluator for the three other seats, or None for random moves.
 
     `pool` (a list of (name, evaluator)) replaces `opponent` with a mixed field: each block
     of 4 games draws three pool members (repeats allowed) for the other seats, and the bot
-    plays that lineup from every seat. With `record`, every game (seat, opponents, scores,
+    plays that lineup from every seat. `bot_player` (a function state -> Move, e.g. a max^n
+    search) plays the bot's seat instead of MCTS over `evaluator`. With `record`, every game (seat, opponents, scores,
     result, moves) is returned under "records".
 
     Model-vs-model games are deterministic (argmax search, no noise), so with
@@ -75,7 +76,9 @@ def evaluate(evaluator, games: int = 4, sims: int = 16, selection: str = "puct",
             state, _ = apply_move(state, move)
             plies += 1
         while not is_game_over(state) and plies < max_plies:
-            if state.current_player() == bot:
+            if state.current_player() == bot and bot_player is not None:
+                move = bot_player(state)
+            elif state.current_player() == bot:
                 root = mcts.search(Node(state))
                 move = root.moves[mcts.choose(root)]
             elif seat_opp[state.current_player()][1] is not None:
