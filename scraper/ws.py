@@ -169,6 +169,19 @@ def seat_players(d: dict) -> list[dict]:
     return out
 
 
+def _int(v) -> int | None:
+    try:
+        return int(float(v))
+    except (TypeError, ValueError):
+        return None
+
+
+def seek_range(d: dict) -> tuple[int | None, int | None]:
+    """The seek's rating bounds (q.minRating, q.maxRating); None where unset."""
+    q = d.get("q") or {}
+    return _int(q.get("minRating")), _int(q.get("maxRating"))
+
+
 def archive_row(row: dict, searched: str | None = None) -> dict:
     """An archive search result in the shape game_scraping uses for its index."""
     q = row.get("q") or {}
@@ -183,9 +196,38 @@ def archive_row(row: dict, searched: str | None = None) -> dict:
         "duration_min": row.get("duration"),
         "plies": row.get("plies"),
         "termination": row.get("termination"),
+        "seek_min": seek_range(row)[0],
+        "seek_max": seek_range(row)[1],
+        "tc_type": q.get("timeControlType"),
         "players": [{**p, "searched": bool(searched) and p["name"].lower() == searched.lower()}
                     for p in seat_players(row)],
     }
+
+
+def min_opponent_rating(row: dict, name: str) -> int | None:
+    """Lowest pre-game rating among `name`'s opponents in an archive_row (None if unknown)."""
+    ratings = [_int(p.get("rating")) for p in row.get("players", [])
+               if p["name"].lower() != name.lower()]
+    return min(ratings) if ratings and None not in ratings else None
+
+
+def annotate_index(name: str, tags: dict[str, dict]) -> int:
+    """Fill fields missing from `name`'s index entries (e.g. tc_type for games indexed
+    before it was recorded). Returns the number of entries changed."""
+    from .game_scraping import players_dir
+    changed = 0
+    for idx in (players_dir() / name.lower()).glob("*/index.jsonl"):
+        rows = [json.loads(l) for l in idx.read_text(encoding="utf-8").splitlines() if l.strip()]
+        dirty = False
+        for r in rows:
+            for k, v in tags.get(str(r.get("game_id")), {}).items():
+                if r.get(k) is None and v is not None:
+                    r[k] = v
+                    dirty = True
+                    changed += 1
+        if dirty:
+            idx.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+    return changed
 
 
 def is_chaturaji(row: dict) -> bool:
@@ -211,6 +253,9 @@ def game_data(d: dict) -> dict:
         "chat": place_chat(d.get("chat") or [], moves),
         "players": seat_players(d),
         "rated": d.get("rated"),
+        "seek_min": seek_range(d)[0],
+        "seek_max": seek_range(d)[1],
+        "time_control_type": (d.get("q") or {}).get("timeControlType"),
         "start_date": d.get("date"),
         "end_date": d.get("endDate"),
         "duration_min": d.get("duration"),
@@ -307,15 +352,27 @@ class VariantsSocket:
                 return mutation, data
         raise TimeoutError("no matching message from the variants server")
 
-    def _retry(self, fn):
-        """Run fn once, and again on a fresh connection if the socket dropped."""
+    def _retry(self, fn, attempts: int = 14):
+        """Run fn; if the connection drops or the network is down, reconnect with growing
+        waits (5, 10, 20, 40, then 60 s; about 10 minutes in all) and try again."""
         import websocket
-        try:
-            return fn()
-        except (websocket.WebSocketConnectionClosedException, ConnectionError, OSError):
-            self.close()
-            self.connect()
-            return fn()
+        errors = (websocket.WebSocketException, ConnectionError, OSError)
+        for attempt in range(attempts):
+            try:
+                if self.ws is None:
+                    self.connect()
+                return fn()
+            except NotLoggedIn:
+                raise
+            except errors as e:
+                # no reply twice in a row means the server has nothing for us (e.g. a
+                # missing game), not a dead connection
+                if attempt == attempts - 1 or (isinstance(e, TimeoutError) and attempt >= 1):
+                    raise
+                wait = min(60, 5 * 2 ** attempt)
+                print(f"  connection problem ({type(e).__name__}); retrying in {wait}s", flush=True)
+                self.close()
+                time.sleep(wait)
 
     # requests
     def find_player(self, username: str) -> int:
@@ -391,12 +448,20 @@ def _load_saved(gid: str) -> dict | None:
 
 def scrape_player(sock: VariantsSocket, name: str, time_controls: list[str] | None = None,
                   max_per_tc: int = 20, days: str = "0-9999", delay: float = 1.0,
-                  refetch: bool = False, max_pages: int | None = None) -> dict[str, int]:
+                  refetch: bool = False, max_pages: int | None = None,
+                  min_seek: int | None = None, tc_types: list[str] | None = None,
+                  min_opp_rating: int | None = None) -> dict[str, int]:
     """Scrape a player's Chaturaji games, saved per time control (like game_scraping's
     Selenium `scrape_player`). Pages through the whole archive in one search.
 
     Games already in this player's index are skipped by id. Games already saved for
     another player are added to this player's index without downloading them again.
+    min_seek: only games whose seek had a minimum rating of at least this (games with
+              no minimum are skipped).
+    tc_types: only these chess.com time-control types ("rapid", "blitz", "bullet", "hyper").
+    min_opp_rating: only games where all three opponents were rated at least this.
+    Every archive row read also back-fills tc_type / min_opponent_rating on games already
+    in the player's index.
     Returns {time_control folder (e.g. '1+5'): games added this run}.
     """
     from collections import defaultdict
@@ -406,6 +471,8 @@ def scrape_player(sock: VariantsSocket, name: str, time_controls: list[str] | No
     known = set() if refetch else known_game_ids(name)
     uid = sock.find_player(name)
     rows_seen = 0
+    types = {t.lower() for t in tc_types} if tc_types else None
+    tags: dict[str, dict] = {}
     from .game_scraping import records_dir
     for raw in sock.iter_archive(uid, days, max_pages=max_pages):
         if wanted and all(saved[t] >= max_per_tc for t in wanted):
@@ -414,9 +481,19 @@ def scrape_player(sock: VariantsSocket, name: str, time_controls: list[str] | No
         if not is_chaturaji(raw):
             continue
         row = archive_row(raw, searched=name)
+        if not any(p["searched"] for p in row["players"]):
+            continue   # chess.com's search can return games the player wasn't seated in
         tc, gid = row["time_control"], row["game_id"]
         slug = tc_slug(tc)
+        opp_min = min_opponent_rating(row, name)
+        tags[gid] = {"tc_type": row["tc_type"], "min_opponent_rating": opp_min}
+        if types and (row["tc_type"] or "").lower() not in types:
+            continue
+        if min_opp_rating is not None and (opp_min is None or opp_min < min_opp_rating):
+            continue
         if (wanted and slug not in wanted) or gid in known or saved[slug] >= max_per_tc:
+            continue
+        if min_seek is not None and (row["seek_min"] is None or row["seek_min"] < min_seek):
             continue
         data = None if refetch else _load_saved(gid)
         if data is not None:   # downloaded before (e.g. for an opponent): just index it
@@ -436,8 +513,9 @@ def scrape_player(sock: VariantsSocket, name: str, time_controls: list[str] | No
         saved[slug] += 1
         print(f"  {slug}: {gid} ({len(data.get('moves', []))} plies) {status}"
               f" [{saved[slug]}/{max_per_tc}]", flush=True)
-    print(f"[{name}] {rows_seen} archive rows read")
-    return dict(saved)
+    print(f"[{name}] {rows_seen} archive rows read; "
+          f"{annotate_index(name, tags)} index fields back-filled")
+    return {tc: n for tc, n in saved.items() if n}
 
 
 def scrape_games(sock: VariantsSocket, ids: list[str], delay: float = 1.0, refetch: bool = False,
