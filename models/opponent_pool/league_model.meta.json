@@ -1,0 +1,8527 @@
+{
+ "label": "2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu",
+ "kind": "mlp",
+ "config": {
+  "embed": 512,
+  "widths": [
+   1024,
+   512,
+   256
+  ],
+  "dropout": 0.1
+ },
+ "params": 3075848,
+ "args": {
+  "tag": "league-5h",
+  "device": "cpu",
+  "resume": null,
+  "init": "opponent_pool/ihavethesauce_model.pt",
+  "seed": 0,
+  "model": "mlp",
+  "embed": null,
+  "widths": null,
+  "channels": null,
+  "blocks": null,
+  "selection": "puct",
+  "c_puct": 1.5,
+  "c_ucb": 1.4142135623730951,
+  "iterations": 0,
+  "hours": 5.0,
+  "snapshot_every": 60.0,
+  "games": 16,
+  "sims": 32,
+  "max_plies": 400,
+  "temp_plies": 16,
+  "save_games": 1,
+  "save_games_every": 1,
+  "keep_snapshots": 0,
+  "quiet": true,
+  "print_every": 1,
+  "steps": 16,
+  "batch": 256,
+  "buffer": 100000,
+  "min_buffer": 5000,
+  "lr": 0.0001,
+  "weight_decay": 0.0001,
+  "score_weight": 0.5,
+  "eval_games": 0,
+  "eval_opponent": null,
+  "opponents": [
+   "logs/models/2026-11-22_2348_sup-arnav2007-v2_mlp-e512-w1024x512x256_sup-ep8_cpu/model.pt",
+   "opponent_pool/ihavethesauce_model.pt",
+   "opponent_pool/BEST_taran0915_model.pt",
+   "opponent_pool/eternalvoias_model.pt"
+  ],
+  "pool_share": 1.0,
+  "check_games": 40,
+  "check_sims": 32,
+  "check_opponent": "benchmark",
+  "grow_pool": true,
+  "revert": true,
+  "log_chunk": 200
+ },
+ "environment": {
+  "host": "arnavjyoga7",
+  "python": "3.14.0",
+  "torch": "2.9.1+cpu",
+  "device": "cpu",
+  "git_commit": "3122848-dirty",
+  "cuda_available": false
+ },
+ "status": "complete",
+ "history": [
+  {
+   "iteration": 0,
+   "step": 0,
+   "buffer": 619,
+   "selfplay_sec": 49.9,
+   "train_sec": 0.0,
+   "loss": {},
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 3,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.625,
+   "league_games": 16
+  },
+  {
+   "iteration": 1,
+   "step": 0,
+   "buffer": 960,
+   "selfplay_sec": 35.3,
+   "train_sec": 0.0,
+   "loss": {},
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 2,
+   "step": 0,
+   "buffer": 1438,
+   "selfplay_sec": 58.2,
+   "train_sec": 0.0,
+   "loss": {},
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.604,
+   "league_games": 16
+  },
+  {
+   "iteration": 3,
+   "step": 0,
+   "buffer": 1903,
+   "selfplay_sec": 65.6,
+   "train_sec": 0.0,
+   "loss": {},
+   "game_endings": {
+    "ply_cap": 1,
+    "last_king": 10,
+    "repetition": 5
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 4,
+   "step": 0,
+   "buffer": 2368,
+   "selfplay_sec": 42.7,
+   "train_sec": 0.0,
+   "loss": {},
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 5,
+   "step": 0,
+   "buffer": 2900,
+   "selfplay_sec": 33.5,
+   "train_sec": 0.0,
+   "loss": {},
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 6,
+   "step": 0,
+   "buffer": 3348,
+   "selfplay_sec": 40.4,
+   "train_sec": 0.0,
+   "loss": {},
+   "game_endings": {
+    "repetition": 8,
+    "last_king": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 7,
+   "step": 0,
+   "buffer": 3862,
+   "selfplay_sec": 39.3,
+   "train_sec": 0.0,
+   "loss": {},
+   "game_endings": {
+    "last_king": 11,
+    "ply_cap": 3,
+    "repetition": 2
+   },
+   "league_pairwise": 0.583,
+   "league_games": 16
+  },
+  {
+   "iteration": 8,
+   "step": 0,
+   "buffer": 4301,
+   "selfplay_sec": 32.9,
+   "train_sec": 0.0,
+   "loss": {},
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 9,
+   "step": 0,
+   "buffer": 4727,
+   "selfplay_sec": 35.9,
+   "train_sec": 0.0,
+   "loss": {},
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 9,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.323,
+   "league_games": 16
+  },
+  {
+   "iteration": 10,
+   "step": 16,
+   "buffer": 5013,
+   "selfplay_sec": 27.1,
+   "train_sec": 0.5,
+   "loss": {
+    "policy": 2.3983,
+    "value": 1.0579,
+    "score": 0.0868,
+    "total": 3.4996
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 11,
+   "step": 32,
+   "buffer": 5471,
+   "selfplay_sec": 46.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4064,
+    "value": 0.8843,
+    "score": 0.0875,
+    "total": 3.3344
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 12,
+   "step": 48,
+   "buffer": 5760,
+   "selfplay_sec": 35.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.3946,
+    "value": 0.8022,
+    "score": 0.0831,
+    "total": 3.2383
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.323,
+   "league_games": 16
+  },
+  {
+   "iteration": 13,
+   "step": 64,
+   "buffer": 6345,
+   "selfplay_sec": 39.0,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4202,
+    "value": 0.7694,
+    "score": 0.0773,
+    "total": 3.2283
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 10,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 14,
+   "step": 80,
+   "buffer": 6662,
+   "selfplay_sec": 34.7,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4212,
+    "value": 0.737,
+    "score": 0.0766,
+    "total": 3.1964
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.344,
+   "league_games": 16
+  },
+  {
+   "iteration": 15,
+   "step": 96,
+   "buffer": 7008,
+   "selfplay_sec": 30.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4366,
+    "value": 0.6917,
+    "score": 0.0709,
+    "total": 3.1638
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 9
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 16,
+   "step": 112,
+   "buffer": 7305,
+   "selfplay_sec": 32.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4261,
+    "value": 0.7,
+    "score": 0.0747,
+    "total": 3.1634
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.323,
+   "league_games": 16
+  },
+  {
+   "iteration": 17,
+   "step": 128,
+   "buffer": 7627,
+   "selfplay_sec": 35.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4363,
+    "value": 0.683,
+    "score": 0.0702,
+    "total": 3.1544
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 3,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 18,
+   "step": 144,
+   "buffer": 8031,
+   "selfplay_sec": 34.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4173,
+    "value": 0.6888,
+    "score": 0.073,
+    "total": 3.1426
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 12
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 19,
+   "step": 160,
+   "buffer": 8459,
+   "selfplay_sec": 37.0,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4268,
+    "value": 0.6732,
+    "score": 0.0716,
+    "total": 3.1357
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.354,
+   "league_games": 16
+  },
+  {
+   "iteration": 20,
+   "step": 176,
+   "buffer": 8794,
+   "selfplay_sec": 60.5,
+   "train_sec": 0.8,
+   "loss": {
+    "policy": 2.4336,
+    "value": 0.6593,
+    "score": 0.0699,
+    "total": 3.1278
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 3,
+    "ply_cap": 3
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 21,
+   "step": 192,
+   "buffer": 9329,
+   "selfplay_sec": 95.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4455,
+    "value": 0.6445,
+    "score": 0.0705,
+    "total": 3.1253
+   },
+   "game_endings": {
+    "last_king": 7,
+    "repetition": 8,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.615,
+   "league_games": 16
+  },
+  {
+   "iteration": 22,
+   "step": 208,
+   "buffer": 9691,
+   "selfplay_sec": 78.1,
+   "train_sec": 0.8,
+   "loss": {
+    "policy": 2.423,
+    "value": 0.6641,
+    "score": 0.0692,
+    "total": 3.1217
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 10,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.323,
+   "league_games": 16
+  },
+  {
+   "iteration": 23,
+   "step": 224,
+   "buffer": 10250,
+   "selfplay_sec": 85.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.435,
+    "value": 0.6549,
+    "score": 0.0694,
+    "total": 3.1246
+   },
+   "game_endings": {
+    "ply_cap": 1,
+    "last_king": 11,
+    "repetition": 4
+   },
+   "league_pairwise": 0.552,
+   "league_games": 16
+  },
+  {
+   "iteration": 24,
+   "step": 240,
+   "buffer": 10612,
+   "selfplay_sec": 44.0,
+   "train_sec": 0.5,
+   "loss": {
+    "policy": 2.4412,
+    "value": 0.6763,
+    "score": 0.0698,
+    "total": 3.1524
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 5,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 25,
+   "step": 256,
+   "buffer": 11091,
+   "selfplay_sec": 55.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4258,
+    "value": 0.6436,
+    "score": 0.0682,
+    "total": 3.1034
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 26,
+   "step": 272,
+   "buffer": 11479,
+   "selfplay_sec": 47.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4115,
+    "value": 0.6625,
+    "score": 0.0696,
+    "total": 3.1087
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.594,
+   "league_games": 16
+  },
+  {
+   "iteration": 27,
+   "step": 288,
+   "buffer": 12034,
+   "selfplay_sec": 68.9,
+   "train_sec": 0.8,
+   "loss": {
+    "policy": 2.4298,
+    "value": 0.6444,
+    "score": 0.0677,
+    "total": 3.108
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 12
+   },
+   "league_pairwise": 0.635,
+   "league_games": 16
+  },
+  {
+   "iteration": 28,
+   "step": 304,
+   "buffer": 12344,
+   "selfplay_sec": 49.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4244,
+    "value": 0.6517,
+    "score": 0.0688,
+    "total": 3.1105
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 29,
+   "step": 320,
+   "buffer": 12831,
+   "selfplay_sec": 66.6,
+   "train_sec": 1.0,
+   "loss": {
+    "policy": 2.4364,
+    "value": 0.6536,
+    "score": 0.0676,
+    "total": 3.1238
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 10,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 30,
+   "step": 336,
+   "buffer": 13164,
+   "selfplay_sec": 56.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4261,
+    "value": 0.649,
+    "score": 0.067,
+    "total": 3.1086
+   },
+   "game_endings": {
+    "last_king": 7,
+    "repetition": 8,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.573,
+   "league_games": 16
+  },
+  {
+   "iteration": 31,
+   "step": 352,
+   "buffer": 13548,
+   "selfplay_sec": 63.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4331,
+    "value": 0.6267,
+    "score": 0.0674,
+    "total": 3.0935
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.344,
+   "league_games": 16
+  },
+  {
+   "iteration": 32,
+   "step": 368,
+   "buffer": 13979,
+   "selfplay_sec": 66.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4249,
+    "value": 0.6134,
+    "score": 0.0681,
+    "total": 3.0724
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 8,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.5,
+   "league_games": 16
+  },
+  {
+   "iteration": 33,
+   "step": 384,
+   "buffer": 14333,
+   "selfplay_sec": 50.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4184,
+    "value": 0.6129,
+    "score": 0.0695,
+    "total": 3.066
+   },
+   "game_endings": {
+    "repetition": 10,
+    "last_king": 6
+   },
+   "league_pairwise": 0.438,
+   "league_games": 16
+  },
+  {
+   "iteration": 34,
+   "step": 400,
+   "buffer": 14790,
+   "selfplay_sec": 52.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4125,
+    "value": 0.6327,
+    "score": 0.0692,
+    "total": 3.0798
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.573,
+   "league_games": 16
+  },
+  {
+   "iteration": 35,
+   "step": 416,
+   "buffer": 15163,
+   "selfplay_sec": 56.1,
+   "train_sec": 0.8,
+   "loss": {
+    "policy": 2.4232,
+    "value": 0.6393,
+    "score": 0.0672,
+    "total": 3.0961
+   },
+   "game_endings": {
+    "repetition": 7,
+    "ply_cap": 1,
+    "last_king": 8
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 36,
+   "step": 432,
+   "buffer": 15628,
+   "selfplay_sec": 67.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4197,
+    "value": 0.6444,
+    "score": 0.0675,
+    "total": 3.0978
+   },
+   "game_endings": {
+    "last_king": 7,
+    "repetition": 7,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 37,
+   "step": 448,
+   "buffer": 16271,
+   "selfplay_sec": 63.9,
+   "train_sec": 1.0,
+   "loss": {
+    "policy": 2.4216,
+    "value": 0.6377,
+    "score": 0.0688,
+    "total": 3.0936
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.656,
+   "league_games": 16
+  },
+  {
+   "iteration": 38,
+   "step": 464,
+   "buffer": 16620,
+   "selfplay_sec": 50.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4295,
+    "value": 0.6272,
+    "score": 0.0664,
+    "total": 3.0899
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 39,
+   "step": 480,
+   "buffer": 17081,
+   "selfplay_sec": 55.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4063,
+    "value": 0.6047,
+    "score": 0.069,
+    "total": 3.0455
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 2,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.438,
+   "league_games": 16
+  },
+  {
+   "iteration": 40,
+   "step": 496,
+   "buffer": 17442,
+   "selfplay_sec": 53.4,
+   "train_sec": 0.8,
+   "loss": {
+    "policy": 2.4213,
+    "value": 0.6228,
+    "score": 0.069,
+    "total": 3.0786
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.229,
+   "league_games": 16
+  },
+  {
+   "iteration": 41,
+   "step": 512,
+   "buffer": 17785,
+   "selfplay_sec": 58.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4113,
+    "value": 0.6185,
+    "score": 0.0703,
+    "total": 3.065
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 8,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  },
+  {
+   "iteration": 42,
+   "step": 528,
+   "buffer": 18197,
+   "selfplay_sec": 56.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.409,
+    "value": 0.5909,
+    "score": 0.0666,
+    "total": 3.0331
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 10,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 43,
+   "step": 544,
+   "buffer": 18599,
+   "selfplay_sec": 53.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.3974,
+    "value": 0.6253,
+    "score": 0.0718,
+    "total": 3.0586
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 44,
+   "step": 560,
+   "buffer": 19131,
+   "selfplay_sec": 50.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4137,
+    "value": 0.6,
+    "score": 0.0693,
+    "total": 3.0483
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 3,
+    "ply_cap": 3
+   },
+   "league_pairwise": 0.635,
+   "league_games": 16
+  },
+  {
+   "iteration": 45,
+   "step": 576,
+   "buffer": 19481,
+   "selfplay_sec": 52.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.3969,
+    "value": 0.6175,
+    "score": 0.0674,
+    "total": 3.0482
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 1,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 46,
+   "step": 592,
+   "buffer": 19848,
+   "selfplay_sec": 51.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4204,
+    "value": 0.6067,
+    "score": 0.0682,
+    "total": 3.0612
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 47,
+   "step": 608,
+   "buffer": 20295,
+   "selfplay_sec": 57.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4032,
+    "value": 0.5904,
+    "score": 0.0694,
+    "total": 3.0282
+   },
+   "game_endings": {
+    "last_king": 11,
+    "ply_cap": 1,
+    "repetition": 4
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 48,
+   "step": 624,
+   "buffer": 20699,
+   "selfplay_sec": 47.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4218,
+    "value": 0.5822,
+    "score": 0.0671,
+    "total": 3.0376
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 49,
+   "step": 640,
+   "buffer": 21007,
+   "selfplay_sec": 44.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4046,
+    "value": 0.606,
+    "score": 0.0699,
+    "total": 3.0456
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.49,
+   "league_games": 16
+  },
+  {
+   "iteration": 50,
+   "step": 656,
+   "buffer": 21340,
+   "selfplay_sec": 57.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4186,
+    "value": 0.5802,
+    "score": 0.0669,
+    "total": 3.0323
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.365,
+   "league_games": 16
+  },
+  {
+   "iteration": 51,
+   "step": 672,
+   "buffer": 21897,
+   "selfplay_sec": 40.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4139,
+    "value": 0.5903,
+    "score": 0.0659,
+    "total": 3.0372
+   },
+   "game_endings": {
+    "repetition": 2,
+    "last_king": 13,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.552,
+   "league_games": 16
+  },
+  {
+   "iteration": 52,
+   "step": 688,
+   "buffer": 22386,
+   "selfplay_sec": 35.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.3977,
+    "value": 0.6093,
+    "score": 0.069,
+    "total": 3.0415
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 53,
+   "step": 704,
+   "buffer": 22654,
+   "selfplay_sec": 34.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4022,
+    "value": 0.5949,
+    "score": 0.0675,
+    "total": 3.0308
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 11,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 54,
+   "step": 720,
+   "buffer": 23016,
+   "selfplay_sec": 45.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4053,
+    "value": 0.5771,
+    "score": 0.0661,
+    "total": 3.0154
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 55,
+   "step": 736,
+   "buffer": 23305,
+   "selfplay_sec": 35.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4167,
+    "value": 0.5821,
+    "score": 0.0662,
+    "total": 3.0319
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 56,
+   "step": 752,
+   "buffer": 23623,
+   "selfplay_sec": 39.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.3929,
+    "value": 0.5859,
+    "score": 0.0679,
+    "total": 3.0127
+   },
+   "game_endings": {
+    "last_king": 7,
+    "repetition": 9
+   },
+   "league_pairwise": 0.333,
+   "league_games": 16
+  },
+  {
+   "iteration": 57,
+   "step": 768,
+   "buffer": 24070,
+   "selfplay_sec": 44.7,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.3961,
+    "value": 0.593,
+    "score": 0.068,
+    "total": 3.0231
+   },
+   "game_endings": {
+    "last_king": 6,
+    "repetition": 8,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 58,
+   "step": 784,
+   "buffer": 24342,
+   "selfplay_sec": 36.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4099,
+    "value": 0.5848,
+    "score": 0.0634,
+    "total": 3.0264
+   },
+   "game_endings": {
+    "repetition": 8,
+    "last_king": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 59,
+   "step": 800,
+   "buffer": 24798,
+   "selfplay_sec": 37.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.3966,
+    "value": 0.5951,
+    "score": 0.0688,
+    "total": 3.0261
+   },
+   "game_endings": {
+    "ply_cap": 1,
+    "last_king": 11,
+    "repetition": 4
+   },
+   "league_pairwise": 0.552,
+   "league_games": 16
+  },
+  {
+   "iteration": 60,
+   "step": 816,
+   "buffer": 25341,
+   "selfplay_sec": 42.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4162,
+    "value": 0.5749,
+    "score": 0.0673,
+    "total": 3.0247
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.365,
+   "league_games": 16
+  },
+  {
+   "iteration": 61,
+   "step": 832,
+   "buffer": 25634,
+   "selfplay_sec": 38.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4203,
+    "value": 0.5692,
+    "score": 0.0659,
+    "total": 3.0225
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  },
+  {
+   "iteration": 62,
+   "step": 848,
+   "buffer": 26074,
+   "selfplay_sec": 37.7,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4194,
+    "value": 0.5758,
+    "score": 0.0682,
+    "total": 3.0293
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.5,
+   "league_games": 16
+  },
+  {
+   "iteration": 63,
+   "step": 864,
+   "buffer": 26434,
+   "selfplay_sec": 28.4,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4205,
+    "value": 0.5781,
+    "score": 0.0667,
+    "total": 3.032
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 10,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  },
+  {
+   "iteration": 64,
+   "step": 880,
+   "buffer": 26824,
+   "selfplay_sec": 31.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4145,
+    "value": 0.5858,
+    "score": 0.0683,
+    "total": 3.0344
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.583,
+   "league_games": 16
+  },
+  {
+   "iteration": 65,
+   "step": 896,
+   "buffer": 27341,
+   "selfplay_sec": 41.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4045,
+    "value": 0.5917,
+    "score": 0.0705,
+    "total": 3.0315
+   },
+   "game_endings": {
+    "repetition": 9,
+    "last_king": 6,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.365,
+   "league_games": 16
+  },
+  {
+   "iteration": 66,
+   "step": 912,
+   "buffer": 27797,
+   "selfplay_sec": 41.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.42,
+    "value": 0.586,
+    "score": 0.0667,
+    "total": 3.0393
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 67,
+   "step": 928,
+   "buffer": 28113,
+   "selfplay_sec": 29.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4011,
+    "value": 0.5889,
+    "score": 0.0671,
+    "total": 3.0236
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 68,
+   "step": 944,
+   "buffer": 28374,
+   "selfplay_sec": 30.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4035,
+    "value": 0.5807,
+    "score": 0.0678,
+    "total": 3.0181
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 69,
+   "step": 960,
+   "buffer": 28692,
+   "selfplay_sec": 30.0,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4025,
+    "value": 0.5822,
+    "score": 0.0689,
+    "total": 3.0191
+   },
+   "game_endings": {
+    "last_king": 13,
+    "ply_cap": 1,
+    "repetition": 2
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 70,
+   "step": 976,
+   "buffer": 29247,
+   "selfplay_sec": 257.6,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4636,
+    "value": 1.1553,
+    "score": 0.089,
+    "total": 3.6634
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 5,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.438,
+   "league_games": 16
+  },
+  {
+   "iteration": 71,
+   "step": 992,
+   "buffer": 29605,
+   "selfplay_sec": 33.4,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.449,
+    "value": 0.9897,
+    "score": 0.0895,
+    "total": 3.4835
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 72,
+   "step": 1008,
+   "buffer": 29831,
+   "selfplay_sec": 37.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4452,
+    "value": 0.9583,
+    "score": 0.0849,
+    "total": 3.4459
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.302,
+   "league_games": 16
+  },
+  {
+   "iteration": 73,
+   "step": 1024,
+   "buffer": 30203,
+   "selfplay_sec": 37.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4465,
+    "value": 0.9307,
+    "score": 0.0812,
+    "total": 3.4179
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 74,
+   "step": 1040,
+   "buffer": 30613,
+   "selfplay_sec": 28.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4478,
+    "value": 0.9066,
+    "score": 0.0803,
+    "total": 3.3946
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.625,
+   "league_games": 16
+  },
+  {
+   "iteration": 75,
+   "step": 1056,
+   "buffer": 31069,
+   "selfplay_sec": 38.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.453,
+    "value": 0.8844,
+    "score": 0.075,
+    "total": 3.3749
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.344,
+   "league_games": 16
+  },
+  {
+   "iteration": 76,
+   "step": 1072,
+   "buffer": 31564,
+   "selfplay_sec": 35.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4458,
+    "value": 0.8778,
+    "score": 0.0778,
+    "total": 3.3625
+   },
+   "game_endings": {
+    "repetition": 3,
+    "last_king": 12,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.469,
+   "league_games": 16
+  },
+  {
+   "iteration": 77,
+   "step": 1088,
+   "buffer": 31929,
+   "selfplay_sec": 39.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4541,
+    "value": 0.8858,
+    "score": 0.075,
+    "total": 3.3773
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.354,
+   "league_games": 16
+  },
+  {
+   "iteration": 78,
+   "step": 1104,
+   "buffer": 32458,
+   "selfplay_sec": 40.7,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4384,
+    "value": 0.8474,
+    "score": 0.0747,
+    "total": 3.3231
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 7,
+    "ply_cap": 3
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 79,
+   "step": 1120,
+   "buffer": 32868,
+   "selfplay_sec": 35.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4707,
+    "value": 0.8359,
+    "score": 0.0735,
+    "total": 3.3434
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.365,
+   "league_games": 16
+  },
+  {
+   "iteration": 80,
+   "step": 1136,
+   "buffer": 33385,
+   "selfplay_sec": 42.7,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4458,
+    "value": 0.827,
+    "score": 0.0742,
+    "total": 3.3098
+   },
+   "game_endings": {
+    "last_king": 8,
+    "ply_cap": 4,
+    "repetition": 4
+   },
+   "league_pairwise": 0.354,
+   "league_games": 16
+  },
+  {
+   "iteration": 81,
+   "step": 1152,
+   "buffer": 33672,
+   "selfplay_sec": 38.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4534,
+    "value": 0.8136,
+    "score": 0.0722,
+    "total": 3.3031
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 82,
+   "step": 1168,
+   "buffer": 34122,
+   "selfplay_sec": 38.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4429,
+    "value": 0.83,
+    "score": 0.0732,
+    "total": 3.3095
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.49,
+   "league_games": 16
+  },
+  {
+   "iteration": 83,
+   "step": 1184,
+   "buffer": 34471,
+   "selfplay_sec": 34.4,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4323,
+    "value": 0.811,
+    "score": 0.0735,
+    "total": 3.28
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.281,
+   "league_games": 16
+  },
+  {
+   "iteration": 84,
+   "step": 1200,
+   "buffer": 34850,
+   "selfplay_sec": 32.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4463,
+    "value": 0.8035,
+    "score": 0.0724,
+    "total": 3.286
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 85,
+   "step": 1216,
+   "buffer": 35216,
+   "selfplay_sec": 33.7,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4423,
+    "value": 0.798,
+    "score": 0.0744,
+    "total": 3.2775
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.302,
+   "league_games": 16
+  },
+  {
+   "iteration": 86,
+   "step": 1232,
+   "buffer": 35768,
+   "selfplay_sec": 35.4,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4477,
+    "value": 0.7868,
+    "score": 0.0739,
+    "total": 3.2715
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.76,
+   "league_games": 16
+  },
+  {
+   "iteration": 87,
+   "step": 1248,
+   "buffer": 36123,
+   "selfplay_sec": 37.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4515,
+    "value": 0.7795,
+    "score": 0.0722,
+    "total": 3.2671
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 88,
+   "step": 1264,
+   "buffer": 36490,
+   "selfplay_sec": 36.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.429,
+    "value": 0.7911,
+    "score": 0.074,
+    "total": 3.2572
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 89,
+   "step": 1280,
+   "buffer": 36933,
+   "selfplay_sec": 47.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4396,
+    "value": 0.7837,
+    "score": 0.0733,
+    "total": 3.2599
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 3,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.542,
+   "league_games": 16
+  },
+  {
+   "iteration": 90,
+   "step": 1296,
+   "buffer": 37291,
+   "selfplay_sec": 36.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4378,
+    "value": 0.7661,
+    "score": 0.0718,
+    "total": 3.2398
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 8
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 91,
+   "step": 1312,
+   "buffer": 37582,
+   "selfplay_sec": 37.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4411,
+    "value": 0.768,
+    "score": 0.0739,
+    "total": 3.246
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.25,
+   "league_games": 16
+  },
+  {
+   "iteration": 92,
+   "step": 1328,
+   "buffer": 37938,
+   "selfplay_sec": 37.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4257,
+    "value": 0.7825,
+    "score": 0.0749,
+    "total": 3.2456
+   },
+   "game_endings": {
+    "repetition": 7,
+    "ply_cap": 1,
+    "last_king": 8
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 93,
+   "step": 1344,
+   "buffer": 38469,
+   "selfplay_sec": 41.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4384,
+    "value": 0.7732,
+    "score": 0.0734,
+    "total": 3.2483
+   },
+   "game_endings": {
+    "repetition": 5,
+    "ply_cap": 2,
+    "last_king": 9
+   },
+   "league_pairwise": 0.646,
+   "league_games": 16
+  },
+  {
+   "iteration": 94,
+   "step": 1360,
+   "buffer": 38898,
+   "selfplay_sec": 42.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4379,
+    "value": 0.7532,
+    "score": 0.0729,
+    "total": 3.2276
+   },
+   "game_endings": {
+    "repetition": 6,
+    "ply_cap": 1,
+    "last_king": 9
+   },
+   "league_pairwise": 0.5,
+   "league_games": 16
+  },
+  {
+   "iteration": 95,
+   "step": 1376,
+   "buffer": 39342,
+   "selfplay_sec": 38.6,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4437,
+    "value": 0.7566,
+    "score": 0.0704,
+    "total": 3.2355
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.438,
+   "league_games": 16
+  },
+  {
+   "iteration": 96,
+   "step": 1392,
+   "buffer": 39657,
+   "selfplay_sec": 26.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4531,
+    "value": 0.7524,
+    "score": 0.0689,
+    "total": 3.2399
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 12
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 97,
+   "step": 1408,
+   "buffer": 39996,
+   "selfplay_sec": 33.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4513,
+    "value": 0.7423,
+    "score": 0.0732,
+    "total": 3.2302
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 8,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 98,
+   "step": 1424,
+   "buffer": 40448,
+   "selfplay_sec": 39.6,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4428,
+    "value": 0.7517,
+    "score": 0.0721,
+    "total": 3.2306
+   },
+   "game_endings": {
+    "repetition": 3,
+    "last_king": 11,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 99,
+   "step": 1440,
+   "buffer": 40786,
+   "selfplay_sec": 30.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4387,
+    "value": 0.7289,
+    "score": 0.0713,
+    "total": 3.2033
+   },
+   "game_endings": {
+    "last_king": 14,
+    "repetition": 2
+   },
+   "league_pairwise": 0.333,
+   "league_games": 16
+  },
+  {
+   "iteration": 100,
+   "step": 1456,
+   "buffer": 41201,
+   "selfplay_sec": 31.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4385,
+    "value": 0.7419,
+    "score": 0.0731,
+    "total": 3.217
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 101,
+   "step": 1472,
+   "buffer": 41550,
+   "selfplay_sec": 30.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4328,
+    "value": 0.7169,
+    "score": 0.0694,
+    "total": 3.1844
+   },
+   "game_endings": {
+    "repetition": 2,
+    "last_king": 14
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 102,
+   "step": 1488,
+   "buffer": 42159,
+   "selfplay_sec": 40.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4509,
+    "value": 0.7371,
+    "score": 0.0708,
+    "total": 3.2234
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 7,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.615,
+   "league_games": 16
+  },
+  {
+   "iteration": 103,
+   "step": 1504,
+   "buffer": 42541,
+   "selfplay_sec": 37.6,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4301,
+    "value": 0.7239,
+    "score": 0.0718,
+    "total": 3.1899
+   },
+   "game_endings": {
+    "repetition": 8,
+    "ply_cap": 2,
+    "last_king": 6
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 104,
+   "step": 1520,
+   "buffer": 43051,
+   "selfplay_sec": 37.7,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4314,
+    "value": 0.7247,
+    "score": 0.0696,
+    "total": 3.1909
+   },
+   "game_endings": {
+    "last_king": 9,
+    "ply_cap": 2,
+    "repetition": 5
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 105,
+   "step": 1536,
+   "buffer": 43417,
+   "selfplay_sec": 30.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4408,
+    "value": 0.7327,
+    "score": 0.0718,
+    "total": 3.2094
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 9
+   },
+   "league_pairwise": 0.365,
+   "league_games": 16
+  },
+  {
+   "iteration": 106,
+   "step": 1552,
+   "buffer": 43887,
+   "selfplay_sec": 37.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4471,
+    "value": 0.7214,
+    "score": 0.0701,
+    "total": 3.2036
+   },
+   "game_endings": {
+    "repetition": 9,
+    "ply_cap": 2,
+    "last_king": 5
+   },
+   "league_pairwise": 0.667,
+   "league_games": 16
+  },
+  {
+   "iteration": 107,
+   "step": 1568,
+   "buffer": 44347,
+   "selfplay_sec": 34.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4413,
+    "value": 0.7135,
+    "score": 0.0673,
+    "total": 3.1884
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 108,
+   "step": 1584,
+   "buffer": 44690,
+   "selfplay_sec": 36.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4431,
+    "value": 0.7282,
+    "score": 0.0712,
+    "total": 3.207
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.438,
+   "league_games": 16
+  },
+  {
+   "iteration": 109,
+   "step": 1600,
+   "buffer": 45169,
+   "selfplay_sec": 44.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4388,
+    "value": 0.7022,
+    "score": 0.0699,
+    "total": 3.176
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 110,
+   "step": 1616,
+   "buffer": 45468,
+   "selfplay_sec": 29.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4371,
+    "value": 0.7206,
+    "score": 0.0716,
+    "total": 3.1935
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 111,
+   "step": 1632,
+   "buffer": 45940,
+   "selfplay_sec": 33.0,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.441,
+    "value": 0.7162,
+    "score": 0.0702,
+    "total": 3.1923
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.49,
+   "league_games": 16
+  },
+  {
+   "iteration": 112,
+   "step": 1648,
+   "buffer": 46392,
+   "selfplay_sec": 39.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4445,
+    "value": 0.6917,
+    "score": 0.0703,
+    "total": 3.1714
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 10,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.615,
+   "league_games": 16
+  },
+  {
+   "iteration": 113,
+   "step": 1664,
+   "buffer": 46800,
+   "selfplay_sec": 39.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4392,
+    "value": 0.7004,
+    "score": 0.0704,
+    "total": 3.1748
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 114,
+   "step": 1680,
+   "buffer": 47170,
+   "selfplay_sec": 31.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4328,
+    "value": 0.696,
+    "score": 0.0706,
+    "total": 3.1641
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 115,
+   "step": 1696,
+   "buffer": 47465,
+   "selfplay_sec": 42.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4417,
+    "value": 0.7091,
+    "score": 0.0691,
+    "total": 3.1853
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.198,
+   "league_games": 16
+  },
+  {
+   "iteration": 116,
+   "step": 1712,
+   "buffer": 47859,
+   "selfplay_sec": 30.6,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4331,
+    "value": 0.6699,
+    "score": 0.0695,
+    "total": 3.1377
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 117,
+   "step": 1728,
+   "buffer": 48307,
+   "selfplay_sec": 40.4,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.445,
+    "value": 0.7017,
+    "score": 0.0696,
+    "total": 3.1815
+   },
+   "game_endings": {
+    "last_king": 9,
+    "ply_cap": 2,
+    "repetition": 5
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 118,
+   "step": 1744,
+   "buffer": 48720,
+   "selfplay_sec": 31.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4334,
+    "value": 0.7111,
+    "score": 0.0708,
+    "total": 3.1799
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 11,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 119,
+   "step": 1760,
+   "buffer": 49221,
+   "selfplay_sec": 36.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4361,
+    "value": 0.6908,
+    "score": 0.0699,
+    "total": 3.1618
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.583,
+   "league_games": 16
+  },
+  {
+   "iteration": 120,
+   "step": 1776,
+   "buffer": 49531,
+   "selfplay_sec": 28.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4394,
+    "value": 0.6905,
+    "score": 0.0699,
+    "total": 3.1648
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.229,
+   "league_games": 16
+  },
+  {
+   "iteration": 121,
+   "step": 1792,
+   "buffer": 49835,
+   "selfplay_sec": 31.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4359,
+    "value": 0.691,
+    "score": 0.0693,
+    "total": 3.1616
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.469,
+   "league_games": 16
+  },
+  {
+   "iteration": 122,
+   "step": 1808,
+   "buffer": 50329,
+   "selfplay_sec": 41.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4327,
+    "value": 0.6925,
+    "score": 0.0688,
+    "total": 3.1596
+   },
+   "game_endings": {
+    "repetition": 2,
+    "last_king": 13,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 123,
+   "step": 1824,
+   "buffer": 50682,
+   "selfplay_sec": 32.7,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4591,
+    "value": 0.6665,
+    "score": 0.0686,
+    "total": 3.1599
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 124,
+   "step": 1840,
+   "buffer": 51133,
+   "selfplay_sec": 29.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.442,
+    "value": 0.6807,
+    "score": 0.0677,
+    "total": 3.1565
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.594,
+   "league_games": 16
+  },
+  {
+   "iteration": 125,
+   "step": 1856,
+   "buffer": 51694,
+   "selfplay_sec": 35.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4383,
+    "value": 0.6897,
+    "score": 0.068,
+    "total": 3.162
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.469,
+   "league_games": 16
+  },
+  {
+   "iteration": 126,
+   "step": 1872,
+   "buffer": 52181,
+   "selfplay_sec": 34.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4419,
+    "value": 0.6967,
+    "score": 0.0688,
+    "total": 3.173
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.469,
+   "league_games": 16
+  },
+  {
+   "iteration": 127,
+   "step": 1888,
+   "buffer": 52563,
+   "selfplay_sec": 29.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4455,
+    "value": 0.6806,
+    "score": 0.0696,
+    "total": 3.161
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.406,
+   "league_games": 16
+  },
+  {
+   "iteration": 128,
+   "step": 1904,
+   "buffer": 52879,
+   "selfplay_sec": 30.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4605,
+    "value": 0.6829,
+    "score": 0.069,
+    "total": 3.178
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 129,
+   "step": 1920,
+   "buffer": 53370,
+   "selfplay_sec": 40.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4316,
+    "value": 0.685,
+    "score": 0.0697,
+    "total": 3.1514
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 130,
+   "step": 1936,
+   "buffer": 53818,
+   "selfplay_sec": 34.0,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4478,
+    "value": 0.6816,
+    "score": 0.0682,
+    "total": 3.1635
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.646,
+   "league_games": 16
+  },
+  {
+   "iteration": 131,
+   "step": 1952,
+   "buffer": 54213,
+   "selfplay_sec": 33.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.452,
+    "value": 0.6717,
+    "score": 0.0691,
+    "total": 3.1583
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 132,
+   "step": 1968,
+   "buffer": 54558,
+   "selfplay_sec": 33.0,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4557,
+    "value": 0.6723,
+    "score": 0.0686,
+    "total": 3.1624
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 9
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 133,
+   "step": 1984,
+   "buffer": 54899,
+   "selfplay_sec": 37.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4419,
+    "value": 0.6769,
+    "score": 0.0696,
+    "total": 3.1536
+   },
+   "game_endings": {
+    "ply_cap": 3,
+    "repetition": 4,
+    "last_king": 9
+   },
+   "league_pairwise": 0.542,
+   "league_games": 16
+  },
+  {
+   "iteration": 134,
+   "step": 2000,
+   "buffer": 55284,
+   "selfplay_sec": 33.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4528,
+    "value": 0.6745,
+    "score": 0.0689,
+    "total": 3.1618
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 8
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 135,
+   "step": 2016,
+   "buffer": 55657,
+   "selfplay_sec": 31.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.438,
+    "value": 0.6832,
+    "score": 0.0683,
+    "total": 3.1553
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 136,
+   "step": 2032,
+   "buffer": 55941,
+   "selfplay_sec": 35.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4462,
+    "value": 0.6989,
+    "score": 0.0691,
+    "total": 3.1797
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 9,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 137,
+   "step": 2048,
+   "buffer": 56242,
+   "selfplay_sec": 28.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4384,
+    "value": 0.6819,
+    "score": 0.068,
+    "total": 3.1542
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.469,
+   "league_games": 16
+  },
+  {
+   "iteration": 138,
+   "step": 2064,
+   "buffer": 56622,
+   "selfplay_sec": 36.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4448,
+    "value": 0.6733,
+    "score": 0.0677,
+    "total": 3.1519
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 8,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 139,
+   "step": 2080,
+   "buffer": 57251,
+   "selfplay_sec": 39.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4652,
+    "value": 0.6741,
+    "score": 0.0677,
+    "total": 3.1731
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 10,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.656,
+   "league_games": 16
+  },
+  {
+   "iteration": 140,
+   "step": 2096,
+   "buffer": 57573,
+   "selfplay_sec": 38.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4356,
+    "value": 0.6798,
+    "score": 0.0685,
+    "total": 3.1496
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 10,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.406,
+   "league_games": 16
+  },
+  {
+   "iteration": 141,
+   "step": 2112,
+   "buffer": 57899,
+   "selfplay_sec": 30.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4288,
+    "value": 0.6905,
+    "score": 0.07,
+    "total": 3.1542
+   },
+   "game_endings": {
+    "last_king": 11,
+    "ply_cap": 1,
+    "repetition": 4
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 142,
+   "step": 2128,
+   "buffer": 58189,
+   "selfplay_sec": 32.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.44,
+    "value": 0.6534,
+    "score": 0.0664,
+    "total": 3.1266
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 143,
+   "step": 2144,
+   "buffer": 58599,
+   "selfplay_sec": 37.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4506,
+    "value": 0.6748,
+    "score": 0.0659,
+    "total": 3.1583
+   },
+   "game_endings": {
+    "repetition": 8,
+    "last_king": 8
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 144,
+   "step": 2160,
+   "buffer": 58931,
+   "selfplay_sec": 35.6,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4357,
+    "value": 0.6724,
+    "score": 0.0686,
+    "total": 3.1424
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 145,
+   "step": 2176,
+   "buffer": 59361,
+   "selfplay_sec": 29.6,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4433,
+    "value": 0.6791,
+    "score": 0.0683,
+    "total": 3.1566
+   },
+   "game_endings": {
+    "last_king": 14,
+    "repetition": 2
+   },
+   "league_pairwise": 0.573,
+   "league_games": 16
+  },
+  {
+   "iteration": 146,
+   "step": 2192,
+   "buffer": 59634,
+   "selfplay_sec": 34.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4388,
+    "value": 0.6685,
+    "score": 0.0668,
+    "total": 3.1407
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.323,
+   "league_games": 16
+  },
+  {
+   "iteration": 147,
+   "step": 2208,
+   "buffer": 60106,
+   "selfplay_sec": 40.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4505,
+    "value": 0.6413,
+    "score": 0.0668,
+    "total": 3.1252
+   },
+   "game_endings": {
+    "last_king": 11,
+    "ply_cap": 1,
+    "repetition": 4
+   },
+   "league_pairwise": 0.437,
+   "league_games": 16
+  },
+  {
+   "iteration": 148,
+   "step": 2224,
+   "buffer": 60459,
+   "selfplay_sec": 41.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4393,
+    "value": 0.6737,
+    "score": 0.0667,
+    "total": 3.1463
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.344,
+   "league_games": 16
+  },
+  {
+   "iteration": 149,
+   "step": 2240,
+   "buffer": 60812,
+   "selfplay_sec": 50.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4382,
+    "value": 0.6599,
+    "score": 0.0674,
+    "total": 3.1319
+   },
+   "game_endings": {
+    "last_king": 14,
+    "repetition": 2
+   },
+   "league_pairwise": 0.542,
+   "league_games": 16
+  },
+  {
+   "iteration": 150,
+   "step": 2256,
+   "buffer": 61173,
+   "selfplay_sec": 60.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.453,
+    "value": 0.6705,
+    "score": 0.0691,
+    "total": 3.1581
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 8,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 151,
+   "step": 2272,
+   "buffer": 61617,
+   "selfplay_sec": 57.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4442,
+    "value": 0.6627,
+    "score": 0.0656,
+    "total": 3.1397
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.542,
+   "league_games": 16
+  },
+  {
+   "iteration": 152,
+   "step": 2288,
+   "buffer": 61993,
+   "selfplay_sec": 62.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4512,
+    "value": 0.6833,
+    "score": 0.0687,
+    "total": 3.1689
+   },
+   "game_endings": {
+    "ply_cap": 1,
+    "repetition": 4,
+    "last_king": 11
+   },
+   "league_pairwise": 0.281,
+   "league_games": 16
+  },
+  {
+   "iteration": 153,
+   "step": 2304,
+   "buffer": 62390,
+   "selfplay_sec": 61.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4467,
+    "value": 0.6714,
+    "score": 0.0679,
+    "total": 3.1521
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 10,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.594,
+   "league_games": 16
+  },
+  {
+   "iteration": 154,
+   "step": 2320,
+   "buffer": 63007,
+   "selfplay_sec": 73.0,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4513,
+    "value": 0.6688,
+    "score": 0.0659,
+    "total": 3.153
+   },
+   "game_endings": {
+    "repetition": 8,
+    "last_king": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 155,
+   "step": 2336,
+   "buffer": 63428,
+   "selfplay_sec": 55.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.428,
+    "value": 0.6798,
+    "score": 0.0673,
+    "total": 3.1415
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 156,
+   "step": 2352,
+   "buffer": 63757,
+   "selfplay_sec": 61.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4371,
+    "value": 0.6669,
+    "score": 0.0677,
+    "total": 3.1378
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 157,
+   "step": 2368,
+   "buffer": 64195,
+   "selfplay_sec": 373.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4531,
+    "value": 0.6674,
+    "score": 0.0697,
+    "total": 3.1554
+   },
+   "game_endings": {
+    "ply_cap": 2,
+    "repetition": 4,
+    "last_king": 10
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 158,
+   "step": 2384,
+   "buffer": 64492,
+   "selfplay_sec": 55.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4336,
+    "value": 0.6683,
+    "score": 0.0671,
+    "total": 3.1355
+   },
+   "game_endings": {
+    "last_king": 15,
+    "repetition": 1
+   },
+   "league_pairwise": 0.406,
+   "league_games": 16
+  },
+  {
+   "iteration": 159,
+   "step": 2400,
+   "buffer": 64890,
+   "selfplay_sec": 59.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4434,
+    "value": 0.6919,
+    "score": 0.068,
+    "total": 3.1692
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 1,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.542,
+   "league_games": 16
+  },
+  {
+   "iteration": 160,
+   "step": 2416,
+   "buffer": 65205,
+   "selfplay_sec": 53.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4471,
+    "value": 0.6565,
+    "score": 0.0664,
+    "total": 3.1368
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.354,
+   "league_games": 16
+  },
+  {
+   "iteration": 161,
+   "step": 2432,
+   "buffer": 65617,
+   "selfplay_sec": 72.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4485,
+    "value": 0.6523,
+    "score": 0.0666,
+    "total": 3.1342
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 4,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.333,
+   "league_games": 16
+  },
+  {
+   "iteration": 162,
+   "step": 2448,
+   "buffer": 66046,
+   "selfplay_sec": 57.0,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4421,
+    "value": 0.6593,
+    "score": 0.0646,
+    "total": 3.1337
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.49,
+   "league_games": 16
+  },
+  {
+   "iteration": 163,
+   "step": 2464,
+   "buffer": 66399,
+   "selfplay_sec": 56.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4525,
+    "value": 0.6695,
+    "score": 0.0666,
+    "total": 3.1553
+   },
+   "game_endings": {
+    "ply_cap": 1,
+    "last_king": 11,
+    "repetition": 4
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 164,
+   "step": 2480,
+   "buffer": 66703,
+   "selfplay_sec": 54.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4468,
+    "value": 0.6564,
+    "score": 0.0666,
+    "total": 3.1365
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.344,
+   "league_games": 16
+  },
+  {
+   "iteration": 165,
+   "step": 2496,
+   "buffer": 67117,
+   "selfplay_sec": 64.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.452,
+    "value": 0.6517,
+    "score": 0.0642,
+    "total": 3.1358
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 4,
+    "ply_cap": 3
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 166,
+   "step": 2512,
+   "buffer": 67507,
+   "selfplay_sec": 51.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4479,
+    "value": 0.6578,
+    "score": 0.0646,
+    "total": 3.138
+   },
+   "game_endings": {
+    "repetition": 3,
+    "last_king": 13
+   },
+   "league_pairwise": 0.583,
+   "league_games": 16
+  },
+  {
+   "iteration": 167,
+   "step": 2528,
+   "buffer": 67946,
+   "selfplay_sec": 57.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.44,
+    "value": 0.6655,
+    "score": 0.0654,
+    "total": 3.1383
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 8
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 168,
+   "step": 2544,
+   "buffer": 68383,
+   "selfplay_sec": 61.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4364,
+    "value": 0.669,
+    "score": 0.0649,
+    "total": 3.1379
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 3,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 169,
+   "step": 2560,
+   "buffer": 68550,
+   "selfplay_sec": 52.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4382,
+    "value": 0.6501,
+    "score": 0.0652,
+    "total": 3.1208
+   },
+   "game_endings": {
+    "last_king": 13,
+    "ply_cap": 1,
+    "repetition": 2
+   },
+   "league_pairwise": 0.24,
+   "league_games": 16
+  },
+  {
+   "iteration": 170,
+   "step": 2576,
+   "buffer": 68939,
+   "selfplay_sec": 46.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4533,
+    "value": 0.6402,
+    "score": 0.064,
+    "total": 3.1255
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.615,
+   "league_games": 16
+  },
+  {
+   "iteration": 171,
+   "step": 2592,
+   "buffer": 69359,
+   "selfplay_sec": 52.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4337,
+    "value": 0.6454,
+    "score": 0.0653,
+    "total": 3.1118
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.406,
+   "league_games": 16
+  },
+  {
+   "iteration": 172,
+   "step": 2608,
+   "buffer": 69684,
+   "selfplay_sec": 43.0,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4343,
+    "value": 0.6654,
+    "score": 0.0648,
+    "total": 3.132
+   },
+   "game_endings": {
+    "last_king": 15,
+    "repetition": 1
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 173,
+   "step": 2624,
+   "buffer": 70129,
+   "selfplay_sec": 60.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4345,
+    "value": 0.6439,
+    "score": 0.0662,
+    "total": 3.1115
+   },
+   "game_endings": {
+    "ply_cap": 1,
+    "last_king": 13,
+    "repetition": 2
+   },
+   "league_pairwise": 0.677,
+   "league_games": 16
+  },
+  {
+   "iteration": 174,
+   "step": 2640,
+   "buffer": 70467,
+   "selfplay_sec": 56.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4483,
+    "value": 0.6309,
+    "score": 0.0649,
+    "total": 3.1116
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 175,
+   "step": 2656,
+   "buffer": 70846,
+   "selfplay_sec": 55.7,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4547,
+    "value": 0.6443,
+    "score": 0.0643,
+    "total": 3.1312
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.688,
+   "league_games": 16
+  },
+  {
+   "iteration": 176,
+   "step": 2672,
+   "buffer": 71410,
+   "selfplay_sec": 61.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4464,
+    "value": 0.6528,
+    "score": 0.0645,
+    "total": 3.1314
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.656,
+   "league_games": 16
+  },
+  {
+   "iteration": 177,
+   "step": 2688,
+   "buffer": 71886,
+   "selfplay_sec": 51.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4391,
+    "value": 0.6295,
+    "score": 0.0645,
+    "total": 3.1009
+   },
+   "game_endings": {
+    "last_king": 14,
+    "repetition": 2
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 178,
+   "step": 2704,
+   "buffer": 72271,
+   "selfplay_sec": 54.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4281,
+    "value": 0.674,
+    "score": 0.0663,
+    "total": 3.1353
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 3,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 179,
+   "step": 2720,
+   "buffer": 72719,
+   "selfplay_sec": 62.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4421,
+    "value": 0.6457,
+    "score": 0.0648,
+    "total": 3.1202
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 10,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.5,
+   "league_games": 16
+  },
+  {
+   "iteration": 180,
+   "step": 2736,
+   "buffer": 72996,
+   "selfplay_sec": 47.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4339,
+    "value": 0.6553,
+    "score": 0.0658,
+    "total": 3.122
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 9,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.333,
+   "league_games": 16
+  },
+  {
+   "iteration": 181,
+   "step": 2752,
+   "buffer": 73466,
+   "selfplay_sec": 35.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4288,
+    "value": 0.6542,
+    "score": 0.0653,
+    "total": 3.1157
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 9,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.646,
+   "league_games": 16
+  },
+  {
+   "iteration": 182,
+   "step": 2768,
+   "buffer": 74003,
+   "selfplay_sec": 43.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4446,
+    "value": 0.6435,
+    "score": 0.0644,
+    "total": 3.1203
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.333,
+   "league_games": 16
+  },
+  {
+   "iteration": 183,
+   "step": 2784,
+   "buffer": 74493,
+   "selfplay_sec": 38.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.448,
+    "value": 0.6422,
+    "score": 0.0666,
+    "total": 3.1236
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 9
+   },
+   "league_pairwise": 0.49,
+   "league_games": 16
+  },
+  {
+   "iteration": 184,
+   "step": 2800,
+   "buffer": 74827,
+   "selfplay_sec": 29.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4356,
+    "value": 0.6554,
+    "score": 0.0637,
+    "total": 3.1229
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 12
+   },
+   "league_pairwise": 0.438,
+   "league_games": 16
+  },
+  {
+   "iteration": 185,
+   "step": 2816,
+   "buffer": 75248,
+   "selfplay_sec": 30.6,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4301,
+    "value": 0.6526,
+    "score": 0.0673,
+    "total": 3.1164
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 186,
+   "step": 2832,
+   "buffer": 75643,
+   "selfplay_sec": 33.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4264,
+    "value": 0.6385,
+    "score": 0.0674,
+    "total": 3.0987
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 187,
+   "step": 2848,
+   "buffer": 76009,
+   "selfplay_sec": 34.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4443,
+    "value": 0.6448,
+    "score": 0.0649,
+    "total": 3.1216
+   },
+   "game_endings": {
+    "last_king": 14,
+    "repetition": 2
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 188,
+   "step": 2864,
+   "buffer": 76341,
+   "selfplay_sec": 30.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4388,
+    "value": 0.6342,
+    "score": 0.0646,
+    "total": 3.1053
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 2,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 189,
+   "step": 2880,
+   "buffer": 77035,
+   "selfplay_sec": 46.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4364,
+    "value": 0.6364,
+    "score": 0.0637,
+    "total": 3.1047
+   },
+   "game_endings": {
+    "last_king": 11,
+    "ply_cap": 3,
+    "repetition": 2
+   },
+   "league_pairwise": 0.615,
+   "league_games": 16
+  },
+  {
+   "iteration": 190,
+   "step": 2896,
+   "buffer": 77378,
+   "selfplay_sec": 35.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4439,
+    "value": 0.6363,
+    "score": 0.0648,
+    "total": 3.1126
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 12
+   },
+   "league_pairwise": 0.583,
+   "league_games": 16
+  },
+  {
+   "iteration": 191,
+   "step": 2912,
+   "buffer": 77920,
+   "selfplay_sec": 33.6,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.441,
+    "value": 0.6283,
+    "score": 0.0633,
+    "total": 3.1009
+   },
+   "game_endings": {
+    "ply_cap": 1,
+    "repetition": 2,
+    "last_king": 13
+   },
+   "league_pairwise": 0.604,
+   "league_games": 16
+  },
+  {
+   "iteration": 192,
+   "step": 2928,
+   "buffer": 78200,
+   "selfplay_sec": 30.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4486,
+    "value": 0.6407,
+    "score": 0.0647,
+    "total": 3.1216
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.406,
+   "league_games": 16
+  },
+  {
+   "iteration": 193,
+   "step": 2944,
+   "buffer": 78548,
+   "selfplay_sec": 33.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.444,
+    "value": 0.6185,
+    "score": 0.0648,
+    "total": 3.0949
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.719,
+   "league_games": 16
+  },
+  {
+   "iteration": 194,
+   "step": 2960,
+   "buffer": 78884,
+   "selfplay_sec": 33.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4461,
+    "value": 0.6268,
+    "score": 0.065,
+    "total": 3.1055
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.354,
+   "league_games": 16
+  },
+  {
+   "iteration": 195,
+   "step": 2976,
+   "buffer": 79268,
+   "selfplay_sec": 39.2,
+   "train_sec": 0.9,
+   "loss": {
+    "policy": 2.4361,
+    "value": 0.6452,
+    "score": 0.0652,
+    "total": 3.114
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 196,
+   "step": 2992,
+   "buffer": 79567,
+   "selfplay_sec": 34.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4546,
+    "value": 0.6139,
+    "score": 0.0624,
+    "total": 3.0997
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 8
+   },
+   "league_pairwise": 0.333,
+   "league_games": 16
+  },
+  {
+   "iteration": 197,
+   "step": 3008,
+   "buffer": 79876,
+   "selfplay_sec": 30.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4506,
+    "value": 0.6273,
+    "score": 0.0655,
+    "total": 3.1106
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 9
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 198,
+   "step": 3024,
+   "buffer": 80288,
+   "selfplay_sec": 32.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4309,
+    "value": 0.6295,
+    "score": 0.0646,
+    "total": 3.0927
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 199,
+   "step": 3040,
+   "buffer": 80632,
+   "selfplay_sec": 40.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4332,
+    "value": 0.6431,
+    "score": 0.0665,
+    "total": 3.1096
+   },
+   "game_endings": {
+    "repetition": 8,
+    "last_king": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.26,
+   "league_games": 16
+  },
+  {
+   "iteration": 200,
+   "step": 3056,
+   "buffer": 81180,
+   "selfplay_sec": 34.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4446,
+    "value": 0.6382,
+    "score": 0.0667,
+    "total": 3.1162
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.656,
+   "league_games": 16
+  },
+  {
+   "iteration": 201,
+   "step": 3072,
+   "buffer": 81528,
+   "selfplay_sec": 38.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4535,
+    "value": 0.6157,
+    "score": 0.065,
+    "total": 3.1017
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 8,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  },
+  {
+   "iteration": 202,
+   "step": 3088,
+   "buffer": 81806,
+   "selfplay_sec": 30.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4394,
+    "value": 0.6394,
+    "score": 0.0639,
+    "total": 3.1107
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.333,
+   "league_games": 16
+  },
+  {
+   "iteration": 203,
+   "step": 3104,
+   "buffer": 82081,
+   "selfplay_sec": 24.0,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4388,
+    "value": 0.64,
+    "score": 0.0653,
+    "total": 3.1115
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  },
+  {
+   "iteration": 204,
+   "step": 3120,
+   "buffer": 82382,
+   "selfplay_sec": 31.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4651,
+    "value": 0.6318,
+    "score": 0.0646,
+    "total": 3.1292
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 205,
+   "step": 3136,
+   "buffer": 82678,
+   "selfplay_sec": 33.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4309,
+    "value": 0.6254,
+    "score": 0.0639,
+    "total": 3.0882
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 206,
+   "step": 3152,
+   "buffer": 82965,
+   "selfplay_sec": 35.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4413,
+    "value": 0.6266,
+    "score": 0.065,
+    "total": 3.1004
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  },
+  {
+   "iteration": 207,
+   "step": 3168,
+   "buffer": 83320,
+   "selfplay_sec": 37.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4508,
+    "value": 0.6167,
+    "score": 0.0646,
+    "total": 3.0998
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 208,
+   "step": 3184,
+   "buffer": 83709,
+   "selfplay_sec": 32.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4524,
+    "value": 0.6254,
+    "score": 0.0648,
+    "total": 3.1102
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 209,
+   "step": 3200,
+   "buffer": 83936,
+   "selfplay_sec": 25.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4422,
+    "value": 0.6069,
+    "score": 0.0638,
+    "total": 3.0811
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.406,
+   "league_games": 16
+  },
+  {
+   "iteration": 210,
+   "step": 3216,
+   "buffer": 84221,
+   "selfplay_sec": 33.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4218,
+    "value": 0.622,
+    "score": 0.0646,
+    "total": 3.0761
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 211,
+   "step": 3232,
+   "buffer": 84500,
+   "selfplay_sec": 35.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4461,
+    "value": 0.6215,
+    "score": 0.064,
+    "total": 3.0996
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.323,
+   "league_games": 16
+  },
+  {
+   "iteration": 212,
+   "step": 3248,
+   "buffer": 84937,
+   "selfplay_sec": 36.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4343,
+    "value": 0.6106,
+    "score": 0.0653,
+    "total": 3.0775
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 213,
+   "step": 3264,
+   "buffer": 85561,
+   "selfplay_sec": 46.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4489,
+    "value": 0.6365,
+    "score": 0.0654,
+    "total": 3.1181
+   },
+   "game_endings": {
+    "repetition": 8,
+    "last_king": 8
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 214,
+   "step": 3280,
+   "buffer": 86034,
+   "selfplay_sec": 36.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.436,
+    "value": 0.6151,
+    "score": 0.0621,
+    "total": 3.0822
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.656,
+   "league_games": 16
+  },
+  {
+   "iteration": 215,
+   "step": 3296,
+   "buffer": 86327,
+   "selfplay_sec": 28.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4451,
+    "value": 0.6264,
+    "score": 0.0627,
+    "total": 3.1029
+   },
+   "game_endings": {
+    "repetition": 8,
+    "last_king": 8
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 216,
+   "step": 3312,
+   "buffer": 86727,
+   "selfplay_sec": 36.7,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.446,
+    "value": 0.6229,
+    "score": 0.0647,
+    "total": 3.1013
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 217,
+   "step": 3328,
+   "buffer": 87160,
+   "selfplay_sec": 35.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4394,
+    "value": 0.6464,
+    "score": 0.0635,
+    "total": 3.1176
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 218,
+   "step": 3344,
+   "buffer": 87581,
+   "selfplay_sec": 42.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4537,
+    "value": 0.6227,
+    "score": 0.064,
+    "total": 3.1084
+   },
+   "game_endings": {
+    "last_king": 13,
+    "ply_cap": 1,
+    "repetition": 2
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 219,
+   "step": 3360,
+   "buffer": 88021,
+   "selfplay_sec": 34.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4504,
+    "value": 0.6254,
+    "score": 0.0638,
+    "total": 3.1078
+   },
+   "game_endings": {
+    "last_king": 9,
+    "ply_cap": 1,
+    "repetition": 6
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 220,
+   "step": 3376,
+   "buffer": 88435,
+   "selfplay_sec": 34.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.437,
+    "value": 0.6361,
+    "score": 0.0644,
+    "total": 3.1053
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.438,
+   "league_games": 16
+  },
+  {
+   "iteration": 221,
+   "step": 3392,
+   "buffer": 88803,
+   "selfplay_sec": 32.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4398,
+    "value": 0.6222,
+    "score": 0.0648,
+    "total": 3.0944
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 222,
+   "step": 3408,
+   "buffer": 89194,
+   "selfplay_sec": 37.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4547,
+    "value": 0.6164,
+    "score": 0.062,
+    "total": 3.1021
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.438,
+   "league_games": 16
+  },
+  {
+   "iteration": 223,
+   "step": 3424,
+   "buffer": 89625,
+   "selfplay_sec": 33.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4548,
+    "value": 0.6175,
+    "score": 0.0635,
+    "total": 3.1041
+   },
+   "game_endings": {
+    "last_king": 12,
+    "ply_cap": 2,
+    "repetition": 2
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 224,
+   "step": 3440,
+   "buffer": 89986,
+   "selfplay_sec": 34.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4416,
+    "value": 0.632,
+    "score": 0.0639,
+    "total": 3.1056
+   },
+   "game_endings": {
+    "last_king": 14,
+    "repetition": 2
+   },
+   "league_pairwise": 0.5,
+   "league_games": 16
+  },
+  {
+   "iteration": 225,
+   "step": 3456,
+   "buffer": 90435,
+   "selfplay_sec": 34.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4471,
+    "value": 0.6219,
+    "score": 0.0626,
+    "total": 3.1003
+   },
+   "game_endings": {
+    "last_king": 14,
+    "repetition": 2
+   },
+   "league_pairwise": 0.656,
+   "league_games": 16
+  },
+  {
+   "iteration": 226,
+   "step": 3472,
+   "buffer": 90827,
+   "selfplay_sec": 37.6,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4547,
+    "value": 0.6003,
+    "score": 0.0619,
+    "total": 3.086
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.312,
+   "league_games": 16
+  },
+  {
+   "iteration": 227,
+   "step": 3488,
+   "buffer": 91245,
+   "selfplay_sec": 41.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4379,
+    "value": 0.6425,
+    "score": 0.0651,
+    "total": 3.113
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 228,
+   "step": 3504,
+   "buffer": 91662,
+   "selfplay_sec": 35.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4347,
+    "value": 0.6156,
+    "score": 0.063,
+    "total": 3.0817
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  },
+  {
+   "iteration": 229,
+   "step": 3520,
+   "buffer": 92146,
+   "selfplay_sec": 36.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4606,
+    "value": 0.6202,
+    "score": 0.0621,
+    "total": 3.1119
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 9
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 230,
+   "step": 3536,
+   "buffer": 92567,
+   "selfplay_sec": 39.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4478,
+    "value": 0.6301,
+    "score": 0.0646,
+    "total": 3.1102
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 231,
+   "step": 3552,
+   "buffer": 93046,
+   "selfplay_sec": 33.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4436,
+    "value": 0.6151,
+    "score": 0.0624,
+    "total": 3.09
+   },
+   "game_endings": {
+    "repetition": 1,
+    "last_king": 14,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 232,
+   "step": 3568,
+   "buffer": 93370,
+   "selfplay_sec": 33.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4374,
+    "value": 0.6365,
+    "score": 0.0644,
+    "total": 3.106
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.344,
+   "league_games": 16
+  },
+  {
+   "iteration": 233,
+   "step": 3584,
+   "buffer": 93808,
+   "selfplay_sec": 44.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4482,
+    "value": 0.6301,
+    "score": 0.0633,
+    "total": 3.11
+   },
+   "game_endings": {
+    "ply_cap": 2,
+    "last_king": 10,
+    "repetition": 4
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 234,
+   "step": 3600,
+   "buffer": 94218,
+   "selfplay_sec": 40.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4527,
+    "value": 0.6074,
+    "score": 0.0632,
+    "total": 3.0916
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 235,
+   "step": 3616,
+   "buffer": 94560,
+   "selfplay_sec": 258.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4362,
+    "value": 0.6155,
+    "score": 0.0631,
+    "total": 3.0833
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 236,
+   "step": 3632,
+   "buffer": 94964,
+   "selfplay_sec": 40.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4629,
+    "value": 0.6211,
+    "score": 0.064,
+    "total": 3.116
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 237,
+   "step": 3648,
+   "buffer": 95420,
+   "selfplay_sec": 38.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4366,
+    "value": 0.6316,
+    "score": 0.0631,
+    "total": 3.0998
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 238,
+   "step": 3664,
+   "buffer": 95916,
+   "selfplay_sec": 36.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4478,
+    "value": 0.6407,
+    "score": 0.0653,
+    "total": 3.1212
+   },
+   "game_endings": {
+    "repetition": 3,
+    "last_king": 12,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 239,
+   "step": 3680,
+   "buffer": 96267,
+   "selfplay_sec": 28.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4291,
+    "value": 0.6309,
+    "score": 0.0649,
+    "total": 3.0924
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 12
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 240,
+   "step": 3696,
+   "buffer": 96557,
+   "selfplay_sec": 32.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4341,
+    "value": 0.6347,
+    "score": 0.0627,
+    "total": 3.1002
+   },
+   "game_endings": {
+    "last_king": 15,
+    "repetition": 1
+   },
+   "league_pairwise": 0.365,
+   "league_games": 16
+  },
+  {
+   "iteration": 241,
+   "step": 3712,
+   "buffer": 97018,
+   "selfplay_sec": 40.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4555,
+    "value": 0.6237,
+    "score": 0.0637,
+    "total": 3.111
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 9
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 242,
+   "step": 3728,
+   "buffer": 97432,
+   "selfplay_sec": 36.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4458,
+    "value": 0.6317,
+    "score": 0.0625,
+    "total": 3.1087
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.312,
+   "league_games": 16
+  },
+  {
+   "iteration": 243,
+   "step": 3744,
+   "buffer": 97920,
+   "selfplay_sec": 32.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4392,
+    "value": 0.6372,
+    "score": 0.0654,
+    "total": 3.109
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 11,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.552,
+   "league_games": 16
+  },
+  {
+   "iteration": 244,
+   "step": 3760,
+   "buffer": 98479,
+   "selfplay_sec": 40.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.448,
+    "value": 0.6164,
+    "score": 0.0625,
+    "total": 3.0956
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 11,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 245,
+   "step": 3776,
+   "buffer": 98804,
+   "selfplay_sec": 39.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4255,
+    "value": 0.6241,
+    "score": 0.0638,
+    "total": 3.0815
+   },
+   "game_endings": {
+    "last_king": 5,
+    "repetition": 9,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.25,
+   "league_games": 16
+  },
+  {
+   "iteration": 246,
+   "step": 3792,
+   "buffer": 99105,
+   "selfplay_sec": 36.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4438,
+    "value": 0.6062,
+    "score": 0.0628,
+    "total": 3.0814
+   },
+   "game_endings": {
+    "ply_cap": 1,
+    "repetition": 6,
+    "last_king": 9
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 247,
+   "step": 3808,
+   "buffer": 99434,
+   "selfplay_sec": 33.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4433,
+    "value": 0.6094,
+    "score": 0.0618,
+    "total": 3.0836
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.438,
+   "league_games": 16
+  },
+  {
+   "iteration": 248,
+   "step": 3824,
+   "buffer": 99861,
+   "selfplay_sec": 31.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4499,
+    "value": 0.6118,
+    "score": 0.0614,
+    "total": 3.0924
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 249,
+   "step": 3840,
+   "buffer": 100000,
+   "selfplay_sec": 33.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4432,
+    "value": 0.623,
+    "score": 0.0649,
+    "total": 3.0987
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 11,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.594,
+   "league_games": 16
+  },
+  {
+   "iteration": 250,
+   "step": 3856,
+   "buffer": 100000,
+   "selfplay_sec": 32.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4325,
+    "value": 0.6219,
+    "score": 0.0622,
+    "total": 3.0854
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 2,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.406,
+   "league_games": 16
+  },
+  {
+   "iteration": 251,
+   "step": 3872,
+   "buffer": 100000,
+   "selfplay_sec": 34.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4404,
+    "value": 0.6228,
+    "score": 0.0636,
+    "total": 3.0951
+   },
+   "game_endings": {
+    "repetition": 8,
+    "last_king": 8
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 252,
+   "step": 3888,
+   "buffer": 100000,
+   "selfplay_sec": 39.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4484,
+    "value": 0.6367,
+    "score": 0.0633,
+    "total": 3.1168
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 253,
+   "step": 3904,
+   "buffer": 100000,
+   "selfplay_sec": 32.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4509,
+    "value": 0.6354,
+    "score": 0.0626,
+    "total": 3.1176
+   },
+   "game_endings": {
+    "last_king": 14,
+    "repetition": 2
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 254,
+   "step": 3920,
+   "buffer": 100000,
+   "selfplay_sec": 38.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4385,
+    "value": 0.6038,
+    "score": 0.0608,
+    "total": 3.0727
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.5,
+   "league_games": 16
+  },
+  {
+   "iteration": 255,
+   "step": 3936,
+   "buffer": 100000,
+   "selfplay_sec": 34.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.447,
+    "value": 0.6541,
+    "score": 0.0635,
+    "total": 3.1328
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 11,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.562,
+   "league_games": 16
+  },
+  {
+   "iteration": 256,
+   "step": 3952,
+   "buffer": 100000,
+   "selfplay_sec": 33.7,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4489,
+    "value": 0.62,
+    "score": 0.0638,
+    "total": 3.1008
+   },
+   "game_endings": {
+    "last_king": 12,
+    "ply_cap": 1,
+    "repetition": 3
+   },
+   "league_pairwise": 0.437,
+   "league_games": 16
+  },
+  {
+   "iteration": 257,
+   "step": 3968,
+   "buffer": 100000,
+   "selfplay_sec": 33.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4319,
+    "value": 0.6177,
+    "score": 0.0621,
+    "total": 3.0806
+   },
+   "game_endings": {
+    "last_king": 14,
+    "repetition": 2
+   },
+   "league_pairwise": 0.594,
+   "league_games": 16
+  },
+  {
+   "iteration": 258,
+   "step": 3984,
+   "buffer": 100000,
+   "selfplay_sec": 31.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4465,
+    "value": 0.6083,
+    "score": 0.0619,
+    "total": 3.0857
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 9
+   },
+   "league_pairwise": 0.625,
+   "league_games": 16
+  },
+  {
+   "iteration": 259,
+   "step": 4000,
+   "buffer": 100000,
+   "selfplay_sec": 32.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4405,
+    "value": 0.6271,
+    "score": 0.0629,
+    "total": 3.0991
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.469,
+   "league_games": 16
+  },
+  {
+   "iteration": 260,
+   "step": 4016,
+   "buffer": 100000,
+   "selfplay_sec": 34.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4505,
+    "value": 0.6023,
+    "score": 0.0618,
+    "total": 3.0836
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 2,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 261,
+   "step": 4032,
+   "buffer": 100000,
+   "selfplay_sec": 26.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4503,
+    "value": 0.6037,
+    "score": 0.0616,
+    "total": 3.0848
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 12
+   },
+   "league_pairwise": 0.583,
+   "league_games": 16
+  },
+  {
+   "iteration": 262,
+   "step": 4048,
+   "buffer": 100000,
+   "selfplay_sec": 33.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4438,
+    "value": 0.6183,
+    "score": 0.0615,
+    "total": 3.0929
+   },
+   "game_endings": {
+    "last_king": 11,
+    "ply_cap": 2,
+    "repetition": 3
+   },
+   "league_pairwise": 0.562,
+   "league_games": 16
+  },
+  {
+   "iteration": 263,
+   "step": 4064,
+   "buffer": 100000,
+   "selfplay_sec": 33.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.44,
+    "value": 0.6242,
+    "score": 0.0635,
+    "total": 3.096
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.552,
+   "league_games": 16
+  },
+  {
+   "iteration": 264,
+   "step": 4080,
+   "buffer": 100000,
+   "selfplay_sec": 35.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4475,
+    "value": 0.6047,
+    "score": 0.0618,
+    "total": 3.0831
+   },
+   "game_endings": {
+    "ply_cap": 2,
+    "last_king": 13,
+    "repetition": 1
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 265,
+   "step": 4096,
+   "buffer": 100000,
+   "selfplay_sec": 40.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4478,
+    "value": 0.6237,
+    "score": 0.0639,
+    "total": 3.1034
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 9
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  },
+  {
+   "iteration": 266,
+   "step": 4112,
+   "buffer": 100000,
+   "selfplay_sec": 28.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4621,
+    "value": 0.5932,
+    "score": 0.0601,
+    "total": 3.0854
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 267,
+   "step": 4128,
+   "buffer": 100000,
+   "selfplay_sec": 30.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4507,
+    "value": 0.6222,
+    "score": 0.0634,
+    "total": 3.1047
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.49,
+   "league_games": 16
+  },
+  {
+   "iteration": 268,
+   "step": 4144,
+   "buffer": 100000,
+   "selfplay_sec": 31.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4292,
+    "value": 0.6127,
+    "score": 0.0628,
+    "total": 3.0733
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.229,
+   "league_games": 16
+  },
+  {
+   "iteration": 269,
+   "step": 4160,
+   "buffer": 100000,
+   "selfplay_sec": 32.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4649,
+    "value": 0.6073,
+    "score": 0.0632,
+    "total": 3.1038
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 270,
+   "step": 4176,
+   "buffer": 100000,
+   "selfplay_sec": 32.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4493,
+    "value": 0.6119,
+    "score": 0.0621,
+    "total": 3.0922
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.323,
+   "league_games": 16
+  },
+  {
+   "iteration": 271,
+   "step": 4192,
+   "buffer": 100000,
+   "selfplay_sec": 41.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4411,
+    "value": 0.6149,
+    "score": 0.0647,
+    "total": 3.0883
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 272,
+   "step": 4208,
+   "buffer": 100000,
+   "selfplay_sec": 40.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4311,
+    "value": 0.601,
+    "score": 0.0613,
+    "total": 3.0627
+   },
+   "game_endings": {
+    "last_king": 12,
+    "ply_cap": 2,
+    "repetition": 2
+   },
+   "league_pairwise": 0.219,
+   "league_games": 16
+  },
+  {
+   "iteration": 273,
+   "step": 4224,
+   "buffer": 100000,
+   "selfplay_sec": 30.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4352,
+    "value": 0.6231,
+    "score": 0.0642,
+    "total": 3.0904
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.406,
+   "league_games": 16
+  },
+  {
+   "iteration": 274,
+   "step": 4240,
+   "buffer": 100000,
+   "selfplay_sec": 32.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4543,
+    "value": 0.6054,
+    "score": 0.0637,
+    "total": 3.0915
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 10,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.344,
+   "league_games": 16
+  },
+  {
+   "iteration": 275,
+   "step": 4256,
+   "buffer": 100000,
+   "selfplay_sec": 37.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4378,
+    "value": 0.6169,
+    "score": 0.0619,
+    "total": 3.0857
+   },
+   "game_endings": {
+    "last_king": 13,
+    "ply_cap": 1,
+    "repetition": 2
+   },
+   "league_pairwise": 0.646,
+   "league_games": 16
+  },
+  {
+   "iteration": 276,
+   "step": 4272,
+   "buffer": 100000,
+   "selfplay_sec": 33.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4517,
+    "value": 0.5922,
+    "score": 0.0622,
+    "total": 3.075
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 277,
+   "step": 4288,
+   "buffer": 100000,
+   "selfplay_sec": 34.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4397,
+    "value": 0.6294,
+    "score": 0.065,
+    "total": 3.1016
+   },
+   "game_endings": {
+    "last_king": 8,
+    "ply_cap": 3,
+    "repetition": 5
+   },
+   "league_pairwise": 0.49,
+   "league_games": 16
+  },
+  {
+   "iteration": 278,
+   "step": 4304,
+   "buffer": 100000,
+   "selfplay_sec": 34.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4289,
+    "value": 0.6174,
+    "score": 0.063,
+    "total": 3.0778
+   },
+   "game_endings": {
+    "ply_cap": 2,
+    "last_king": 9,
+    "repetition": 5
+   },
+   "league_pairwise": 0.354,
+   "league_games": 16
+  },
+  {
+   "iteration": 279,
+   "step": 4320,
+   "buffer": 100000,
+   "selfplay_sec": 31.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4288,
+    "value": 0.6313,
+    "score": 0.0631,
+    "total": 3.0917
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.302,
+   "league_games": 16
+  },
+  {
+   "iteration": 280,
+   "step": 4336,
+   "buffer": 100000,
+   "selfplay_sec": 31.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4395,
+    "value": 0.6245,
+    "score": 0.0626,
+    "total": 3.0953
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 281,
+   "step": 4352,
+   "buffer": 100000,
+   "selfplay_sec": 37.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4365,
+    "value": 0.6057,
+    "score": 0.0633,
+    "total": 3.0738
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 7,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  },
+  {
+   "iteration": 282,
+   "step": 4368,
+   "buffer": 100000,
+   "selfplay_sec": 37.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.448,
+    "value": 0.6145,
+    "score": 0.0626,
+    "total": 3.0938
+   },
+   "game_endings": {
+    "last_king": 15,
+    "repetition": 1
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 283,
+   "step": 4384,
+   "buffer": 100000,
+   "selfplay_sec": 34.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4522,
+    "value": 0.6094,
+    "score": 0.0614,
+    "total": 3.0923
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 10,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 284,
+   "step": 4400,
+   "buffer": 100000,
+   "selfplay_sec": 40.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4404,
+    "value": 0.635,
+    "score": 0.0628,
+    "total": 3.1069
+   },
+   "game_endings": {
+    "last_king": 12,
+    "ply_cap": 1,
+    "repetition": 3
+   },
+   "league_pairwise": 0.5,
+   "league_games": 16
+  },
+  {
+   "iteration": 285,
+   "step": 4416,
+   "buffer": 100000,
+   "selfplay_sec": 37.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4386,
+    "value": 0.6268,
+    "score": 0.0621,
+    "total": 3.0964
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 2,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.542,
+   "league_games": 16
+  },
+  {
+   "iteration": 286,
+   "step": 4432,
+   "buffer": 100000,
+   "selfplay_sec": 43.3,
+   "train_sec": 0.8,
+   "loss": {
+    "policy": 2.455,
+    "value": 0.6124,
+    "score": 0.0627,
+    "total": 3.0987
+   },
+   "game_endings": {
+    "ply_cap": 1,
+    "repetition": 6,
+    "last_king": 9
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 287,
+   "step": 4448,
+   "buffer": 100000,
+   "selfplay_sec": 29.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4455,
+    "value": 0.6209,
+    "score": 0.06,
+    "total": 3.0964
+   },
+   "game_endings": {
+    "last_king": 15,
+    "repetition": 1
+   },
+   "league_pairwise": 0.542,
+   "league_games": 16
+  },
+  {
+   "iteration": 288,
+   "step": 4464,
+   "buffer": 100000,
+   "selfplay_sec": 35.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4431,
+    "value": 0.5967,
+    "score": 0.0616,
+    "total": 3.0706
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.562,
+   "league_games": 16
+  },
+  {
+   "iteration": 289,
+   "step": 4480,
+   "buffer": 100000,
+   "selfplay_sec": 37.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4423,
+    "value": 0.6087,
+    "score": 0.0609,
+    "total": 3.0814
+   },
+   "game_endings": {
+    "repetition": 3,
+    "last_king": 10,
+    "ply_cap": 3
+   },
+   "league_pairwise": 0.469,
+   "league_games": 16
+  },
+  {
+   "iteration": 290,
+   "step": 4496,
+   "buffer": 100000,
+   "selfplay_sec": 46.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4471,
+    "value": 0.6177,
+    "score": 0.0646,
+    "total": 3.097
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 9,
+    "ply_cap": 3
+   },
+   "league_pairwise": 0.542,
+   "league_games": 16
+  },
+  {
+   "iteration": 291,
+   "step": 4512,
+   "buffer": 100000,
+   "selfplay_sec": 37.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4392,
+    "value": 0.6264,
+    "score": 0.0629,
+    "total": 3.0971
+   },
+   "game_endings": {
+    "repetition": 1,
+    "last_king": 14,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.573,
+   "league_games": 16
+  },
+  {
+   "iteration": 292,
+   "step": 4528,
+   "buffer": 100000,
+   "selfplay_sec": 38.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.452,
+    "value": 0.6149,
+    "score": 0.0625,
+    "total": 3.0982
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 293,
+   "step": 4544,
+   "buffer": 100000,
+   "selfplay_sec": 38.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.454,
+    "value": 0.6009,
+    "score": 0.0621,
+    "total": 3.086
+   },
+   "game_endings": {
+    "last_king": 11,
+    "ply_cap": 1,
+    "repetition": 4
+   },
+   "league_pairwise": 0.219,
+   "league_games": 16
+  },
+  {
+   "iteration": 294,
+   "step": 4560,
+   "buffer": 100000,
+   "selfplay_sec": 46.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.46,
+    "value": 0.6077,
+    "score": 0.0613,
+    "total": 3.0983
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 295,
+   "step": 4576,
+   "buffer": 100000,
+   "selfplay_sec": 41.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4446,
+    "value": 0.6066,
+    "score": 0.0612,
+    "total": 3.0818
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 7,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.333,
+   "league_games": 16
+  },
+  {
+   "iteration": 296,
+   "step": 4592,
+   "buffer": 100000,
+   "selfplay_sec": 39.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4513,
+    "value": 0.6292,
+    "score": 0.0634,
+    "total": 3.1122
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 4,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 297,
+   "step": 4608,
+   "buffer": 100000,
+   "selfplay_sec": 41.7,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4456,
+    "value": 0.607,
+    "score": 0.062,
+    "total": 3.0836
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 9,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.271,
+   "league_games": 16
+  },
+  {
+   "iteration": 298,
+   "step": 4624,
+   "buffer": 100000,
+   "selfplay_sec": 42.1,
+   "train_sec": 0.8,
+   "loss": {
+    "policy": 2.4511,
+    "value": 0.6178,
+    "score": 0.0628,
+    "total": 3.1003
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.365,
+   "league_games": 16
+  },
+  {
+   "iteration": 299,
+   "step": 4640,
+   "buffer": 100000,
+   "selfplay_sec": 28.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4547,
+    "value": 0.6178,
+    "score": 0.0631,
+    "total": 3.1041
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.333,
+   "league_games": 16
+  },
+  {
+   "iteration": 300,
+   "step": 4656,
+   "buffer": 100000,
+   "selfplay_sec": 38.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4314,
+    "value": 0.6277,
+    "score": 0.0634,
+    "total": 3.0908
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.333,
+   "league_games": 16
+  },
+  {
+   "iteration": 301,
+   "step": 4672,
+   "buffer": 100000,
+   "selfplay_sec": 33.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4382,
+    "value": 0.6277,
+    "score": 0.0631,
+    "total": 3.0974
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.583,
+   "league_games": 16
+  },
+  {
+   "iteration": 302,
+   "step": 4688,
+   "buffer": 100000,
+   "selfplay_sec": 36.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4544,
+    "value": 0.6218,
+    "score": 0.0605,
+    "total": 3.1064
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 12
+   },
+   "league_pairwise": 0.271,
+   "league_games": 16
+  },
+  {
+   "iteration": 303,
+   "step": 4704,
+   "buffer": 100000,
+   "selfplay_sec": 40.2,
+   "train_sec": 0.8,
+   "loss": {
+    "policy": 2.4448,
+    "value": 0.6221,
+    "score": 0.0635,
+    "total": 3.0986
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 4,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 304,
+   "step": 4720,
+   "buffer": 100000,
+   "selfplay_sec": 43.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4421,
+    "value": 0.6265,
+    "score": 0.0637,
+    "total": 3.1005
+   },
+   "game_endings": {
+    "repetition": 5,
+    "ply_cap": 2,
+    "last_king": 9
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 305,
+   "step": 4736,
+   "buffer": 100000,
+   "selfplay_sec": 35.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4641,
+    "value": 0.5845,
+    "score": 0.0619,
+    "total": 3.0796
+   },
+   "game_endings": {
+    "last_king": 7,
+    "repetition": 9
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 306,
+   "step": 4752,
+   "buffer": 100000,
+   "selfplay_sec": 39.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4473,
+    "value": 0.635,
+    "score": 0.0644,
+    "total": 3.1145
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 4,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 307,
+   "step": 4768,
+   "buffer": 100000,
+   "selfplay_sec": 35.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4512,
+    "value": 0.6098,
+    "score": 0.0646,
+    "total": 3.0933
+   },
+   "game_endings": {
+    "last_king": 14,
+    "repetition": 2
+   },
+   "league_pairwise": 0.5,
+   "league_games": 16
+  },
+  {
+   "iteration": 308,
+   "step": 4784,
+   "buffer": 100000,
+   "selfplay_sec": 32.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4509,
+    "value": 0.6069,
+    "score": 0.0622,
+    "total": 3.0889
+   },
+   "game_endings": {
+    "last_king": 9,
+    "ply_cap": 1,
+    "repetition": 6
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 309,
+   "step": 4800,
+   "buffer": 100000,
+   "selfplay_sec": 39.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4465,
+    "value": 0.6114,
+    "score": 0.0614,
+    "total": 3.0886
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.5,
+   "league_games": 16
+  },
+  {
+   "iteration": 310,
+   "step": 4816,
+   "buffer": 100000,
+   "selfplay_sec": 30.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4385,
+    "value": 0.6009,
+    "score": 0.0607,
+    "total": 3.0697
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 311,
+   "step": 4832,
+   "buffer": 100000,
+   "selfplay_sec": 42.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4577,
+    "value": 0.6107,
+    "score": 0.0594,
+    "total": 3.0981
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.583,
+   "league_games": 16
+  },
+  {
+   "iteration": 312,
+   "step": 4848,
+   "buffer": 100000,
+   "selfplay_sec": 35.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4591,
+    "value": 0.6242,
+    "score": 0.0616,
+    "total": 3.1141
+   },
+   "game_endings": {
+    "repetition": 3,
+    "last_king": 12,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 313,
+   "step": 4864,
+   "buffer": 100000,
+   "selfplay_sec": 32.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.447,
+    "value": 0.6393,
+    "score": 0.0622,
+    "total": 3.1173
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 314,
+   "step": 4880,
+   "buffer": 100000,
+   "selfplay_sec": 33.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4553,
+    "value": 0.6146,
+    "score": 0.062,
+    "total": 3.1009
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 315,
+   "step": 4896,
+   "buffer": 100000,
+   "selfplay_sec": 35.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4439,
+    "value": 0.6208,
+    "score": 0.0649,
+    "total": 3.0972
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 3,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 316,
+   "step": 4912,
+   "buffer": 100000,
+   "selfplay_sec": 37.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4569,
+    "value": 0.6054,
+    "score": 0.0619,
+    "total": 3.0933
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 317,
+   "step": 4928,
+   "buffer": 100000,
+   "selfplay_sec": 40.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4552,
+    "value": 0.6264,
+    "score": 0.0622,
+    "total": 3.1127
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 318,
+   "step": 4944,
+   "buffer": 100000,
+   "selfplay_sec": 42.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4522,
+    "value": 0.6075,
+    "score": 0.0631,
+    "total": 3.0912
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.802,
+   "league_games": 16
+  },
+  {
+   "iteration": 319,
+   "step": 4960,
+   "buffer": 100000,
+   "selfplay_sec": 42.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4412,
+    "value": 0.6418,
+    "score": 0.0629,
+    "total": 3.1144
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 11,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.333,
+   "league_games": 16
+  },
+  {
+   "iteration": 320,
+   "step": 4976,
+   "buffer": 100000,
+   "selfplay_sec": 36.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4452,
+    "value": 0.6334,
+    "score": 0.0628,
+    "total": 3.11
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.354,
+   "league_games": 16
+  },
+  {
+   "iteration": 321,
+   "step": 4992,
+   "buffer": 100000,
+   "selfplay_sec": 35.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4424,
+    "value": 0.6307,
+    "score": 0.0638,
+    "total": 3.105
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.615,
+   "league_games": 16
+  },
+  {
+   "iteration": 322,
+   "step": 5008,
+   "buffer": 100000,
+   "selfplay_sec": 38.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4573,
+    "value": 0.6185,
+    "score": 0.0621,
+    "total": 3.1068
+   },
+   "game_endings": {
+    "repetition": 3,
+    "last_king": 12,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.552,
+   "league_games": 16
+  },
+  {
+   "iteration": 323,
+   "step": 5024,
+   "buffer": 100000,
+   "selfplay_sec": 38.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4391,
+    "value": 0.6078,
+    "score": 0.0616,
+    "total": 3.0777
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.656,
+   "league_games": 16
+  },
+  {
+   "iteration": 324,
+   "step": 5040,
+   "buffer": 100000,
+   "selfplay_sec": 31.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4349,
+    "value": 0.6217,
+    "score": 0.0607,
+    "total": 3.0869
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  },
+  {
+   "iteration": 325,
+   "step": 5056,
+   "buffer": 100000,
+   "selfplay_sec": 36.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4414,
+    "value": 0.6372,
+    "score": 0.063,
+    "total": 3.1101
+   },
+   "game_endings": {
+    "last_king": 11,
+    "ply_cap": 2,
+    "repetition": 3
+   },
+   "league_pairwise": 0.552,
+   "league_games": 16
+  },
+  {
+   "iteration": 326,
+   "step": 5072,
+   "buffer": 100000,
+   "selfplay_sec": 220.5,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4442,
+    "value": 0.6181,
+    "score": 0.0612,
+    "total": 3.0929
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.437,
+   "league_games": 16
+  },
+  {
+   "iteration": 327,
+   "step": 5088,
+   "buffer": 100000,
+   "selfplay_sec": 34.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4519,
+    "value": 0.6188,
+    "score": 0.0595,
+    "total": 3.1004
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.531,
+   "league_games": 16
+  },
+  {
+   "iteration": 328,
+   "step": 5104,
+   "buffer": 100000,
+   "selfplay_sec": 37.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4637,
+    "value": 0.6136,
+    "score": 0.0596,
+    "total": 3.1071
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  },
+  {
+   "iteration": 329,
+   "step": 5120,
+   "buffer": 100000,
+   "selfplay_sec": 32.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4609,
+    "value": 0.6018,
+    "score": 0.0609,
+    "total": 3.0931
+   },
+   "game_endings": {
+    "last_king": 14,
+    "repetition": 2
+   },
+   "league_pairwise": 0.365,
+   "league_games": 16
+  },
+  {
+   "iteration": 330,
+   "step": 5136,
+   "buffer": 100000,
+   "selfplay_sec": 33.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4445,
+    "value": 0.5943,
+    "score": 0.0595,
+    "total": 3.0686
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.469,
+   "league_games": 16
+  },
+  {
+   "iteration": 331,
+   "step": 5152,
+   "buffer": 100000,
+   "selfplay_sec": 34.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4515,
+    "value": 0.6283,
+    "score": 0.0617,
+    "total": 3.1106
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 9
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  },
+  {
+   "iteration": 332,
+   "step": 5168,
+   "buffer": 100000,
+   "selfplay_sec": 33.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4582,
+    "value": 0.6171,
+    "score": 0.062,
+    "total": 3.1063
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.271,
+   "league_games": 16
+  },
+  {
+   "iteration": 333,
+   "step": 5184,
+   "buffer": 100000,
+   "selfplay_sec": 33.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4611,
+    "value": 0.6216,
+    "score": 0.0619,
+    "total": 3.1137
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 11,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.406,
+   "league_games": 16
+  },
+  {
+   "iteration": 334,
+   "step": 5200,
+   "buffer": 100000,
+   "selfplay_sec": 34.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4606,
+    "value": 0.6178,
+    "score": 0.0609,
+    "total": 3.1088
+   },
+   "game_endings": {
+    "repetition": 1,
+    "last_king": 14,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.365,
+   "league_games": 16
+  },
+  {
+   "iteration": 335,
+   "step": 5216,
+   "buffer": 100000,
+   "selfplay_sec": 32.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4415,
+    "value": 0.6012,
+    "score": 0.0604,
+    "total": 3.0729
+   },
+   "game_endings": {
+    "repetition": 2,
+    "last_king": 13,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.354,
+   "league_games": 16
+  },
+  {
+   "iteration": 336,
+   "step": 5232,
+   "buffer": 100000,
+   "selfplay_sec": 45.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4469,
+    "value": 0.6142,
+    "score": 0.0611,
+    "total": 3.0916
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 4,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 337,
+   "step": 5248,
+   "buffer": 100000,
+   "selfplay_sec": 36.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4486,
+    "value": 0.6281,
+    "score": 0.0624,
+    "total": 3.1079
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 338,
+   "step": 5264,
+   "buffer": 100000,
+   "selfplay_sec": 42.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4484,
+    "value": 0.6152,
+    "score": 0.0611,
+    "total": 3.0942
+   },
+   "game_endings": {
+    "last_king": 7,
+    "ply_cap": 4,
+    "repetition": 5
+   },
+   "league_pairwise": 0.312,
+   "league_games": 16
+  },
+  {
+   "iteration": 339,
+   "step": 5280,
+   "buffer": 100000,
+   "selfplay_sec": 40.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4533,
+    "value": 0.6213,
+    "score": 0.0613,
+    "total": 3.1053
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.354,
+   "league_games": 16
+  },
+  {
+   "iteration": 340,
+   "step": 5296,
+   "buffer": 100000,
+   "selfplay_sec": 30.3,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4577,
+    "value": 0.6048,
+    "score": 0.0627,
+    "total": 3.0938
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.24,
+   "league_games": 16
+  },
+  {
+   "iteration": 341,
+   "step": 5312,
+   "buffer": 100000,
+   "selfplay_sec": 34.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4358,
+    "value": 0.6073,
+    "score": 0.0617,
+    "total": 3.0739
+   },
+   "game_endings": {
+    "repetition": 7,
+    "last_king": 9
+   },
+   "league_pairwise": 0.438,
+   "league_games": 16
+  },
+  {
+   "iteration": 342,
+   "step": 5328,
+   "buffer": 100000,
+   "selfplay_sec": 43.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4428,
+    "value": 0.6087,
+    "score": 0.0599,
+    "total": 3.0814
+   },
+   "game_endings": {
+    "repetition": 8,
+    "ply_cap": 2,
+    "last_king": 6
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 343,
+   "step": 5344,
+   "buffer": 100000,
+   "selfplay_sec": 34.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4515,
+    "value": 0.6239,
+    "score": 0.0616,
+    "total": 3.1062
+   },
+   "game_endings": {
+    "last_king": 13,
+    "ply_cap": 1,
+    "repetition": 2
+   },
+   "league_pairwise": 0.49,
+   "league_games": 16
+  },
+  {
+   "iteration": 344,
+   "step": 5360,
+   "buffer": 100000,
+   "selfplay_sec": 33.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4605,
+    "value": 0.6203,
+    "score": 0.0608,
+    "total": 3.1112
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.49,
+   "league_games": 16
+  },
+  {
+   "iteration": 345,
+   "step": 5376,
+   "buffer": 100000,
+   "selfplay_sec": 32.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4535,
+    "value": 0.6321,
+    "score": 0.0609,
+    "total": 3.116
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.344,
+   "league_games": 16
+  },
+  {
+   "iteration": 346,
+   "step": 5392,
+   "buffer": 100000,
+   "selfplay_sec": 37.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4403,
+    "value": 0.6209,
+    "score": 0.0624,
+    "total": 3.0925
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.604,
+   "league_games": 16
+  },
+  {
+   "iteration": 347,
+   "step": 5408,
+   "buffer": 100000,
+   "selfplay_sec": 37.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4738,
+    "value": 0.5932,
+    "score": 0.061,
+    "total": 3.0975
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.302,
+   "league_games": 16
+  },
+  {
+   "iteration": 348,
+   "step": 5424,
+   "buffer": 100000,
+   "selfplay_sec": 28.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4545,
+    "value": 0.5947,
+    "score": 0.0601,
+    "total": 3.0792
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.354,
+   "league_games": 16
+  },
+  {
+   "iteration": 349,
+   "step": 5440,
+   "buffer": 100000,
+   "selfplay_sec": 40.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4538,
+    "value": 0.6085,
+    "score": 0.062,
+    "total": 3.0933
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 10,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.604,
+   "league_games": 16
+  },
+  {
+   "iteration": 350,
+   "step": 5456,
+   "buffer": 100000,
+   "selfplay_sec": 37.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4535,
+    "value": 0.6255,
+    "score": 0.063,
+    "total": 3.1104
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 351,
+   "step": 5472,
+   "buffer": 100000,
+   "selfplay_sec": 29.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4436,
+    "value": 0.602,
+    "score": 0.0601,
+    "total": 3.0756
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.365,
+   "league_games": 16
+  },
+  {
+   "iteration": 352,
+   "step": 5488,
+   "buffer": 100000,
+   "selfplay_sec": 38.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.441,
+    "value": 0.5859,
+    "score": 0.0589,
+    "total": 3.0563
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 353,
+   "step": 5504,
+   "buffer": 100000,
+   "selfplay_sec": 33.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.436,
+    "value": 0.6084,
+    "score": 0.062,
+    "total": 3.0754
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 8
+   },
+   "league_pairwise": 0.594,
+   "league_games": 16
+  },
+  {
+   "iteration": 354,
+   "step": 5520,
+   "buffer": 100000,
+   "selfplay_sec": 40.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4419,
+    "value": 0.6134,
+    "score": 0.0631,
+    "total": 3.0868
+   },
+   "game_endings": {
+    "last_king": 10,
+    "ply_cap": 1,
+    "repetition": 5
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 355,
+   "step": 5536,
+   "buffer": 100000,
+   "selfplay_sec": 36.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4482,
+    "value": 0.6172,
+    "score": 0.0611,
+    "total": 3.0959
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.271,
+   "league_games": 16
+  },
+  {
+   "iteration": 356,
+   "step": 5552,
+   "buffer": 100000,
+   "selfplay_sec": 35.4,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4471,
+    "value": 0.6106,
+    "score": 0.0631,
+    "total": 3.0892
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.542,
+   "league_games": 16
+  },
+  {
+   "iteration": 357,
+   "step": 5568,
+   "buffer": 100000,
+   "selfplay_sec": 43.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4526,
+    "value": 0.6173,
+    "score": 0.0596,
+    "total": 3.0997
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 12
+   },
+   "league_pairwise": 0.583,
+   "league_games": 16
+  },
+  {
+   "iteration": 358,
+   "step": 5584,
+   "buffer": 100000,
+   "selfplay_sec": 34.2,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4347,
+    "value": 0.6237,
+    "score": 0.0612,
+    "total": 3.089
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 11,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 359,
+   "step": 5600,
+   "buffer": 100000,
+   "selfplay_sec": 44.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4558,
+    "value": 0.6147,
+    "score": 0.0602,
+    "total": 3.1005
+   },
+   "game_endings": {
+    "ply_cap": 3,
+    "repetition": 6,
+    "last_king": 7
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 360,
+   "step": 5616,
+   "buffer": 100000,
+   "selfplay_sec": 33.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4502,
+    "value": 0.6126,
+    "score": 0.0619,
+    "total": 3.0937
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 361,
+   "step": 5632,
+   "buffer": 100000,
+   "selfplay_sec": 33.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4466,
+    "value": 0.6084,
+    "score": 0.0604,
+    "total": 3.0853
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 5
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 362,
+   "step": 5648,
+   "buffer": 100000,
+   "selfplay_sec": 40.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4319,
+    "value": 0.6219,
+    "score": 0.061,
+    "total": 3.0843
+   },
+   "game_endings": {
+    "last_king": 10,
+    "ply_cap": 3,
+    "repetition": 3
+   },
+   "league_pairwise": 0.469,
+   "league_games": 16
+  },
+  {
+   "iteration": 363,
+   "step": 5664,
+   "buffer": 100000,
+   "selfplay_sec": 32.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.441,
+    "value": 0.6258,
+    "score": 0.0606,
+    "total": 3.0971
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 364,
+   "step": 5680,
+   "buffer": 100000,
+   "selfplay_sec": 28.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.446,
+    "value": 0.616,
+    "score": 0.0608,
+    "total": 3.0924
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 2,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.562,
+   "league_games": 16
+  },
+  {
+   "iteration": 365,
+   "step": 5696,
+   "buffer": 100000,
+   "selfplay_sec": 32.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4479,
+    "value": 0.6209,
+    "score": 0.0615,
+    "total": 3.0996
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.406,
+   "league_games": 16
+  },
+  {
+   "iteration": 366,
+   "step": 5712,
+   "buffer": 100000,
+   "selfplay_sec": 36.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4495,
+    "value": 0.6181,
+    "score": 0.0602,
+    "total": 3.0977
+   },
+   "game_endings": {
+    "repetition": 7,
+    "ply_cap": 1,
+    "last_king": 8
+   },
+   "league_pairwise": 0.469,
+   "league_games": 16
+  },
+  {
+   "iteration": 367,
+   "step": 5728,
+   "buffer": 100000,
+   "selfplay_sec": 45.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4465,
+    "value": 0.6219,
+    "score": 0.0604,
+    "total": 3.0985
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 368,
+   "step": 5744,
+   "buffer": 100000,
+   "selfplay_sec": 38.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4391,
+    "value": 0.6174,
+    "score": 0.0598,
+    "total": 3.0864
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 369,
+   "step": 5760,
+   "buffer": 100000,
+   "selfplay_sec": 39.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4537,
+    "value": 0.626,
+    "score": 0.0596,
+    "total": 3.1095
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 370,
+   "step": 5776,
+   "buffer": 100000,
+   "selfplay_sec": 41.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4401,
+    "value": 0.6153,
+    "score": 0.0603,
+    "total": 3.0855
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 371,
+   "step": 5792,
+   "buffer": 100000,
+   "selfplay_sec": 38.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4433,
+    "value": 0.6028,
+    "score": 0.0604,
+    "total": 3.0762
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 372,
+   "step": 5808,
+   "buffer": 100000,
+   "selfplay_sec": 36.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4428,
+    "value": 0.6196,
+    "score": 0.061,
+    "total": 3.0929
+   },
+   "game_endings": {
+    "last_king": 11,
+    "ply_cap": 1,
+    "repetition": 4
+   },
+   "league_pairwise": 0.5,
+   "league_games": 16
+  },
+  {
+   "iteration": 373,
+   "step": 5824,
+   "buffer": 100000,
+   "selfplay_sec": 38.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4344,
+    "value": 0.6286,
+    "score": 0.0612,
+    "total": 3.0936
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 374,
+   "step": 5840,
+   "buffer": 100000,
+   "selfplay_sec": 42.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4475,
+    "value": 0.6126,
+    "score": 0.0623,
+    "total": 3.0912
+   },
+   "game_endings": {
+    "last_king": 8,
+    "repetition": 8
+   },
+   "league_pairwise": 0.458,
+   "league_games": 16
+  },
+  {
+   "iteration": 375,
+   "step": 5856,
+   "buffer": 100000,
+   "selfplay_sec": 40.3,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.441,
+    "value": 0.6261,
+    "score": 0.0606,
+    "total": 3.0974
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.49,
+   "league_games": 16
+  },
+  {
+   "iteration": 376,
+   "step": 5872,
+   "buffer": 100000,
+   "selfplay_sec": 39.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4464,
+    "value": 0.6109,
+    "score": 0.0597,
+    "total": 3.0871
+   },
+   "game_endings": {
+    "ply_cap": 1,
+    "repetition": 6,
+    "last_king": 9
+   },
+   "league_pairwise": 0.365,
+   "league_games": 16
+  },
+  {
+   "iteration": 377,
+   "step": 5888,
+   "buffer": 100000,
+   "selfplay_sec": 37.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4453,
+    "value": 0.6149,
+    "score": 0.0605,
+    "total": 3.0905
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.594,
+   "league_games": 16
+  },
+  {
+   "iteration": 378,
+   "step": 5904,
+   "buffer": 100000,
+   "selfplay_sec": 35.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4438,
+    "value": 0.6177,
+    "score": 0.06,
+    "total": 3.0915
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.542,
+   "league_games": 16
+  },
+  {
+   "iteration": 379,
+   "step": 5920,
+   "buffer": 100000,
+   "selfplay_sec": 35.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4548,
+    "value": 0.5871,
+    "score": 0.0586,
+    "total": 3.0712
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 12
+   },
+   "league_pairwise": 0.552,
+   "league_games": 16
+  },
+  {
+   "iteration": 380,
+   "step": 5936,
+   "buffer": 100000,
+   "selfplay_sec": 30.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4455,
+    "value": 0.5994,
+    "score": 0.0599,
+    "total": 3.0748
+   },
+   "game_endings": {
+    "repetition": 3,
+    "last_king": 13
+   },
+   "league_pairwise": 0.5,
+   "league_games": 16
+  },
+  {
+   "iteration": 381,
+   "step": 5952,
+   "buffer": 100000,
+   "selfplay_sec": 36.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4439,
+    "value": 0.6203,
+    "score": 0.0602,
+    "total": 3.0943
+   },
+   "game_endings": {
+    "repetition": 6,
+    "ply_cap": 2,
+    "last_king": 8
+   },
+   "league_pairwise": 0.385,
+   "league_games": 16
+  },
+  {
+   "iteration": 382,
+   "step": 5968,
+   "buffer": 100000,
+   "selfplay_sec": 48.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.444,
+    "value": 0.6209,
+    "score": 0.0604,
+    "total": 3.0951
+   },
+   "game_endings": {
+    "repetition": 5,
+    "ply_cap": 2,
+    "last_king": 9
+   },
+   "league_pairwise": 0.271,
+   "league_games": 16
+  },
+  {
+   "iteration": 383,
+   "step": 5984,
+   "buffer": 100000,
+   "selfplay_sec": 43.4,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4342,
+    "value": 0.6053,
+    "score": 0.0586,
+    "total": 3.0688
+   },
+   "game_endings": {
+    "last_king": 9,
+    "ply_cap": 2,
+    "repetition": 5
+   },
+   "league_pairwise": 0.438,
+   "league_games": 16
+  },
+  {
+   "iteration": 384,
+   "step": 6000,
+   "buffer": 100000,
+   "selfplay_sec": 34.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4493,
+    "value": 0.6269,
+    "score": 0.0619,
+    "total": 3.1072
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 385,
+   "step": 6016,
+   "buffer": 100000,
+   "selfplay_sec": 40.0,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4534,
+    "value": 0.6086,
+    "score": 0.062,
+    "total": 3.0931
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 3
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 386,
+   "step": 6032,
+   "buffer": 100000,
+   "selfplay_sec": 35.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4263,
+    "value": 0.6208,
+    "score": 0.061,
+    "total": 3.0776
+   },
+   "game_endings": {
+    "last_king": 9,
+    "ply_cap": 1,
+    "repetition": 6
+   },
+   "league_pairwise": 0.344,
+   "league_games": 16
+  },
+  {
+   "iteration": 387,
+   "step": 6048,
+   "buffer": 100000,
+   "selfplay_sec": 36.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4405,
+    "value": 0.6167,
+    "score": 0.0617,
+    "total": 3.088
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.365,
+   "league_games": 16
+  },
+  {
+   "iteration": 388,
+   "step": 6064,
+   "buffer": 100000,
+   "selfplay_sec": 37.9,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4486,
+    "value": 0.5954,
+    "score": 0.0604,
+    "total": 3.0742
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 5,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.521,
+   "league_games": 16
+  },
+  {
+   "iteration": 389,
+   "step": 6080,
+   "buffer": 100000,
+   "selfplay_sec": 40.1,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4368,
+    "value": 0.6125,
+    "score": 0.06,
+    "total": 3.0793
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.417,
+   "league_games": 16
+  },
+  {
+   "iteration": 390,
+   "step": 6096,
+   "buffer": 100000,
+   "selfplay_sec": 32.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4462,
+    "value": 0.627,
+    "score": 0.0616,
+    "total": 3.104
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 11,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.427,
+   "league_games": 16
+  },
+  {
+   "iteration": 391,
+   "step": 6112,
+   "buffer": 100000,
+   "selfplay_sec": 38.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4296,
+    "value": 0.6173,
+    "score": 0.0608,
+    "total": 3.0773
+   },
+   "game_endings": {
+    "last_king": 10,
+    "repetition": 6
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 392,
+   "step": 6128,
+   "buffer": 100000,
+   "selfplay_sec": 36.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4432,
+    "value": 0.6092,
+    "score": 0.0603,
+    "total": 3.0826
+   },
+   "game_endings": {
+    "last_king": 13,
+    "repetition": 2,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.344,
+   "league_games": 16
+  },
+  {
+   "iteration": 393,
+   "step": 6144,
+   "buffer": 100000,
+   "selfplay_sec": 37.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4461,
+    "value": 0.6027,
+    "score": 0.0605,
+    "total": 3.0791
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 11
+   },
+   "league_pairwise": 0.469,
+   "league_games": 16
+  },
+  {
+   "iteration": 394,
+   "step": 6160,
+   "buffer": 100000,
+   "selfplay_sec": 36.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4398,
+    "value": 0.6082,
+    "score": 0.0603,
+    "total": 3.0781
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 7
+   },
+   "league_pairwise": 0.198,
+   "league_games": 16
+  },
+  {
+   "iteration": 395,
+   "step": 6176,
+   "buffer": 100000,
+   "selfplay_sec": 37.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4424,
+    "value": 0.6131,
+    "score": 0.0589,
+    "total": 3.085
+   },
+   "game_endings": {
+    "last_king": 12,
+    "repetition": 4
+   },
+   "league_pairwise": 0.437,
+   "league_games": 16
+  },
+  {
+   "iteration": 396,
+   "step": 6192,
+   "buffer": 100000,
+   "selfplay_sec": 34.5,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4457,
+    "value": 0.5942,
+    "score": 0.0614,
+    "total": 3.0706
+   },
+   "game_endings": {
+    "repetition": 2,
+    "last_king": 14
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 397,
+   "step": 6208,
+   "buffer": 100000,
+   "selfplay_sec": 35.9,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4378,
+    "value": 0.6114,
+    "score": 0.0605,
+    "total": 3.0794
+   },
+   "game_endings": {
+    "last_king": 12,
+    "ply_cap": 1,
+    "repetition": 3
+   },
+   "league_pairwise": 0.479,
+   "league_games": 16
+  },
+  {
+   "iteration": 398,
+   "step": 6224,
+   "buffer": 100000,
+   "selfplay_sec": 34.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4465,
+    "value": 0.6115,
+    "score": 0.0594,
+    "total": 3.0878
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 10
+   },
+   "league_pairwise": 0.323,
+   "league_games": 16
+  },
+  {
+   "iteration": 399,
+   "step": 6240,
+   "buffer": 100000,
+   "selfplay_sec": 42.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4305,
+    "value": 0.6115,
+    "score": 0.0591,
+    "total": 3.0716
+   },
+   "game_endings": {
+    "last_king": 9,
+    "ply_cap": 1,
+    "repetition": 6
+   },
+   "league_pairwise": 0.646,
+   "league_games": 16
+  },
+  {
+   "iteration": 400,
+   "step": 6256,
+   "buffer": 100000,
+   "selfplay_sec": 39.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.445,
+    "value": 0.6003,
+    "score": 0.0616,
+    "total": 3.0761
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.24,
+   "league_games": 16
+  },
+  {
+   "iteration": 401,
+   "step": 6272,
+   "buffer": 100000,
+   "selfplay_sec": 34.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.443,
+    "value": 0.6033,
+    "score": 0.0602,
+    "total": 3.0764
+   },
+   "game_endings": {
+    "repetition": 6,
+    "last_king": 9,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.49,
+   "league_games": 16
+  },
+  {
+   "iteration": 402,
+   "step": 6288,
+   "buffer": 100000,
+   "selfplay_sec": 30.6,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4362,
+    "value": 0.6117,
+    "score": 0.0618,
+    "total": 3.0787
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.448,
+   "league_games": 16
+  },
+  {
+   "iteration": 403,
+   "step": 6304,
+   "buffer": 100000,
+   "selfplay_sec": 40.1,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4334,
+    "value": 0.629,
+    "score": 0.0623,
+    "total": 3.0935
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 10,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.51,
+   "league_games": 16
+  },
+  {
+   "iteration": 404,
+   "step": 6320,
+   "buffer": 100000,
+   "selfplay_sec": 41.0,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4445,
+    "value": 0.5948,
+    "score": 0.0587,
+    "total": 3.0686
+   },
+   "game_endings": {
+    "repetition": 5,
+    "last_king": 10,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.625,
+   "league_games": 16
+  },
+  {
+   "iteration": 405,
+   "step": 6336,
+   "buffer": 100000,
+   "selfplay_sec": 33.4,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4317,
+    "value": 0.6247,
+    "score": 0.0634,
+    "total": 3.0881
+   },
+   "game_endings": {
+    "repetition": 8,
+    "last_king": 8
+   },
+   "league_pairwise": 0.219,
+   "league_games": 16
+  },
+  {
+   "iteration": 406,
+   "step": 6352,
+   "buffer": 100000,
+   "selfplay_sec": 39.8,
+   "train_sec": 0.6,
+   "loss": {
+    "policy": 2.4309,
+    "value": 0.6226,
+    "score": 0.0622,
+    "total": 3.0846
+   },
+   "game_endings": {
+    "last_king": 9,
+    "ply_cap": 1,
+    "repetition": 6
+   },
+   "league_pairwise": 0.469,
+   "league_games": 16
+  },
+  {
+   "iteration": 407,
+   "step": 6368,
+   "buffer": 100000,
+   "selfplay_sec": 34.8,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4363,
+    "value": 0.6246,
+    "score": 0.0601,
+    "total": 3.0909
+   },
+   "game_endings": {
+    "last_king": 11,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "league_pairwise": 0.625,
+   "league_games": 16
+  },
+  {
+   "iteration": 408,
+   "step": 6384,
+   "buffer": 100000,
+   "selfplay_sec": 34.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4462,
+    "value": 0.6066,
+    "score": 0.0603,
+    "total": 3.083
+   },
+   "game_endings": {
+    "repetition": 10,
+    "last_king": 6
+   },
+   "league_pairwise": 0.344,
+   "league_games": 16
+  },
+  {
+   "iteration": 409,
+   "step": 6400,
+   "buffer": 100000,
+   "selfplay_sec": 39.4,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4415,
+    "value": 0.6161,
+    "score": 0.0615,
+    "total": 3.0883
+   },
+   "game_endings": {
+    "last_king": 9,
+    "repetition": 5,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.396,
+   "league_games": 16
+  },
+  {
+   "iteration": 410,
+   "step": 6416,
+   "buffer": 100000,
+   "selfplay_sec": 37.2,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4387,
+    "value": 0.6184,
+    "score": 0.0602,
+    "total": 3.0872
+   },
+   "game_endings": {
+    "last_king": 11,
+    "ply_cap": 1,
+    "repetition": 4
+   },
+   "league_pairwise": 0.552,
+   "league_games": 16
+  },
+  {
+   "iteration": 411,
+   "step": 6432,
+   "buffer": 100000,
+   "selfplay_sec": 34.7,
+   "train_sec": 0.7,
+   "loss": {
+    "policy": 2.4403,
+    "value": 0.6133,
+    "score": 0.0625,
+    "total": 3.0848
+   },
+   "game_endings": {
+    "repetition": 4,
+    "last_king": 10,
+    "ply_cap": 2
+   },
+   "league_pairwise": 0.375,
+   "league_games": 16
+  }
+ ],
+ "evaluation": null,
+ "eval_opponent": "opponent_pool/ihavethesauce_model.pt",
+ "snapshots": [
+  {
+   "name": "snap_001_it00070_20261123-0244",
+   "iteration": 70,
+   "step": 960,
+   "hours": 1.0,
+   "path": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\logs\\models\\2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu\\snapshots\\snap_001_it00070_20261123-0244.pt"
+  },
+  {
+   "name": "snap_002_it00157_20261123-0344",
+   "iteration": 157,
+   "step": 2352,
+   "hours": 2.0,
+   "path": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\logs\\models\\2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu\\snapshots\\snap_002_it00157_20261123-0344.pt"
+  },
+  {
+   "name": "snap_003_it00235_20261123-0444",
+   "iteration": 235,
+   "step": 3600,
+   "hours": 3.0,
+   "path": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\logs\\models\\2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu\\snapshots\\snap_003_it00235_20261123-0444.pt"
+  },
+  {
+   "name": "snap_004_it00326_20261123-0544",
+   "iteration": 326,
+   "step": 5056,
+   "hours": 4.0,
+   "path": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\logs\\models\\2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu\\snapshots\\snap_004_it00326_20261123-0544.pt"
+  },
+  {
+   "name": "final_it00412_20261123-0641",
+   "iteration": 412,
+   "step": 6432,
+   "path": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\logs\\models\\2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu\\snapshots\\final_it00412_20261123-0641.pt",
+   "hours": 4.94
+  }
+ ],
+ "opponents": [
+  "2026-11-22_2348_sup-arnav2007-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+  "2026-11-22_2352_sup-ihavethesauce-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+  "2026-11-22_2357_sup-taran0915-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+  "2026-11-23_0003_sup-eternalvoias-v2_mlp-e512-w1024x512x256_sup-ep8_cpu"
+ ],
+ "pool_open": false,
+ "pool_added": [],
+ "checks": [
+  {
+   "snapshot": "start",
+   "hours": 0.0,
+   "vs_pool": {
+    "pool": [
+     "2026-11-22_2348_sup-arnav2007-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-22_2352_sup-ihavethesauce-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-22_2357_sup-taran0915-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-23_0003_sup-eternalvoias-v2_mlp-e512-w1024x512x256_sup-ep8_cpu"
+    ],
+    "games": 40,
+    "pairwise": 0.487,
+    "pairwise_se": 0.06,
+    "per_seat_pairwise": {
+     "R": 0.533,
+     "B": 0.5,
+     "Y": 0.45,
+     "G": 0.467
+    },
+    "wins_draws_losses": [
+     54,
+     9,
+     57
+    ],
+    "score_share": 0.247,
+    "avg_place": 2.42,
+    "outperforms": false,
+    "why": "pairwise 0.487 \u00b1 0.120 is not clearly above 0.5"
+   },
+   "vs_yardstick": {
+    "opponent": "2026-11-22_1647_sup-arnav2007-blitz-small_mlp-e256-w512x256x128_sup-ep4_cpu",
+    "games": 40,
+    "pairwise": 0.467,
+    "pairwise_se": 0.054,
+    "per_seat_pairwise": {
+     "R": 0.533,
+     "B": 0.417,
+     "Y": 0.467,
+     "G": 0.45
+    },
+    "wins_draws_losses": [
+     54,
+     4,
+     62
+    ],
+    "score_share": 0.235,
+    "avg_place": 2.55
+   },
+   "check_sec": 250.3
+  },
+  {
+   "snapshot": "snap_001_it00070_20261123-0244",
+   "hours": 1.0,
+   "vs_best": {
+    "games": 40,
+    "pairwise": 0.383,
+    "pairwise_se": 0.055,
+    "per_seat_pairwise": {
+     "R": 0.5,
+     "B": 0.45,
+     "Y": 0.267,
+     "G": 0.317
+    },
+    "wins_draws_losses": [
+     43,
+     6,
+     71
+    ],
+    "score_share": 0.223,
+    "avg_place": 2.77
+   },
+   "decision": "clearly worse: reverted to start",
+   "best": "start",
+   "vs_pool": {
+    "pool": [
+     "2026-11-22_2348_sup-arnav2007-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-22_2352_sup-ihavethesauce-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-22_2357_sup-taran0915-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-23_0003_sup-eternalvoias-v2_mlp-e512-w1024x512x256_sup-ep8_cpu"
+    ],
+    "games": 40,
+    "pairwise": 0.592,
+    "pairwise_se": 0.054,
+    "per_seat_pairwise": {
+     "R": 0.567,
+     "B": 0.55,
+     "Y": 0.617,
+     "G": 0.633
+    },
+    "wins_draws_losses": [
+     67,
+     8,
+     45
+    ],
+    "score_share": 0.299,
+    "avg_place": 2.12,
+    "outperforms": false,
+    "why": "pairwise 0.592 \u00b1 0.108 is not clearly above 0.5"
+   },
+   "vs_yardstick": {
+    "opponent": "2026-11-22_1647_sup-arnav2007-blitz-small_mlp-e256-w512x256x128_sup-ep4_cpu",
+    "games": 40,
+    "pairwise": 0.467,
+    "pairwise_se": 0.054,
+    "per_seat_pairwise": {
+     "R": 0.533,
+     "B": 0.417,
+     "Y": 0.467,
+     "G": 0.45
+    },
+    "wins_draws_losses": [
+     54,
+     4,
+     62
+    ],
+    "score_share": 0.235,
+    "avg_place": 2.55
+   },
+   "check_sec": 213.2
+  },
+  {
+   "snapshot": "snap_002_it00157_20261123-0344",
+   "hours": 2.0,
+   "vs_best": {
+    "games": 40,
+    "pairwise": 0.562,
+    "pairwise_se": 0.06,
+    "per_seat_pairwise": {
+     "R": 0.6,
+     "B": 0.7,
+     "Y": 0.483,
+     "G": 0.467
+    },
+    "wins_draws_losses": [
+     66,
+     3,
+     51
+    ],
+    "score_share": 0.302,
+    "avg_place": 2.27
+   },
+   "decision": "new best",
+   "best": "snap_002_it00157_20261123-0344",
+   "vs_pool": {
+    "pool": [
+     "2026-11-22_2348_sup-arnav2007-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-22_2352_sup-ihavethesauce-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-22_2357_sup-taran0915-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-23_0003_sup-eternalvoias-v2_mlp-e512-w1024x512x256_sup-ep8_cpu"
+    ],
+    "games": 40,
+    "pairwise": 0.617,
+    "pairwise_se": 0.061,
+    "per_seat_pairwise": {
+     "R": 0.567,
+     "B": 0.467,
+     "Y": 0.683,
+     "G": 0.75
+    },
+    "wins_draws_losses": [
+     71,
+     6,
+     43
+    ],
+    "score_share": 0.337,
+    "avg_place": 2.08,
+    "outperforms": false,
+    "why": "pairwise 0.617 \u00b1 0.122 is not clearly above 0.5"
+   },
+   "vs_yardstick": {
+    "opponent": "2026-11-22_1647_sup-arnav2007-blitz-small_mlp-e256-w512x256x128_sup-ep4_cpu",
+    "games": 40,
+    "pairwise": 0.492,
+    "pairwise_se": 0.06,
+    "per_seat_pairwise": {
+     "R": 0.433,
+     "B": 0.533,
+     "Y": 0.433,
+     "G": 0.567
+    },
+    "wins_draws_losses": [
+     57,
+     4,
+     59
+    ],
+    "score_share": 0.231,
+    "avg_place": 2.48
+   },
+   "check_sec": 307.1
+  },
+  {
+   "snapshot": "snap_003_it00235_20261123-0444",
+   "hours": 3.0,
+   "vs_best": {
+    "games": 40,
+    "pairwise": 0.467,
+    "pairwise_se": 0.06,
+    "per_seat_pairwise": {
+     "R": 0.55,
+     "B": 0.433,
+     "Y": 0.267,
+     "G": 0.617
+    },
+    "wins_draws_losses": [
+     55,
+     2,
+     63
+    ],
+    "score_share": 0.213,
+    "avg_place": 2.58
+   },
+   "decision": "not better than snap_002_it00157_20261123-0344; kept training",
+   "best": "snap_002_it00157_20261123-0344",
+   "vs_pool": {
+    "pool": [
+     "2026-11-22_2348_sup-arnav2007-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-22_2352_sup-ihavethesauce-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-22_2357_sup-taran0915-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-23_0003_sup-eternalvoias-v2_mlp-e512-w1024x512x256_sup-ep8_cpu"
+    ],
+    "games": 40,
+    "pairwise": 0.571,
+    "pairwise_se": 0.059,
+    "per_seat_pairwise": {
+     "R": 0.483,
+     "B": 0.55,
+     "Y": 0.7,
+     "G": 0.55
+    },
+    "wins_draws_losses": [
+     64,
+     9,
+     47
+    ],
+    "score_share": 0.279,
+    "avg_place": 2.17,
+    "outperforms": false,
+    "why": "pairwise 0.571 \u00b1 0.118 is not clearly above 0.5"
+   },
+   "vs_yardstick": {
+    "opponent": "2026-11-22_1647_sup-arnav2007-blitz-small_mlp-e256-w512x256x128_sup-ep4_cpu",
+    "games": 40,
+    "pairwise": 0.542,
+    "pairwise_se": 0.057,
+    "per_seat_pairwise": {
+     "R": 0.45,
+     "B": 0.6,
+     "Y": 0.417,
+     "G": 0.7
+    },
+    "wins_draws_losses": [
+     62,
+     6,
+     52
+    ],
+    "score_share": 0.244,
+    "avg_place": 2.3
+   },
+   "check_sec": 223.8
+  },
+  {
+   "snapshot": "snap_004_it00326_20261123-0544",
+   "hours": 4.0,
+   "vs_best": {
+    "games": 40,
+    "pairwise": 0.546,
+    "pairwise_se": 0.059,
+    "per_seat_pairwise": {
+     "R": 0.533,
+     "B": 0.517,
+     "Y": 0.4,
+     "G": 0.733
+    },
+    "wins_draws_losses": [
+     64,
+     3,
+     53
+    ],
+    "score_share": 0.275,
+    "avg_place": 2.33
+   },
+   "decision": "new best",
+   "best": "snap_004_it00326_20261123-0544",
+   "vs_pool": {
+    "pool": [
+     "2026-11-22_2348_sup-arnav2007-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-22_2352_sup-ihavethesauce-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-22_2357_sup-taran0915-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-23_0003_sup-eternalvoias-v2_mlp-e512-w1024x512x256_sup-ep8_cpu"
+    ],
+    "games": 40,
+    "pairwise": 0.496,
+    "pairwise_se": 0.06,
+    "per_seat_pairwise": {
+     "R": 0.6,
+     "B": 0.55,
+     "Y": 0.417,
+     "G": 0.417
+    },
+    "wins_draws_losses": [
+     57,
+     5,
+     58
+    ],
+    "score_share": 0.26,
+    "avg_place": 2.45,
+    "outperforms": false,
+    "why": "pairwise 0.496 \u00b1 0.120 is not clearly above 0.5"
+   },
+   "vs_yardstick": {
+    "opponent": "2026-11-22_1647_sup-arnav2007-blitz-small_mlp-e256-w512x256x128_sup-ep4_cpu",
+    "games": 40,
+    "pairwise": 0.504,
+    "pairwise_se": 0.061,
+    "per_seat_pairwise": {
+     "R": 0.517,
+     "B": 0.533,
+     "Y": 0.483,
+     "G": 0.483
+    },
+    "wins_draws_losses": [
+     58,
+     5,
+     57
+    ],
+    "score_share": 0.22,
+    "avg_place": 2.42
+   },
+   "check_sec": 183.4
+  },
+  {
+   "snapshot": "final_it00412_20261123-0641",
+   "hours": 4.94,
+   "vs_best": {
+    "games": 40,
+    "pairwise": 0.504,
+    "pairwise_se": 0.053,
+    "per_seat_pairwise": {
+     "R": 0.5,
+     "B": 0.467,
+     "Y": 0.6,
+     "G": 0.45
+    },
+    "wins_draws_losses": [
+     58,
+     5,
+     57
+    ],
+    "score_share": 0.249,
+    "avg_place": 2.42
+   },
+   "decision": "new best",
+   "best": "final_it00412_20261123-0641",
+   "vs_pool": {
+    "pool": [
+     "2026-11-22_2348_sup-arnav2007-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-22_2352_sup-ihavethesauce-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-22_2357_sup-taran0915-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
+     "2026-11-23_0003_sup-eternalvoias-v2_mlp-e512-w1024x512x256_sup-ep8_cpu"
+    ],
+    "games": 40,
+    "pairwise": 0.592,
+    "pairwise_se": 0.061,
+    "per_seat_pairwise": {
+     "R": 0.583,
+     "B": 0.65,
+     "Y": 0.733,
+     "G": 0.4
+    },
+    "wins_draws_losses": [
+     69,
+     4,
+     47
+    ],
+    "score_share": 0.3,
+    "avg_place": 2.17,
+    "outperforms": false,
+    "why": "pairwise 0.592 \u00b1 0.122 is not clearly above 0.5"
+   },
+   "vs_yardstick": {
+    "opponent": "2026-11-22_1647_sup-arnav2007-blitz-small_mlp-e256-w512x256x128_sup-ep4_cpu",
+    "games": 40,
+    "pairwise": 0.492,
+    "pairwise_se": 0.066,
+    "per_seat_pairwise": {
+     "R": 0.517,
+     "B": 0.667,
+     "Y": 0.333,
+     "G": 0.45
+    },
+    "wins_draws_losses": [
+     56,
+     6,
+     58
+    ],
+    "score_share": 0.239,
+    "avg_place": 2.45
+   },
+   "check_sec": 211.1
+  }
+ ],
+ "best_snapshot": "final_it00412_20261123-0641",
+ "step": 6432,
+ "iteration": 411,
+ "run_hours": 4.999
+}
