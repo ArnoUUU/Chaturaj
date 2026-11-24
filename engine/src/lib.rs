@@ -1,10 +1,16 @@
 //! `chaturaji_engine`: the compiled core of the Chaturaji bot.
 //!
-//! So far: NNUE inference (`nnue.rs`) with incremental accumulators, exposed to Python as
-//! `chaturaji_engine.Nnue` and `chaturaji_engine.Accumulator`. `bot/nnue.py` uses it
-//! automatically when the module is installed. Next: move generation and the max^n search.
+//! - `nnue.rs`: NNUE inference with incremental accumulators, exposed to Python as
+//!   `chaturaji_engine.Nnue` and `chaturaji_engine.Accumulator`. `bot/nnue.py` uses it
+//!   automatically when the module is installed.
+//! - `rules.rs`: the game rules (move generation, make/unmake, scoring, elimination, game
+//!   end, the network's global features), exposed as `chaturaji_engine.Position`.
+//!   `bot/rules_core.py` converts to and from the Python rules engine and checks the two
+//!   agree on every scraped game.
+//! Next: the max^n search loop itself, on top of both.
 
 pub mod nnue;
+pub mod rules;
 
 #[cfg(feature = "python")]
 mod python {
@@ -15,6 +21,7 @@ mod python {
     use pyo3::prelude::*;
 
     use crate::nnue::{AccStack, Layer, Net, NUM_GLOBALS};
+    use crate::rules::{self, GameOver, Position};
 
     fn vec1(a: &PyReadonlyArray1<f32>) -> Vec<f32> {
         a.as_array().iter().copied().collect()
@@ -190,10 +197,161 @@ mod python {
         }
     }
 
+    /// Parse a chaturaji board_key ("/"-joined rows of 2-character squares, ".." = empty).
+    fn parse_board_key(key: &str) -> PyResult<[u8; 64]> {
+        let rows: Vec<&str> = key.split('/').collect();
+        let bad = || PyValueError::new_err(format!("bad board key {:?}", key));
+        if rows.len() != 8 {
+            return Err(bad());
+        }
+        let mut b = [0u8; 64];
+        for (r, row) in rows.iter().enumerate() {
+            let bytes = row.as_bytes();
+            if bytes.len() != 16 {
+                return Err(bad());
+            }
+            for c in 0..8 {
+                let (o, t) = (bytes[2 * c], bytes[2 * c + 1]);
+                if o == b'.' {
+                    continue;
+                }
+                let owner = b"RBYGX".iter().position(|&x| x == o).ok_or_else(bad)?;
+                let ty = b"KBNRP".iter().position(|&x| x == t).ok_or_else(bad)?;
+                b[r * 8 + c] = rules::code(owner, ty);
+            }
+        }
+        Ok(b)
+    }
+
+    fn over_name(o: Option<GameOver>) -> Option<&'static str> {
+        match o {
+            Some(GameOver::LastKing) => Some("last_king"),
+            Some(GameOver::Repetition) => Some("repetition"),
+            None => None,
+        }
+    }
+
+    /// A game position with make/unmake (the rules in engine/src/rules.rs). Seats are
+    /// 0..4 = R, B, Y, G; moves are from_square * 64 + to_square (square = row * 8 + col).
+    #[pyclass(name = "Position", module = "chaturaji_engine")]
+    #[derive(Clone)]
+    pub struct PyPosition {
+        pos: Position,
+    }
+
+    #[pymethods]
+    impl PyPosition {
+        #[staticmethod]
+        fn initial() -> Self {
+            PyPosition { pos: Position::initial() }
+        }
+
+        /// From a chaturaji state's parts: 64 piece codes, turn, 4 scores (R B Y G),
+        /// eliminated seats and position_counts as (board_key, count) pairs.
+        #[staticmethod]
+        fn from_parts(board_codes: PyReadonlyArray1<u8>, turn: u32, scores: Vec<i32>, eliminated: Vec<usize>,
+                      counts: Vec<(String, u32)>) -> PyResult<Self> {
+            let b = board(&board_codes)?;
+            if scores.len() != 4 || eliminated.iter().any(|&c| c > 3) {
+                return Err(PyValueError::new_err("scores must have 4 entries and seats be 0..4"));
+            }
+            let mut parsed = Vec::with_capacity(counts.len());
+            for (k, n) in &counts {
+                parsed.push((parse_board_key(k)?, *n));
+            }
+            let mask = eliminated.iter().fold(0u8, |m, &c| m | (1 << c));
+            let pos = Position::from_parts(b, turn, [scores[0], scores[1], scores[2], scores[3]], mask, parsed).map_err(err)?;
+            Ok(PyPosition { pos })
+        }
+
+        fn copy(&self) -> Self {
+            self.clone()
+        }
+
+        fn legal_moves(&self) -> Vec<u16> {
+            self.pos.legal_moves()
+        }
+
+        /// Make a move: returns (points gained incl. end bonus, captured code, check bonus,
+        /// eliminated seat or None).
+        fn push(&mut self, m: u16) -> PyResult<(i32, u8, i32, Option<usize>)> {
+            let i = self.pos.push(m).map_err(err)?;
+            Ok((i.points, i.captured, i.check_bonus, i.eliminated))
+        }
+
+        /// Resignation or timeout of a seat (undo with pop).
+        fn eliminate(&mut self, color: usize) -> PyResult<()> {
+            if color > 3 {
+                return Err(PyValueError::new_err("seat must be 0..4"));
+            }
+            self.pos.eliminate(color);
+            Ok(())
+        }
+
+        fn pop(&mut self) -> PyResult<()> {
+            self.pos.pop().map_err(PyIndexError::new_err)
+        }
+
+        fn capture_points(&self, m: u16) -> i32 {
+            self.pos.capture_points(m)
+        }
+
+        /// The 16 network globals from seat k's view (bot.mlp.global_features).
+        fn globals<'py>(&self, py: Python<'py>, k: usize) -> Bound<'py, numpy::PyArray1<f32>> {
+            numpy::PyArray1::from_slice(py, &self.pos.globals(k % 4))
+        }
+
+        #[getter]
+        fn board<'py>(&self, py: Python<'py>) -> Bound<'py, numpy::PyArray1<u8>> {
+            numpy::PyArray1::from_slice(py, &self.pos.board)
+        }
+
+        #[getter]
+        fn turn(&self) -> u32 {
+            self.pos.turn
+        }
+
+        #[getter]
+        fn scores(&self) -> Vec<i32> {
+            self.pos.scores.to_vec()
+        }
+
+        #[getter]
+        fn eliminated(&self) -> Vec<usize> {
+            (0..4).filter(|&c| !self.pos.is_active(c)).collect()
+        }
+
+        #[getter]
+        fn current_player(&self) -> usize {
+            self.pos.current_player()
+        }
+
+        #[getter]
+        fn game_over(&self) -> Option<&'static str> {
+            over_name(self.pos.game_over())
+        }
+
+        #[getter]
+        fn repetitions(&self) -> u32 {
+            self.pos.repetitions()
+        }
+
+        #[getter]
+        fn depth(&self) -> usize {
+            self.pos.depth()
+        }
+
+        #[getter]
+        fn hash(&self) -> u64 {
+            self.pos.hash
+        }
+    }
+
     #[pymodule]
     fn chaturaji_engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
         m.add_class::<PyNnue>()?;
         m.add_class::<PyAccumulator>()?;
+        m.add_class::<PyPosition>()?;
         m.add("__version__", env!("CARGO_PKG_VERSION"))?;
         Ok(())
     }
