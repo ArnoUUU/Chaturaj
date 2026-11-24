@@ -12,3 +12,6 @@ scraper/.firefox-profile/
 gui/.cache/
 scraper/data/
 cluster/site.env
+
+# Rust build output
+engine/target/
