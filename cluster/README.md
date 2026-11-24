@@ -19,7 +19,7 @@ The archive leaves out the scraper's browser profiles (they hold your chess.com 
 scraped data, logs and caches. Replace `NETID` with your UW NetID.
 ```powershell
 cd C:\Users\Arnav\Downloads
-tar -czf chaturaj.tgz --exclude=Chaturaj/scraper/.firefox-profile --exclude=Chaturaj/scraper/.selenium-profile --exclude=Chaturaj/scraper/data --exclude=Chaturaj/logs --exclude=Chaturaj/gui/.cache --exclude=__pycache__ --exclude=.pytest_cache --exclude=Chaturaj/.claude Chaturaj
+tar -czf chaturaj.tgz --exclude=Chaturaj/scraper/.firefox-profile --exclude=Chaturaj/scraper/.selenium-profile --exclude=Chaturaj/scraper/data --exclude=Chaturaj/logs --exclude=Chaturaj/gui/.cache --exclude=Chaturaj/engine/target --exclude=__pycache__ --exclude=.pytest_cache --exclude=Chaturaj/.claude Chaturaj
 scp chaturaj.tgz NETID@tillicum.hyak.uw.edu:~/
 ssh NETID@tillicum.hyak.uw.edu "tar -xzf chaturaj.tgz && rm chaturaj.tgz && mkdir -p Chaturaj/logs/slurm"
 ```
@@ -86,6 +86,40 @@ Interactive debugging on a GPU node:
 salloc --qos=interactive --gpus=1 --time=01:00:00
 source cluster/activate.sh && python -m bot.gpu_check --require-gpu
 ```
+
+### Compiled core and NNUE training
+Build the Rust core once (it installs Rust into `/gpfs/scrubbed/$USER` the first time):
+```bash
+bash cluster/build_engine.sh
+```
+The NNUE trains on the scraped games and the self-play logs, which the archive leaves out
+(`scraper/data`, `logs`). Copy them separately, about 60 MB (from Windows PowerShell):
+```powershell
+cd C:\Users\Arnav\Downloads\Chaturaj
+ssh NETID@tillicum.hyak.uw.edu "mkdir -p Chaturaj/scraper/data Chaturaj/logs/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu"
+scp -r scraper/data/records NETID@tillicum.hyak.uw.edu:~/Chaturaj/scraper/data/
+scp logs/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu/games.jsonl NETID@tillicum.hyak.uw.edu:~/Chaturaj/logs/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu/
+```
+Then train the larger sizes on the GPU (`medium` 14 MB, `large` 49 MB, `xl` 255 MB, all
+7 residual layers; see `bot/nnue.py` PRESETS):
+```bash
+sbatch cluster/train_nnue.slurm                                    # medium, large, xl, 4 epochs each
+sbatch --export=ALL,PRESETS="xl",EPOCHS=6,DROPOUT=0.2 cluster/train_nnue.slurm
+```
+The positions are built once into `logs/nnue_cache.npz`; every size reuses it.
+
+### max^n + NNUE matches (CPU-bound)
+`maxn_match.slurm` plays the max^n engine (`bot/maxn.py`) against MCTS + MLP in 8 parallel
+single-threaded shards: at 32 MCTS simulations, and at equal time per move (250 ms and 1 s;
+the MCTS simulation count is measured on the node first). About 1.5–2 h, so about $1.80.
+Each shard uses one thread (`RAYON_NUM_THREADS=1`). A large NNUE is slow on one thread, so
+for `large` or `xl` run fewer shards with more threads each.
+The NNUE and MLP are both under `models/`, so the usual archive copy includes them.
+```bash
+sbatch --export=ALL,NNUE=models/2026-11-23_1607_nnue-v1_nnue-a256-h32x32_ep8_cpu cluster/maxn_match.slurm
+cat logs/maxn/<jobid>/summary.jsonl          # one line per setting when it finishes
+```
+Copy back with `scp -r NETID@tillicum.hyak.uw.edu:~/Chaturaj/logs/maxn logs/`.
 
 ## What a run produces
 | Path | Contents |
