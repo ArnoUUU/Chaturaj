@@ -14,6 +14,7 @@ from http.server import ThreadingHTTPServer
 import pytest
 
 from chaturaji.constants import TURN_ORDER
+from chaturaji.moves import Resign
 from gui import play
 
 
@@ -287,3 +288,27 @@ def test_api_pause_seat_and_review(tmp_path, monkeypatch):
         app.stop()
         server.shutdown()
         server.server_close()
+
+
+def test_a_bot_that_resigns_is_eliminated(bank, monkeypatch):
+    """Red's bot picks RESIGN: the seat is out, the move list says so with the think time and
+    clock, and play passes to Blue."""
+    real_choose = play.MCTS.choose
+
+    def choose(self, root, temperature=0.0):
+        if root.state.current_player() == "R" and isinstance(root.moves[-1], Resign):
+            return len(root.moves) - 1
+        return real_choose(self, root, temperature)
+
+    monkeypatch.setattr(play.MCTS, "choose", choose)
+    s = make_session(bank, {"R": "uniform", "B": None, "Y": None, "G": None})
+    try:
+        assert wait_for(lambda: "R" in s.snapshot()["e"]), "Red's bot never resigned"
+        first = s.game.history[0]
+        assert first["color"] == "R" and first["event"] == "resign" and first["uci"] is None
+        assert first["san"] == "R" and "think" in first and "clock" in first
+        snap = s.snapshot()
+        assert snap["moves"][0]["event"] == "resign" and snap["t"] == "B" and snap["running"] == "B"
+        assert snap["engine"]["R"]["sims"] >= 0
+    finally:
+        s.close()

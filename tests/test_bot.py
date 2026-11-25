@@ -7,11 +7,14 @@ from bot.features import (
     NUM_ACTIONS, NUM_PLANES, PIECE_PLANES, action_to_move, canonical_action, encode,
     legal_canonical, mover_index, to_absolute, to_relative,
 )
+from bot.evaluate import evaluate
 from bot.mcts import MCTS, NetEvaluator, Node, UniformEvaluator
 from bot.model import ChaturajiNet, NetConfig, load_checkpoint, save_checkpoint
 from bot.selfplay import play_game
 from bot.train import ReplayBuffer, compute_loss
-from chaturaji import ChaturajiState, legal_moves
+from chaturaji import RESIGN, ChaturajiState, legal_moves
+from chaturaji.game import eliminate
+from chaturaji.moves import Resign
 
 
 def seat_view(k: int) -> ChaturajiState:
@@ -64,7 +67,7 @@ def test_mcts_returns_legal_move(evaluator):
     mcts = MCTS(ev, num_simulations=24, rng=np.random.default_rng(0))
     s = ChaturajiState.initial()
     root = mcts.search(Node(s), add_noise=True)
-    assert root.child_n.sum() == 24
+    assert MCTS.real_visits(root) == 24
     assert root.moves[mcts.choose(root)] in legal_moves(s)
 
 
@@ -120,8 +123,8 @@ def test_ucb1_tries_every_move_then_finds_win():
     s = ChaturajiState.initial()
     mcts = MCTS(UniformEvaluator(), num_simulations=40, selection="ucb1", rng=np.random.default_rng(0))
     root = mcts.search(Node(s))
-    assert len(root.moves) == 8 and root.child_n.sum() == 40
-    assert (root.child_n >= 1).all()  # UCB1 tries every move before revisiting any
+    assert len(root.moves) == 9 and MCTS.real_visits(root) == 40  # 8 moves + resign
+    assert (root.child_n[:-1] >= 1).all()  # UCB1 tries every move before revisiting any
     s = make_state({"a1": "RR", "a8": "BK", "e1": "RK", "h6": "XP"}, eliminated={"Y", "G"})
     s.scores = {"R": 0, "B": 2, "Y": 0, "G": 0}
     mcts = MCTS(UniformEvaluator(), num_simulations=300, selection="ucb1", rng=np.random.default_rng(0))
@@ -401,3 +404,112 @@ def test_model_references_resolve_pool_and_archive(tmp_path, monkeypatch):
     bench = benchmark.current()
     assert bench["model"] == "opponent_pool/BEST_x_model.pt" and bench["label"] == "2026_x_run"
     assert benchmark.model_file() == pool / "BEST_x_model.pt"
+
+
+def _two_left(**scores):
+    """Red and Blue left to play; Yellow and Green resigned (their dead kings stay)."""
+    s = eliminate(eliminate(ChaturajiState.initial(), "Y"), "G")
+    for color, pts in scores.items():
+        s.scores[color] = pts
+    return s
+
+
+def test_mcts_claims_the_win_when_ahead():
+    s = _two_left(R=50, B=0)  # resigning gives Blue 3 per dead king: 3 kings -> 9 < 50
+    mcts = MCTS(UniformEvaluator(), num_simulations=32, max_turn=None)
+    root = mcts.search(Node(s))
+    assert isinstance(root.moves[-1], Resign)
+    assert root.moves[mcts.choose(root)] is RESIGN
+    assert root.children[-1].terminal and root.children[-1].value[0] == 1.0
+    assert root.priors.sum() == pytest.approx(1.0)
+
+
+def test_mcts_does_not_claim_the_win_when_it_would_lose():
+    s = _two_left(R=50, B=0, Y=100)  # a frozen score of 100 wins if Red resigns
+    mcts = MCTS(UniformEvaluator(), num_simulations=32, max_turn=None)
+    root = mcts.search(Node(s))
+    assert root.moves[mcts.choose(root)] is not RESIGN
+    assert root.children[-1].value[0] == 0.0
+
+
+def test_three_players_resign_only_at_the_root():
+    mcts = MCTS(UniformEvaluator(), num_simulations=16, max_turn=None)
+    s = ChaturajiState.initial()
+    root = mcts.search(Node(s))
+    i = mcts.choose(root)
+    assert root.moves[i] is RESIGN or root.moves[i] in legal_moves(s)
+    assert isinstance(root.moves[-1], Resign)
+    for child in root.children:
+        if child is not None and child.expanded:
+            if len(child.state.active_players()) >= 3:
+                assert not MCTS._has_resign(child)
+
+
+def test_reused_subtree_gets_its_resign_child():
+    mcts = MCTS(UniformEvaluator(), num_simulations=16, max_turn=None)
+    root = mcts.search(Node(ChaturajiState.initial()))
+    j = next(k for k, c in enumerate(root.children) if c is not None and not isinstance(root.moves[k], Resign))
+    child = MCTS.advance(root, root.moves[j])
+    assert child is root.children[j] and not MCTS._has_resign(child)
+    mcts.search(child)
+    assert isinstance(child.moves[-1], Resign)
+    mcts.search(child)  # never added twice
+    assert sum(isinstance(m, Resign) for m in child.moves) == 1
+
+
+def test_advance_follows_resign():
+    mcts = MCTS(UniformEvaluator(), num_simulations=0, max_turn=None)
+    root = mcts.search(Node(_two_left(R=50, B=0)))
+    assert MCTS.advance(root, RESIGN) is root.children[-1]
+
+
+def test_resign_can_be_turned_off():
+    mcts = MCTS(UniformEvaluator(), num_simulations=8, max_turn=None, resign=False)
+    root = mcts.search(Node(_two_left(R=50, B=0)))
+    assert not any(isinstance(m, Resign) for m in root.moves)
+
+
+def test_temperature_samples_resign_only_when_it_is_the_argmax():
+    mcts = MCTS(UniformEvaluator(), num_simulations=0, max_turn=None, rng=np.random.default_rng(0))
+    root = mcts.search(Node(ChaturajiState.initial()))
+    r = len(root.moves) - 1
+    assert isinstance(root.moves[r], Resign)
+    root.child_n[:] = 0
+    root.child_n[-1] = 1           # the pre-visit only: resign has 0 real visits
+    root.child_n[0] = 3
+    assert {mcts.choose(root, 1.0) for _ in range(200)} == {0}
+    root.child_n[-1] = 11          # 10 real visits: resign is the argmax
+    assert {mcts.choose(root, 1.0) for _ in range(20)} == {r}
+    root.child_n[-1] = 4           # tie at 3 real visits: a move wins
+    assert mcts.choose(root) == 0
+
+
+def test_policy_targets_ignore_the_resign_entry():
+    mcts = MCTS(UniformEvaluator(), num_simulations=16, max_turn=None)
+    root = mcts.search(Node(ChaturajiState.initial()))
+    n = len(root.moves) - 1
+    assert len(MCTS.visit_policy(root)) == n and MCTS.visit_policy(root).sum() == pytest.approx(1)
+    assert len(MCTS.move_actions(root)) == n and (MCTS.move_actions(root) >= 0).all()
+    samples, _ = play_game(MCTS(UniformEvaluator(), num_simulations=4, max_turn=None), max_plies=3)
+    assert samples
+    for smp in samples:
+        assert (smp.actions >= 0).all() and len(smp.actions) == len(smp.policy)
+        assert smp.policy.sum() == pytest.approx(1, abs=1e-5)
+
+
+def test_evaluate_records_a_bot_resignation():
+    res = evaluate(UniformEvaluator(), games=4, sims=2, bot_player=lambda state: RESIGN, record=True)
+    assert len(res["records"]) == 4
+    for rec in res["records"]:
+        assert rec["moves"].count("resign") == 1
+        assert rec["reason"] != "ply_cap"
+
+
+def test_policy_falls_back_to_priors_when_only_resign_was_visited():
+    mcts = MCTS(UniformEvaluator(), num_simulations=0, max_turn=None)
+    root = mcts.search(Node(_two_left(R=50, B=0)))
+    root.child_n[:] = 0
+    root.child_n[-1] = 5           # every simulation went to the resign child
+    pol = MCTS.visit_policy(root)
+    assert np.isfinite(pol).all() and pol.sum() == pytest.approx(1)
+    assert np.allclose(pol, root.priors[:-1] / root.priors[:-1].sum())

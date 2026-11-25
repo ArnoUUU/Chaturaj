@@ -37,7 +37,7 @@ from bot.mcts import MCTS, Node, UniformEvaluator
 from bot.timing import Clock, move_budget
 from chaturaji.constants import TURN_ORDER
 from chaturaji.game import is_game_over
-from chaturaji.moves import Move, legal_moves
+from chaturaji.moves import Move, Resign, legal_moves
 from chaturaji.record import Game
 from chaturaji.state import index_to_square, square_to_index
 
@@ -500,12 +500,29 @@ class Session:
                 q = root.child_w[i] / n if n else root.value
                 self.engine_info[job["color"]] = {
                     "bot": self._seat_name(job["color"]),
-                    "sims": int(root.child_n.sum()), "new_sims": mcts.last_simulations,
+                    "sims": MCTS.real_visits(root), "new_sims": mcts.last_simulations,
                     "seconds": round(time.monotonic() - started, 2),
                     "budget": round(job["budget"], 2),
                     "values": [round(float(v), 3) for v in q]}
                 self.root, self.root_owner = root, job["ref"]
-                self._play(job["color"], root.moves[i], {"sims": int(mcts.last_simulations)})
+                if isinstance(root.moves[i], Resign):
+                    self._engine_resign(job["color"], {"sims": int(mcts.last_simulations)})
+                else:
+                    self._play(job["color"], root.moves[i], {"sims": int(mcts.last_simulations)})
+
+    def _engine_resign(self, color: str, extra: dict | None = None) -> None:
+        """A bot resigns for `color` (under the lock): charged like a move, logged as
+        "<Color> resigned", and the seat is eliminated as for a person."""
+        used = self.clock.press(color)
+        self.game.eliminate(color, "resign")
+        entry = self.game.history[-1]
+        entry.update({"think": round(used, 2), **(extra or {})})
+        if color not in self.clock.untimed:
+            entry["clock"] = round(self.clock.remaining[color], 2)
+        self.root = None
+        if self.verbose:
+            print(f"{entry['turn']:>4} {_caption(entry):<12} {used:5.2f}s used", flush=True)
+        self._after_change()
 
     # --- for the page ---------------------------------------------------------------
 

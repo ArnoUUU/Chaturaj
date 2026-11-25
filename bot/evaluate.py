@@ -27,7 +27,7 @@ from pathlib import Path
 import numpy as np
 
 from chaturaji.constants import TURN_ORDER
-from chaturaji.game import apply_move, game_over_reason, is_game_over, require_moves
+from chaturaji.game import apply_action, apply_move, game_over_reason, is_game_over, require_moves
 from chaturaji.state import ChaturajiState
 
 from .mcts import MCTS, Node
@@ -88,8 +88,8 @@ def evaluate(evaluator, games: int = 4, sims: int = 16, selection: str = "puct",
             else:
                 moves = require_moves(state)
                 move = moves[rng.integers(len(moves))]
-            moves_played.append(move.uci)
-            state, _ = apply_move(state, move)
+            moves_played.append(move.uci)   # "resign" for RESIGN
+            state, _ = apply_action(state, move)
             plies += 1
         scores = state.scores
         total = sum(scores.values())

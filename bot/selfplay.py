@@ -31,7 +31,7 @@ def play_game(mcts: MCTS, temp_plies: int = 30, max_plies: int = 400,
            and not mcts.is_terminal(game.state)):
         mcts.search(root, add_noise=True)
         policy = MCTS.visit_policy(root).astype(np.float32)
-        pending.append((encoder(root.state), root.actions.copy(), policy, mover_index(root.state)))
+        pending.append((encoder(root.state), MCTS.move_actions(root).copy(), policy, mover_index(root.state)))
         temp = 1.0 if len(game.history) < temp_plies else 0.0
         i = mcts.choose(root, temp)
         game.play(root.moves[i])
@@ -68,7 +68,7 @@ def play_league_game(learner: MCTS, seat_players: dict[str, MCTS], learner_seat:
         root = mcts.search(Node(game.state), add_noise=mine)
         if mine:
             policy = MCTS.visit_policy(root).astype(np.float32)
-            pending.append((encoder(root.state), root.actions.copy(), policy, mover_index(root.state)))
+            pending.append((encoder(root.state), MCTS.move_actions(root).copy(), policy, mover_index(root.state)))
         temp = 1.0 if len(game.history) < temp_plies else 0.0
         game.play(root.moves[mcts.choose(root, temp)])
     share, margin = outcome_vectors(game.state)
