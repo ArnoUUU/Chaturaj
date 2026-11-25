@@ -328,8 +328,8 @@ def run(args) -> str:
             for rs in r["resigns"]:
                 n_claims += rs["active"] == 2
                 n_early += rs["active"] >= 3
-            for kind, d, nd, sec in zip(r["kinds"], r["depths"], r["nodes"], r["secs"]):
-                n_random += kind in ("opening", "explore")
+            for mk, d, nd, sec in zip(r["kinds"], r["depths"], r["nodes"], r["secs"]):   # not `kind`: the model's
+                n_random += mk in ("opening", "explore")
                 if d is not None:
                     s_depth.append(d)
                     s_nodes.append(nd)
