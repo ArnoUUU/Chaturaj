@@ -23,6 +23,7 @@ import argparse
 import ast
 import json
 import re
+import textwrap
 import time
 from pathlib import Path
 
@@ -31,10 +32,6 @@ LOGS = ROOT / "logs"
 OUT = LOGS / "players"
 PLAYERS = ROOT / "scraper" / "data" / "players"
 MODELS = ROOT / "models"
-
-# reference categorical palette (light), fixed order; text stays in ink colors
-SERIES = ["#2a78d6", "#eb6834", "#1baf7a"]
-INK, INK2, GRID, SURFACE = "#0b0b0b", "#52514e", "#e6e5e0", "#fcfcfb"
 
 GAME_LINE = re.compile(r"^\s+\S+: \d+ \(\d+ plies\) .*\[\d+/\d+\]\s*$")   # "  1+5: 113... (153 plies) ok [1/20]"
 GAMES_CMD = re.compile(r"^\[\d+/\d+\] \d+")                                 # "[1/3] 113...: ok"
@@ -122,10 +119,13 @@ def best_val_loss(meta: dict) -> float:
     return min((l for l in losses if l is not None), default=float("inf"))
 
 
-def chart(player: str) -> Path | None:
+def chart(player: str, out: Path | None = None) -> Path | None:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    from matplotlib.ticker import MaxNLocator, PercentFormatter
+
+    from . import plotstyle as ps
 
     tcs = games_by_tc(player)
     models = player_models(player)
@@ -133,93 +133,93 @@ def chart(player: str) -> Path | None:
     bench_now = json.loads(bench_file.read_text(encoding="utf-8")) if bench_file.exists() else None
     if not tcs and not models:
         return None
-    plt.rcParams.update({"font.size": 10, "text.color": INK, "axes.labelcolor": INK2,
-                         "xtick.color": INK2, "ytick.color": INK2, "axes.edgecolor": GRID})
     ncols = 1 + 2 * bool(models)
-    fig, axes = plt.subplots(1, ncols, figsize=(5.2 * ncols, 4.2), facecolor=SURFACE,
-                             gridspec_kw={"width_ratios": [1.1] + [1] * (ncols - 1)})
-    axes = list(axes) if ncols > 1 else [axes]
-    from matplotlib.ticker import MaxNLocator
-    for i, ax in enumerate(axes):
-        if i:
-            ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.set_facecolor(SURFACE)
-        for side in ("top", "right"):
-            ax.spines[side].set_visible(False)
-        ax.grid(color=GRID, linewidth=0.8)
-        ax.set_axisbelow(True)
+    with ps.style_context():
+        fig, axes = plt.subplots(1, ncols, figsize=(2.6 * ncols + 1.2, 3.9),
+                                 gridspec_kw={"width_ratios": [1.1] + [1] * (ncols - 1)})
+        axes = list(axes) if ncols > 1 else [axes]
+        letters = iter("abc")
+        for i, ax in enumerate(axes):
+            if i:
+                ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-    # 1. games per time control (single series -> no legend)
-    ax = axes[0]
-    labels = [t for t, _ in tcs][::-1]
-    values = [n for _, n in tcs][::-1]
-    ax.barh(labels, values, color=SERIES[0], height=0.6, edgecolor=SURFACE, linewidth=2)
-    ax.set_ylim(-0.6, max(len(labels), 4) - 0.4)   # keep bars thin when there are few
-    ax.grid(axis="y", visible=False)
-    for y, v in enumerate(values):
-        ax.text(v, y, f" {v}", va="center", color=INK2, fontsize=9)
-    ax.set_xlim(0, max(values or [1]) * 1.15)
-    ax.set_title(f"Games scraped: {sum(values)}", loc="left", fontsize=11, color=INK)
-    ax.set_xlabel("games")
+        # a. games per time control (single series -> no legend)
+        ax = axes[0]
+        labels = [t for t, _ in tcs][::-1]
+        values = [n for _, n in tcs][::-1]
+        ax.barh(labels, values, color=ps.BLUE, height=0.6, edgecolor="white", linewidth=0.5)
+        ps.finish(ax)
+        ax.grid(axis="y", visible=False)
+        ax.set_ylim(-0.6, max(len(labels), 4) - 0.4)   # keep bars thin when there are few
+        for y, v in enumerate(values):
+            ax.text(v, y, f" {v}", va="center", color="black", fontsize=7)
+        ax.set_xlim(0, max(values or [1]) * 1.15)
+        ps.panel(ax, next(letters), f"Games scraped: {sum(values)}")
+        ax.set_xlabel("Games")
 
-    if models:
-        scored = [x for x in models if "pairwise" in (x.get("evaluation") or {})]
-        # newest model scored with the pairwise rule; else the lowest validation loss
-        m = max(scored, key=lambda x: x["label"]) if scored else min(models, key=best_val_loss)
-        hist = m["history"]
-        ep = [h["epoch"] + 1 for h in hist]
-        best = m.get("best_epoch")
+        if models:
+            scored = [x for x in models if "pairwise" in (x.get("evaluation") or {})]
+            # newest model scored with the pairwise rule; else the lowest validation loss
+            m = max(scored, key=lambda x: x["label"]) if scored else min(models, key=best_val_loss)
+            hist = m["history"]
+            ep = [h["epoch"] + 1 for h in hist]
+            best = m.get("best_epoch")
 
-        # 2. policy loss: train vs validation (2 series -> legend + direct labels)
-        ax = axes[1]
-        tr = [h["train_loss"]["policy"] for h in hist]
-        va = [h["val"].get("policy_loss") for h in hist]
-        ax.plot(ep, tr, color=SERIES[0], linewidth=2, label="train")
-        ax.plot(ep, va, color=SERIES[1], linewidth=2, label="validation")
-        ax.text(ep[-1], tr[-1], " train", color=INK2, va="center", fontsize=9)
-        ax.text(ep[-1], va[-1], " validation", color=INK2, va="center", fontsize=9)
-        if best is not None:
-            ax.axvline(best + 1, color=INK2, linewidth=1, linestyle=(0, (3, 3)))
-            ax.text(best + 1, ax.get_ylim()[1], f" kept: epoch {best + 1}", color=INK2,
-                    va="top", fontsize=9)
-        ax.legend(frameon=False, loc="lower left", fontsize=9)
-        ax.set_xlim(0.5, ep[-1] + max(1.5, ep[-1] * 0.25))
-        ax.set_title("Policy loss (move prediction)", loc="left", fontsize=11, color=INK)
-        ax.set_xlabel("epoch")
+            # b. policy loss: train vs validation
+            ax = axes[1]
+            tr = [h["train_loss"]["policy"] for h in hist]
+            va = [h["val"].get("policy_loss") for h in hist]
+            ax.plot(ep, tr, color=ps.BLUE, label="Train")
+            ax.plot(ep, va, color=ps.ORANGE, label="Validation")
+            if best is not None:
+                ax.axvline(best + 1, color=ps.RED, linewidth=0.8, linestyle="--")
+                lo, hi = ax.get_ylim()
+                ax.text(best + 1, hi - 0.05 * (hi - lo), f" kept: epoch {best + 1}", color="black",
+                        va="top", fontsize=7)
+            ax.set_xlim(0.5, ep[-1] + max(1.5, ep[-1] * 0.25))
+            ax.legend(loc="best")
+            ps.panel(ax, next(letters), "Policy loss (move prediction)")
+            ax.set_xlabel("Epoch")
+            ax.set_ylabel("Loss (cross-entropy)")
+            ps.finish(ax)
 
-        # 3. validation top-1 move accuracy (single series)
-        ax = axes[2]
-        top1 = [100 * h["val"].get("top1", 0) for h in hist]
-        ax.plot(ep, top1, color=SERIES[0], linewidth=2, marker="o", markersize=4,
-                markeredgecolor=SURFACE, markeredgewidth=1.5)
-        i = max(range(len(top1)), key=top1.__getitem__)
-        ax.annotate(f"{top1[i]:.1f}%", (ep[i], top1[i]), textcoords="offset points",
-                    xytext=(0, 8), ha="center", color=INK, fontsize=9)
-        ax.set_ylim(0, max(top1) * 1.25)
-        ax.set_title("Validation: played move ranked first", loc="left", fontsize=11, color=INK)
-        ax.set_xlabel("epoch")
-        ax.set_ylabel("% of positions")
-        d = m["data"]
-        r = m.get("evaluation") or {}
-        opp = (m.get("benchmark_eval") or {}).get("benchmark") or r.get("opponent")
-        is_bench = (bench_now or {}).get("label") == m["label"]
-        sub = (f"warm start {m['label']}  ·  {d['games']} games ({d['train_positions']:,} train / "
-               f"{d['val_positions']:,} val positions)")
-        if "pairwise" in r:
-            w, dr, l = r["wins_draws_losses"]
-            sub += (f"\nvs {opp} ({r['games']} games, every seat): pairwise score "
-                    f"{r['pairwise']:.3f} ± {2 * (r.get('pairwise_se') or 0):.3f} (fair 0.5)  ·  "
-                    f"1v1 results W {w} / D {dr} / L {l}")
-        if is_bench:
-            sub += "\ncurrent benchmark model"
-        fig.text(0.01, 0.005, sub, color=INK2, fontsize=8, ha="left", va="bottom")
+            # c. validation top-1 move accuracy (single series)
+            ax = axes[2]
+            top1 = [100 * h["val"].get("top1", 0) for h in hist]
+            ax.plot(ep, top1, color=ps.BLUE, marker="o", markersize=3)
+            i = max(range(len(top1)), key=top1.__getitem__)
+            ax.annotate(f"{top1[i]:.1f}%", (ep[i], top1[i]), textcoords="offset points",
+                        xytext=(4, 4), ha="left", va="bottom", color="black", fontsize=7)
+            ax.set_ylim(0, max(top1) * 1.25)
+            ax.yaxis.set_major_formatter(PercentFormatter(xmax=100))
+            ps.panel(ax, next(letters), "Validation: played move ranked first")
+            ax.set_xlabel("Epoch")
+            ax.set_ylabel("Positions (%)")
+            ps.finish(ax)
+            d = m["data"]
+            r = m.get("evaluation") or {}
+            opp = (m.get("benchmark_eval") or {}).get("benchmark") or r.get("opponent")
+            is_bench = (bench_now or {}).get("label") == m["label"]
+            sub = (f"warm start {m['label']}  ·  {d['games']} games ({d['train_positions']:,} train / "
+                   f"{d['val_positions']:,} val positions)")
+            if "pairwise" in r:
+                w, dr, l = r["wins_draws_losses"]
+                sub += (f"\nvs {opp} ({r['games']} games, every seat): pairwise score "
+                        f"{r['pairwise']:.3f} ± {2 * (r.get('pairwise_se') or 0):.3f} (fair 0.5)  ·  "
+                        f"1v1 results W {w} / D {dr} / L {l}")
+            if is_bench:
+                sub += "\ncurrent benchmark model"
+            sub = "\n".join(textwrap.fill(line, 120) for line in sub.split("\n"))
+            fig.text(0.01, 0.005, sub, color=ps.SUBTLE, fontsize=7, ha="left", va="bottom")
+        else:
+            ps.finish(axes[0])
 
-    fig.suptitle(player, x=0.01, ha="left", fontsize=14, color=INK, fontweight="bold")
-    fig.tight_layout(rect=(0, 0.09, 1, 0.95))
-    OUT.mkdir(parents=True, exist_ok=True)
-    out = OUT / f"{player.lower()}.png"
-    fig.savefig(out, dpi=130, facecolor=SURFACE)
-    plt.close(fig)
+        fig.suptitle(player, x=0.01, ha="left", fontsize=9, fontweight="bold")
+        fig.tight_layout(rect=(0, 0.14, 1, 0.95))
+        out = Path(out) if out else OUT / f"{player.lower()}.png"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out, dpi=300)
+        plt.close(fig)
     return out
 
 
