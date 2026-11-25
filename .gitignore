@@ -45,3 +45,6 @@ engine/target/
 
 # misc.
 claude-playground/
+
+# local Claude Code settings (launch configs, worktrees)
+.claude/
