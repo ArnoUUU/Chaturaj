@@ -197,7 +197,9 @@ def run(args) -> str:
 
     ctx = mp.get_context("spawn")
     pool = ctx.Pool(args.workers)
-    common = {"depth": args.depth, "qdepth": args.qdepth, "check_ext": args.check_ext, "max_turn": 400}
+    common = {"depth": args.depth, "qdepth": args.qdepth, "check_ext": args.check_ext, "width": args.width,
+              "full_plies": args.full_plies, "max_turn": 400}
+    total_steps = 0
 
     def check(tag: str, it: int, final: bool = False) -> None:
         nonlocal best, best_state
@@ -343,6 +345,9 @@ def parse_args(argv=None):
     ap.add_argument("--depth", type=int, default=2)
     ap.add_argument("--qdepth", type=int, default=2)
     ap.add_argument("--check-ext", type=int, default=3)
+    ap.add_argument("--width", type=int, default=0,
+                    help="selective depth: children searched per node from ply --full-plies on (0 = all)")
+    ap.add_argument("--full-plies", type=int, default=2, help="plies from the root searched at full width")
     ap.add_argument("--explore", type=float, default=0.05)
     ap.add_argument("--steps", type=int, default=120)
     ap.add_argument("--batch", type=int, default=1024)

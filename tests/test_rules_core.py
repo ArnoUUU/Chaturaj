@@ -79,12 +79,15 @@ def _positions(seed, n=80, every=8):
     return out
 
 
-@pytest.mark.parametrize("depth,qdepth", [(1, 2), (2, 1), (2, 2)])
-def test_compiled_search_matches_python(depth, qdepth):
+@pytest.mark.parametrize("depth,qdepth,width,full", [(1, 2, 0, 2), (2, 1, 0, 2), (2, 2, 0, 2),
+                                                     (3, 1, 3, 1), (4, 1, 2, 1)])
+def test_compiled_search_matches_python(depth, qdepth, width, full):
+    """Same move and root value; the last two cases use selective depth (width)."""
     torch.manual_seed(5)
     net = NumpyNNUE.from_model(NNUE().eval())
-    py = MaxN(net, time_ms=None, depth=depth, qdepth=qdepth, backend="python")
-    rs = MaxN(net, time_ms=None, depth=depth, qdepth=qdepth, backend="rust")
+    kw = dict(time_ms=None, depth=depth, qdepth=qdepth, width=width, full_plies=full)
+    py = MaxN(net, backend="python", **kw)
+    rs = MaxN(net, backend="rust", **kw)
     exact = n = 0
     for s in _positions(17)[:6] + _positions(23)[:3]:
         a, b = py.best_move(s), rs.best_move(s)

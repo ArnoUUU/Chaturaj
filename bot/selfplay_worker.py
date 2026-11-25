@@ -36,11 +36,13 @@ def load_core_net(path: str):
     return _NETS[path]
 
 
-def searcher(path: str, depth: int, qdepth: int, check_ext: int, slot: int = 0):
-    key = (path, depth, qdepth, check_ext, slot)
+def searcher(path: str, depth: int, qdepth: int, check_ext: int, slot: int = 0, width: int = 0,
+             full_plies: int = 2):
+    key = (path, depth, qdepth, check_ext, width, full_plies, slot)
     if key not in _SEARCHERS:
         net = _NETS.get(path) or load_core_net(path)
-        _SEARCHERS[key] = E.MaxN(net, depth=depth, qdepth=qdepth, check_ext=check_ext)
+        _SEARCHERS[key] = E.MaxN(net, depth=depth, qdepth=qdepth, check_ext=check_ext, width=width,
+                                 full_plies=full_plies, tt_size=1_000_000)
     return _SEARCHERS[key]
 
 
@@ -58,7 +60,8 @@ def selfplay_game(task: dict) -> dict:
     is returned (board codes, mover, the 16 globals), with the final scores.
     """
     rng = np.random.default_rng(task["seed"])
-    s = searcher(task["weights"], task["depth"], task["qdepth"], task["check_ext"])
+    s = searcher(task["weights"], task["depth"], task["qdepth"], task["check_ext"], 0,
+                 task.get("width", 0), task.get("full_plies", 2))
     s.clear()
     pos = E.Position.initial()
     n_open = int(rng.integers(task["open_lo"], task["open_hi"] + 1))
@@ -93,8 +96,9 @@ def match_game(task: dict) -> dict:
     """Candidate network in one seat, opponent network in the other three (each seat its own
     search), after a seeded random opening; no exploration."""
     seat = task["seat"]
-    cand = searcher(task["cand"], task["depth"], task["qdepth"], task["check_ext"], slot=9)
-    opps = {c: searcher(task["opp"], task["depth"], task["qdepth"], task["check_ext"], slot=c)
+    w, fp = task.get("width", 0), task.get("full_plies", 2)
+    cand = searcher(task["cand"], task["depth"], task["qdepth"], task["check_ext"], 9, w, fp)
+    opps = {c: searcher(task["opp"], task["depth"], task["qdepth"], task["check_ext"], c, w, fp)
             for c in range(4) if c != seat}
     for x in (cand, *opps.values()):
         x.clear()
@@ -122,7 +126,8 @@ def yardstick_block(task: dict) -> dict:
     from .maxn import MaxN
     from .nnue import NumpyNNUE
     player = MaxN(NumpyNNUE.load(task["weights"]), time_ms=None, depth=task["depth"], qdepth=task["qdepth"],
-                  check_ext=task["check_ext"])
+                  check_ext=task["check_ext"], width=task.get("width", 0),
+                  full_plies=task.get("full_plies", 2))
     times = []
 
     def play(state):

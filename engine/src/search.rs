@@ -13,6 +13,9 @@
 //! - check extensions: a move that newly attacks an active king is searched one move deeper,
 //!   up to `check_ext` times along a line, so chains of checks are followed; the first
 //!   quiescence step also plays out checks (where "predator and prey" play happens)
+//! - selective depth (`width`): from ply `full_plies` on, a node searches only the `width`
+//!   children with the best static evaluation for the mover (plus the table's move), so deep
+//!   searches (depth 5) fit in a self-play budget; 0 = search every move
 //! - immediate pruning: a utility of 1 (above all three) can't be beaten
 //! - all sibling leaves are evaluated together in one batched network pass
 //! - if the time runs out before depth 1 finishes, the best child by one batched evaluation
@@ -88,6 +91,8 @@ pub struct Searcher {
     pub qdepth: u32,
     pub tt_size: usize,
     pub check_ext: u32,
+    pub width: usize,
+    pub full_plies: u32,
     tt: HashMap<u64, Entry>,
     nodes: u64,
     deadline: Option<Instant>,
@@ -95,11 +100,11 @@ pub struct Searcher {
 
 impl Searcher {
     pub fn new(net: Arc<Net>, time_ms: Option<f64>, depth: Option<u32>, max_depth: u32, qdepth: u32,
-               tt_size: usize, check_ext: u32) -> Result<Self, String> {
+               tt_size: usize, check_ext: u32, width: usize, full_plies: u32) -> Result<Self, String> {
         if time_ms.is_none() && depth.is_none() {
             return Err("give a time budget or a fixed depth".into());
         }
-        Ok(Searcher { net, time_ms, depth, max_depth, qdepth, tt_size, check_ext, tt: HashMap::new(), nodes: 0,
+        Ok(Searcher { net, time_ms, depth, max_depth, qdepth, tt_size, check_ext, width, full_plies, tt: HashMap::new(), nodes: 0,
                       deadline: None })
     }
 
@@ -125,7 +130,7 @@ impl Searcher {
         let me = pos.current_player();
         let mut res = SearchResult { best: moves[0], ..Default::default() };
         for d in 1..=self.depth.unwrap_or(self.max_depth) {
-            match self.search(pos, &mut acc, d, self.check_ext, true) {
+            match self.search(pos, &mut acc, d, self.check_ext, 0) {
                 None => break, // out of time: keep the last completed depth
                 Some((v, m)) => {
                     res.best = m.unwrap_or(moves[0]);
@@ -235,8 +240,10 @@ impl Searcher {
 
     /// None when the time ran out (the position and accumulators are restored either way).
     /// `ext`: check extensions still allowed on this line.
-    fn search(&mut self, pos: &mut Position, acc: &mut AccStack, depth: u32, ext: u32, root: bool)
+    /// `ply`: distance from the root (0 = root).
+    fn search(&mut self, pos: &mut Position, acc: &mut AccStack, depth: u32, ext: u32, ply: u32)
               -> Option<(Utilities, Option<Move>)> {
+        let root = ply == 0;
         if self.tick() {
             return None;
         }
@@ -255,13 +262,37 @@ impl Searcher {
             }
         }
         let me = pos.current_player();
-        let kids = Self::ordered(pos, hit.and_then(|h| h.best));
+        let tt_move = hit.and_then(|h| h.best);
+        let mut kids = Self::ordered(pos, tt_move);
         if kids.is_empty() {
             return Some((self.evaluate(pos, acc), None));
         }
-        // depth 1: every child that isn't extended is a leaf, evaluated in one batch
         let mut leaves: Vec<Option<(bool, Utilities)>> = vec![None; kids.len()];
-        if depth == 1 {
+        // selective depth: keep the `width` best children by static evaluation (and the
+        // table's move, which `ordered` put first), in search order
+        if self.width > 0 && ply >= self.full_plies && kids.len() > self.width {
+            let ms: Vec<Move> = kids.iter().map(|&(m, _)| m).collect();
+            let evals = self.children(pos, acc, &ms);
+            let mut idx: Vec<usize> = (0..kids.len()).collect();
+            idx.sort_by(|&a, &b| evals[b].1[me].partial_cmp(&evals[a].1[me]).unwrap().then(a.cmp(&b)));
+            let mut keep = vec![false; kids.len()];
+            for &i in idx.iter().take(self.width) {
+                keep[i] = true;
+            }
+            if tt_move.is_some_and(|t| kids[0].0 == t) {
+                keep[0] = true;
+            }
+            let (mut k2, mut l2) = (vec![], vec![]);
+            for i in 0..kids.len() {
+                if keep[i] {
+                    k2.push(kids[i]);
+                    l2.push(if depth == 1 && !(kids[i].1 && ext > 0) { Some(evals[i]) } else { None });
+                }
+            }
+            kids = k2;
+            leaves = l2;
+        } else if depth == 1 {
+            // depth 1: every child that isn't extended is a leaf, evaluated in one batch
             let idx: Vec<usize> = (0..kids.len()).filter(|&i| !(kids[i].1 && ext > 0)).collect();
             let ms: Vec<Move> = idx.iter().map(|&i| kids[i].0).collect();
             for (j, r) in self.children(pos, acc, &ms).into_iter().enumerate() {
@@ -288,9 +319,9 @@ impl Searcher {
                 let r = if pos.game_over().is_some() {
                     Some((exact_utilities(pos), None))
                 } else if extend {
-                    self.search(pos, acc, depth, ext - 1, false)
+                    self.search(pos, acc, depth, ext - 1, ply + 1)
                 } else {
-                    self.search(pos, acc, depth - 1, ext, false)
+                    self.search(pos, acc, depth - 1, ext, ply + 1)
                 };
                 Self::pop(pos, acc);
                 r?.0
@@ -376,7 +407,7 @@ mod tests {
             pos.push(m).unwrap();
         }
         let before = (pos.board, pos.turn, pos.scores, pos.depth());
-        let mut s = Searcher::new(tiny_net(), None, Some(3), 12, 2, 100_000, 3).unwrap();
+        let mut s = Searcher::new(tiny_net(), None, Some(3), 12, 2, 100_000, 3, 0, 2).unwrap();
         let r = s.best_move(&mut pos).unwrap();
         assert_eq!((pos.board, pos.turn, pos.scores, pos.depth()), before);
         assert!(pos.legal_moves().contains(&r.best));
@@ -388,7 +419,7 @@ mod tests {
     #[test]
     fn time_budget_is_respected() {
         let mut pos = Position::initial();
-        let mut s = Searcher::new(tiny_net(), Some(50.0), None, 30, 2, 100_000, 3).unwrap();
+        let mut s = Searcher::new(tiny_net(), Some(50.0), None, 30, 2, 100_000, 3, 0, 2).unwrap();
         let r = s.best_move(&mut pos).unwrap();
         assert!(r.seconds < 0.2, "{}", r.seconds);
         assert!(r.depth >= 1);

@@ -73,13 +73,17 @@ def capture_points(board, move: Move) -> int:
 class MaxN:
     def __init__(self, net: NumpyNNUE, time_ms: float | None = 250, depth: int | None = None,
                  max_depth: int = 12, qdepth: int = 2, tt_size: int = 200_000, backend: str = "auto",
-                 check_ext: int = 3):
-        """backend: "auto" (compiled when available), "rust" (require it) or "python"."""
+                 check_ext: int = 3, width: int = 0, full_plies: int = 2):
+        """backend: "auto" (compiled when available), "rust" (require it) or "python".
+
+        width: selective depth. From ply `full_plies` on, a node searches only the `width`
+        children with the best static evaluation for the mover (plus the table's move);
+        0 searches every move."""
         if time_ms is None and depth is None:
             raise ValueError("give a time budget or a fixed depth")
         self.net, self.time_ms, self.depth = net, time_ms, depth
         self.max_depth, self.qdepth, self.tt_size = max_depth, qdepth, tt_size
-        self.check_ext = check_ext
+        self.check_ext, self.width, self.full_plies = check_ext, width, full_plies
         self.tt: dict = {}
         self.stats: dict = {}
         self.fast = None
@@ -88,7 +92,8 @@ class MaxN:
         if backend != "python" and getattr(net, "core", None) is not None:
             import chaturaji_engine
             self.fast = chaturaji_engine.MaxN(net.core, time_ms=time_ms, depth=depth, max_depth=max_depth,
-                                              qdepth=qdepth, tt_size=tt_size, check_ext=check_ext)
+                                              qdepth=qdepth, tt_size=tt_size, check_ext=check_ext,
+                                              width=width, full_plies=full_plies)
         elif backend == "rust":
             raise RuntimeError("backend='rust' needs the compiled core (engine/README.md)")
         self.backend = "rust" if self.fast is not None else "python"
@@ -116,7 +121,7 @@ class MaxN:
         best, value, reached = moves[0], None, 0
         for d in range(1, (self.depth or self.max_depth) + 1):
             try:
-                v, m = self._search(state, d, acc, self.check_ext, root=True)
+                v, m = self._search(state, d, acc, self.check_ext, ply=0)
             except _Timeout:
                 break
             best, value, reached = m, v, d
@@ -174,8 +179,9 @@ class MaxN:
                     break
         return kids
 
-    def _search(self, state: ChaturajiState, depth: int, acc: Accumulator, ext: int, root: bool = False):
-        """`ext`: check extensions still allowed on this line."""
+    def _search(self, state: ChaturajiState, depth: int, acc: Accumulator, ext: int, ply: int = 0):
+        """`ext`: check extensions still allowed on this line; `ply`: distance from the root."""
+        root = ply == 0
         self._tick()
         if is_game_over(state):
             return exact_utilities(state), None
@@ -187,9 +193,23 @@ class MaxN:
             return hit[1], hit[2]
         me = _SEAT[state.current_player()]
         best_v, best_m = None, None
-        kids = self._ordered(state, hit[2] if hit else None)
+        tt_move = hit[2] if hit else None
+        kids = self._ordered(state, tt_move)
         stands = {}
-        if depth == 1:        # leaves (no extension): one batched evaluation
+        if self.width and ply >= self.full_plies and len(kids) > self.width:
+            # selective depth: the `width` best children by static evaluation, plus the table's move
+            vals = [exact_utilities(c) if is_game_over(c) else None for _, c, _ in kids]
+            live = [i for i, v in enumerate(vals) if v is None]
+            self.nodes += len(live)
+            for i, v in zip(live, acc.evaluate_children([kids[i][1] for i in live])):
+                vals[i] = v
+            top = sorted(range(len(kids)), key=lambda i: (-vals[i][me], i))[:self.width]
+            keep = set(top) | ({0} if tt_move is not None and kids[0][0] == tt_move else set())
+            sel = [i for i in range(len(kids)) if i in keep]
+            kids = [kids[i] for i in sel]
+            if depth == 1:
+                stands = {j: vals[i] for j, i in enumerate(sel)}
+        elif depth == 1:      # leaves (no extension): one batched evaluation
             live = [i for i, (_, c, chk) in enumerate(kids) if not is_game_over(c) and not (chk and ext > 0)]
             self.nodes += len(live)
             for i, v in zip(live, acc.evaluate_children([kids[i][1] for i in live])):
@@ -209,7 +229,7 @@ class MaxN:
             else:
                 acc.push(child.board)
                 try:
-                    v, _ = self._search(child, depth if extend else depth - 1, acc, ext - 1 if extend else ext)
+                    v, _ = self._search(child, depth if extend else depth - 1, acc, ext - 1 if extend else ext, ply + 1)
                 finally:
                     acc.pop()
             if best_v is None or v[me] > best_v[me]:
