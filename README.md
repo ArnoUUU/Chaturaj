@@ -8,7 +8,7 @@ chess.com game scraper.
 | [`bot/`](bot/README.md) | AlphaZero-style bot: PyTorch network, MCTS, self-play and training; the NNUE + max^n engine and its training: [bot/README_NNUE.md](bot/README_NNUE.md) |
 | [`scraper/`](scraper/README.md) | Scrapes chess.com Chaturaji games by player and time control (over the chess.com variants WebSocket; Selenium only to log in) and converts them to game records |
 | [`cluster/`](cluster/README.md) | GPU runs on the Tillicum cluster: Miniforge conda env, Slurm job scripts |
-| `gui/` | Browser game viewer (`python -m gui.viewer`) and timed play against the engine (`python -m gui.play`) |
+| [`gui/`](gui/README.md) | Browser game viewer (`python -m gui.viewer`) and timed play against bots (`python -m gui.play`) |
 | [`models/`](models/README.md) | Saved, labelled bot models (one folder per training run) |
 | `logs/` | Chunked run logs, GPU check reports, Slurm output (not committed) |
 | `tests/` | pytest suite |
@@ -42,20 +42,21 @@ python -m chaturaji.simulate --games 1 --seed 0 --out games
 python -m chaturaji.viewer games/game_0.json
 ```
 
-## Play the engine
-Play a timed game (chess.com `1 | 5` by default) against the engine in your browser. You are
-Red and the engine plays the other three seats:
+## Browser GUI
+`gui/` runs in your browser on this machine, with no packages beyond the repo's own.
 
-```powershell
-python -m gui.play
-```
+- **Play** against the bots: `python -m gui.play`. The setup screen gives each side a dropdown
+  (you or a bot), a time control taken from the games the scraper recorded, and an option to
+  switch off the clock for people. During a game you can change a side's player, pause and
+  resume (which stops the clocks and bot thinking), and step back and forward through the moves.
+- **Review** a finished game: `python -m gui.viewer games/played` (or a single game file).
 
-`--human B` plays Blue, `--human R Y` puts two people at one screen, `--time "3|2"` changes
-the time control and `--engine models/<label>` picks the model (default: the best evaluated
-one in `models/index.jsonl`). The engine decides how long to think from its own clock.
-Finished games are saved to `games/played/` and replay with `python -m gui.viewer games/played`.
-`python -m gui.play --human none --no-open` plays the engine against itself on the clock in
-the terminal, as a check that it never loses on time.
+Other options: `--human B` plays Blue, `--human R Y` puts two people at one screen,
+`--seat R=human B=uniform` sets each side, `--engine models/<label>` picks the bot for the other
+seats (default: the benchmark model, else the best evaluated one), and `--human none --no-open`
+plays bots only in the terminal. Finished games are saved to `games/played/`.
+
+Full controls, options and the HTTP API are in [gui/README.md](gui/README.md).
 
 Generated folders (`games/`, `logs/`, `scraper/data/`, `scraper/.selenium-profile/`) are in
 `.gitignore`. Saved models in `models/` are kept in git.
