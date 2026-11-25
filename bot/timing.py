@@ -11,6 +11,7 @@ share it between threads (gui/play.py) guard it themselves.
 
 from __future__ import annotations
 
+import math
 import time
 from dataclasses import dataclass, field
 
@@ -47,6 +48,7 @@ class Clock:
     remaining: dict[str, float] = field(default_factory=dict)
     running: str | None = None
     started_at: float = 0.0
+    untimed: set[str] = field(default_factory=set)   # seats with no clock (never flag, never add increment)
     now = staticmethod(time.monotonic)
 
     def __post_init__(self):
@@ -65,7 +67,9 @@ class Clock:
         self.running, self.started_at = color, self.now()
 
     def left(self, color: str) -> float:
-        """Time left for `color`, counting the move in progress."""
+        """Time left for `color`, counting the move in progress (infinite for untimed seats)."""
+        if color in self.untimed:
+            return math.inf
         t = self.remaining[color]
         if color == self.running:
             t -= self.now() - self.started_at
@@ -81,16 +85,18 @@ class Clock:
         """`color` finished a move: charge the time used and add the increment.
         Returns the seconds used. Stops the clock (call start() for the next player)."""
         used = self.now() - self.started_at if color == self.running else 0.0
-        self.remaining[color] -= used
-        if self.remaining[color] > 0:
-            self.remaining[color] += self.increment
+        if color not in self.untimed:
+            self.remaining[color] -= used
+            if self.remaining[color] > 0:
+                self.remaining[color] += self.increment
         self.running = None
         return used
 
     def stop(self) -> None:
-        if self.running is not None:
+        if self.running is not None and self.running not in self.untimed:
             self.remaining[self.running] = self.left(self.running)
         self.running = None
 
-    def snapshot(self) -> dict[str, float]:
-        return {c: round(max(self.left(c), 0.0), 2) for c in TURN_ORDER}
+    def snapshot(self) -> dict[str, float | None]:
+        """Seconds left per seat (None for an untimed seat)."""
+        return {c: (None if c in self.untimed else round(max(self.left(c), 0.0), 2)) for c in TURN_ORDER}
