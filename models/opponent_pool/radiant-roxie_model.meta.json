@@ -12,7 +12,7 @@
  },
  "params": 3075848,
  "args": {
-  "records": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\scraper\\data\\records",
+  "records": "scraper/data/records",
   "player": "radiant-roxie",
   "time_controls": [
    "1 | 5"

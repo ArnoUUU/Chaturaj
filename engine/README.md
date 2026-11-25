@@ -31,9 +31,10 @@ without changes once the module is installed.
 ## Build on Windows
 
 Needs Rust (rustup, MSVC toolchain) and maturin (`pip install maturin`).
+Run the build commands from the repository root.
 
 ```powershell
-cd C:\Users\Arnav\Downloads\Chaturaj\engine
+cd engine
 python -m maturin build --release
 python -m pip install --user --no-deps --force-reinstall (Get-ChildItem target\wheels\*.whl | Select-Object -First 1).FullName
 ```

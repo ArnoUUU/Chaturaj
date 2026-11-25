@@ -8079,34 +8079,34 @@
    "iteration": 70,
    "step": 960,
    "hours": 1.0,
-   "path": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\logs\\models\\2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu\\snapshots\\snap_001_it00070_20261123-0244.pt"
+   "path": "logs/models/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu/snapshots/snap_001_it00070_20261123-0244.pt"
   },
   {
    "name": "snap_002_it00157_20261123-0344",
    "iteration": 157,
    "step": 2352,
    "hours": 2.0,
-   "path": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\logs\\models\\2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu\\snapshots\\snap_002_it00157_20261123-0344.pt"
+   "path": "logs/models/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu/snapshots/snap_002_it00157_20261123-0344.pt"
   },
   {
    "name": "snap_003_it00235_20261123-0444",
    "iteration": 235,
    "step": 3600,
    "hours": 3.0,
-   "path": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\logs\\models\\2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu\\snapshots\\snap_003_it00235_20261123-0444.pt"
+   "path": "logs/models/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu/snapshots/snap_003_it00235_20261123-0444.pt"
   },
   {
    "name": "snap_004_it00326_20261123-0544",
    "iteration": 326,
    "step": 5056,
    "hours": 4.0,
-   "path": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\logs\\models\\2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu\\snapshots\\snap_004_it00326_20261123-0544.pt"
+   "path": "logs/models/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu/snapshots/snap_004_it00326_20261123-0544.pt"
   },
   {
    "name": "final_it00412_20261123-0641",
    "iteration": 412,
    "step": 6432,
-   "path": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\logs\\models\\2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu\\snapshots\\final_it00412_20261123-0641.pt",
+   "path": "logs/models/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu/snapshots/final_it00412_20261123-0641.pt",
    "hours": 4.94
   }
  ],
