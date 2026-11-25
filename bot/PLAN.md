@@ -362,7 +362,7 @@ MCTS and self-play.
 | `train.py` | Switch between model types (`--model mlp|resnet`), mix in human data, add an LR schedule. |
 | `arena.py` | **New:** seat-rotating matches, baselines, promotion rule, rating fit. |
 | `bots.py` | **New:** random, greedy-capture and 1-ply baseline players. |
-| `play.py` | **New:** play against the engine in the terminal, with live engine evaluation. |
+| `gui/play.py` | **Done (M7):** play a timed game against the engine in the browser, with clocks, flag-fall, and the engine's live evaluation. Time management is in `bot/timing.py`; `MCTS.search(time_limit=...)` adds time-based search, early stop and tree reuse (`MCTS.advance`). |
 | `tests/test_bot.py` | Add tests: MLP shapes, sparse features match the dense planes, rotation invariance, the search tests in §5.8. |
 
 ---
@@ -377,7 +377,7 @@ MCTS and self-play.
 | M4 | Supervised bootstrap | Top-1 human-move accuracy ≥ 35%. Value is calibrated. MCTS+network beats M3's search with share ≥ 0.30. |
 | M5 | Self-play RL loop | Five consecutive promotions. Steady rating increase on the arena chart. |
 | M6 | Batched / parallel search | ≥ 5× self-play throughput over M5 on the same machine. |
-| M7 | Blitz-ready engine | Plays a full `1 | 5` game within time from `play.py`. Beats every earlier version. |
+| M7 | Blitz-ready engine | Plays a full `1 | 5` game within time from `gui/play.py`. Beats every earlier version. |
 
 ---
 
