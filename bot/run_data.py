@@ -91,7 +91,7 @@ def locate(run, root=None) -> tuple[Path, Path, str]:
         label = p.name
         if p.parent.name == "logs":
             base = p.parent.parent
-            return base / "models" / label, p, label
+            return base / "logs" / "models" / label, p, label
         base = p.parent.parent
         return p, base / "logs" / label, label
     label = str(run).strip("/\\")
@@ -106,7 +106,7 @@ def locate(run, root=None) -> tuple[Path, Path, str]:
             if (base / kind / label).exists():
                 return base / kind / label
         return bases[0] / kind / label
-    return pick("models"), pick("logs"), label
+    return pick("logs/models"), pick("logs"), label
 
 
 # --- reading ----------------------------------------------------------------------------

@@ -34,8 +34,9 @@ import numpy as np
 import torch
 
 ROOT = Path(__file__).resolve().parent.parent
-MODELS_DIR = ROOT / "models"
+MODELS_DIR = ROOT / "models"              # the opponent pool only (models/opponent_pool/)
 LOGS_DIR = ROOT / "logs"
+RUNS_DIR = LOGS_DIR / "models"            # training runs, index.jsonl and benchmark files
 KINDS = ("mlp", "resnet", "nnue")
 
 
@@ -176,7 +177,7 @@ def environment_info(device: str) -> dict:
 # --- saving / loading -----------------------------------------------------------------
 
 def model_dir(label: str, root: Path | None = None) -> Path:
-    return (root or MODELS_DIR) / label
+    return (root or RUNS_DIR) / label
 
 
 def label_for(path: str | Path) -> str:
@@ -201,7 +202,7 @@ def find_model(ref: str | Path) -> Path:
     if p.is_dir() and (p / "model.pt").is_file():
         return p / "model.pt"
     stem = p.parent.name if p.name == "model.pt" else (p.name[:-3] if p.name.endswith(".pt") else p.name)
-    for base in (MODELS_DIR, MODELS_DIR / "opponent_pool", LOGS_DIR / "models", ROOT):
+    for base in (MODELS_DIR, RUNS_DIR, MODELS_DIR / "opponent_pool", ROOT):
         for c in (base / p, base / stem / "model.pt", base / f"{stem}.pt", base / f"BEST_{stem}.pt"):
             if c.is_file():
                 return c
@@ -241,8 +242,8 @@ def save_snapshot(model, kind: str, config: dict, label: str, meta: dict, name: 
 
 
 def register(label: str, meta: dict, root: Path | None = None) -> None:
-    """Append a finished model to models/index.jsonl."""
-    root = root or MODELS_DIR
+    """Append a finished model to logs/models/index.jsonl."""
+    root = root or RUNS_DIR
     root.mkdir(parents=True, exist_ok=True)
     entry = {"label": label, "kind": meta.get("kind"), "params": meta.get("params"),
              "status": meta.get("status"), "evaluation": meta.get("evaluation"),

@@ -9,8 +9,8 @@ chess.com game scraper.
 | [`scraper/`](scraper/README.md) | Scrapes chess.com Chaturaji games by player and time control (over the chess.com variants WebSocket; Selenium only to log in) and converts them to game records |
 | [`cluster/`](cluster/README.md) | GPU runs on the Tillicum cluster: Miniforge conda env, Slurm job scripts |
 | [`gui/`](gui/README.md) | Browser game viewer (`python -m gui.viewer`) and timed play against bots (`python -m gui.play`) |
-| [`models/`](models/README.md) | Saved, labelled bot models (one folder per training run) |
-| `logs/` | Chunked run logs, GPU check reports, Slurm output (not committed) |
+| `models/` | The opponent pool (`models/opponent_pool/`): bot models used as league opponents, kept in git |
+| `logs/` | Chunked run logs, training runs (`logs/models/`: run folders, `index.jsonl`, benchmark files), GPU check reports, Slurm output (not committed) |
 | `tests/` | pytest suite |
 
 Rules and design decisions are in [PLAN.md](PLAN.md). The model plan is in [bot/PLAN.md](bot/PLAN.md).

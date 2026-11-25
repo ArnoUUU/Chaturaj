@@ -18,7 +18,7 @@ LABEL = "2026-01-01_0000_test"
 
 
 def _write_run(root):
-    models, logs = root / "models" / LABEL, root / "logs" / LABEL
+    models, logs = root / "logs" / "models" / LABEL, root / "logs" / LABEL
     models.mkdir(parents=True)
     logs.mkdir(parents=True)
     meta = {"label": LABEL, "history": [
@@ -116,7 +116,7 @@ def test_loader_tables_from_a_synthetic_run(tmp_path):
 
 
 def test_loader_handles_an_empty_run(tmp_path):
-    (tmp_path / "models" / "empty").mkdir(parents=True)
+    (tmp_path / "logs" / "models" / "empty").mkdir(parents=True)
     (tmp_path / "logs" / "empty").mkdir(parents=True)
     t = RD.load("empty", root=str(tmp_path))
     assert set(t) == set(RD.TABLES)

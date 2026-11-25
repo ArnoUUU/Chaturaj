@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent
 LOGS = ROOT / "logs"
 OUT = LOGS / "players"
 PLAYERS = ROOT / "scraper" / "data" / "players"
-MODELS = ROOT / "models"
+RUNS = ROOT / "logs" / "models"
 
 GAME_LINE = re.compile(r"^\s+\S+: \d+ \(\d+ plies\) .*\[\d+/\d+\]\s*$")   # "  1+5: 113... (153 plies) ok [1/20]"
 GAMES_CMD = re.compile(r"^\[\d+/\d+\] \d+")                                 # "[1/3] 113...: ok"
@@ -105,7 +105,7 @@ def games_by_tc(player: str) -> list[tuple[str, int]]:
 
 def player_models(player: str) -> list[dict]:
     out = []
-    for meta_path in MODELS.glob("*/meta.json"):
+    for meta_path in RUNS.glob("*/meta.json"):
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
         who = (meta.get("data") or {}).get("player") or (meta.get("args") or {}).get("player")
         if meta.get("training") == "supervised" and who and who.lower() == player.lower() \
@@ -129,7 +129,7 @@ def chart(player: str, out: Path | None = None) -> Path | None:
 
     tcs = games_by_tc(player)
     models = player_models(player)
-    bench_file = MODELS / "benchmark.json"
+    bench_file = RUNS / "benchmark.json"
     bench_now = json.loads(bench_file.read_text(encoding="utf-8")) if bench_file.exists() else None
     if not tcs and not models:
         return None

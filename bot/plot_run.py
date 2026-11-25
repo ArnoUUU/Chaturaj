@@ -214,7 +214,7 @@ def plot_meta(meta: dict, out: str | Path) -> Path:
 
 def find_meta(target: str) -> Path:
     p = Path(target)
-    for cand in (p / "meta.json", ROOT / "models" / target / "meta.json", ROOT / "models" / p.name / "meta.json"):
+    for cand in (p / "meta.json", ROOT / "logs" / "models" / target / "meta.json", ROOT / "logs" / "models" / p.name / "meta.json"):
         if cand.is_file():
             return cand
     raise SystemExit(f"no meta.json for {target}")
