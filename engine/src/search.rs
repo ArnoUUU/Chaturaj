@@ -7,12 +7,15 @@
 //! order (R, B, Y, G) and sum to 2.
 //!
 //! - iterative deepening (depth 1, 2, ...) inside a time budget, or to a fixed depth
+//! - resign option (`resign`): with two players left, the mover may resign, which ends the
+//!   game with the claimed-win utilities (exact, so tried first at every node); with three or
+//!   more, resigning is tried only at the root, after the moves
 //! - quiescence on point-scoring captures at the leaves (the mover may also stand pat)
 //! - a transposition table keyed by board, side to move, scores and eliminated seats
 //! - move ordering: the table's move first, then captures by points, then checks (stable)
 //! - check extensions: a move that newly attacks an active king is searched one move deeper,
 //!   up to `check_ext` times along a line, so chains of checks are followed; the first
-//!   quiescence step also plays out checks (where "predator and prey" play happens)
+//!   quiescence step also plays out checks
 //! - selective depth (`width`): from ply `full_plies` on, a node searches only the `width`
 //!   children with the best static evaluation for the mover (plus the table's move), so deep
 //!   searches (depth 5) fit in a self-play budget; 0 = search every move
@@ -41,6 +44,9 @@ pub type Utilities = [f64; 4];
 
 const PAIRS: [(usize, usize); 6] = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)];
 const WIN: f64 = 1.0 - 1e-9;
+
+/// The move code of resigning (chaturaji_engine.RESIGN). Never a legal move (squares are 0..64).
+pub const RESIGN: Move = u16::MAX;
 
 /// Utilities (absolute seats) from the 6 pairwise logits of mover k (bot.nnue.utilities).
 pub fn utilities_from_logits(logits: &[f32; NUM_OUTPUTS], k: usize) -> Utilities {
@@ -103,6 +109,7 @@ pub struct Searcher {
     pub discount: f64,
     pub elim_bonus: f64,
     pub elim_horizon: u32,
+    pub resign: bool,
     tt: HashMap<u64, Entry>,
     nodes: u64,
     deadline: Option<Instant>,
@@ -111,7 +118,7 @@ pub struct Searcher {
 impl Searcher {
     pub fn new(net: Arc<Net>, time_ms: Option<f64>, depth: Option<u32>, max_depth: u32, qdepth: u32,
                tt_size: usize, check_ext: u32, width: usize, full_plies: u32, discount: f64, elim_bonus: f64,
-               elim_horizon: u32) -> Result<Self, String> {
+               elim_horizon: u32, resign: bool) -> Result<Self, String> {
         if !(0.0..=1.0).contains(&discount) || discount == 0.0 {
             return Err("discount must be in (0, 1]".into());
         }
@@ -119,8 +126,16 @@ impl Searcher {
             return Err("give a time budget or a fixed depth".into());
         }
         Ok(Searcher { net, time_ms, depth, max_depth, qdepth, tt_size, check_ext, width, full_plies, discount, elim_bonus,
-                      elim_horizon: elim_horizon.max(1), tt: HashMap::new(), nodes: 0,
+                      elim_horizon: elim_horizon.max(1), resign, tt: HashMap::new(), nodes: 0,
                       deadline: None })
+    }
+
+    /// The claimed-win utilities after `me` (to move) resigns: exact, the game is over.
+    fn resign_utilities(pos: &mut Position, me: usize) -> Utilities {
+        pos.eliminate(me);
+        let v = exact_utilities(pos);
+        pos.pop().expect("pop");
+        v
     }
 
     pub fn clear(&mut self) {
@@ -133,7 +148,7 @@ impl Searcher {
         if moves.is_empty() {
             return Err("no legal moves".into());
         }
-        if moves.len() == 1 {
+        if moves.len() == 1 && !self.resign {
             return Ok(SearchResult { best: moves[0], forced: true, ..Default::default() });
         }
         self.deadline = self.time_ms.map(|ms| t0 + Duration::from_secs_f64(ms / 1000.0));
@@ -164,6 +179,13 @@ impl Searcher {
             let i = (0..moves.len()).fold(0, |b, i| if kids[i].1[me] > kids[b].1[me] { i } else { b });
             res.best = moves[i];
             res.value = Some(kids[i].1);
+            if self.resign && pos.active_count() == 2 {
+                let claim = Self::resign_utilities(pos, me);
+                if claim[me] > kids[i].1[me] {
+                    res.best = RESIGN;
+                    res.value = Some(claim);
+                }
+            }
         }
         res.nodes = self.nodes;
         res.seconds = t0.elapsed().as_secs_f64();
@@ -292,9 +314,21 @@ impl Searcher {
             }
         }
         let me = pos.current_player();
+        let turn = pos.turn;
+        // the claim: with two players left, resigning ends the game (exact utilities)
+        let mut claim: Option<(Utilities, Utilities)> = None; // (unshaped, shaped)
+        if self.resign && pos.active_count() == 2 {
+            let v = Self::resign_utilities(pos, me);
+            let sv = self.shape(v, me, turn, false);
+            if v[me] >= WIN {
+                self.tt.insert(key, Entry { depth, value: sv, best: Some(RESIGN) });
+                return Some((sv, Some(RESIGN)));
+            }
+            claim = Some((v, sv));
+        }
         let tt_move = hit.and_then(|h| h.best);
         let mut kids = Self::ordered(pos, tt_move);
-        if kids.is_empty() {
+        if kids.is_empty() && claim.is_none() {
             return Some((self.evaluate(pos, acc), None));
         }
         let mut leaves: Vec<Option<(bool, Utilities)>> = vec![None; kids.len()];
@@ -329,8 +363,10 @@ impl Searcher {
                 leaves[idx[j]] = Some(r);
             }
         }
-        let turn = pos.turn;
-        let (mut best_v, mut best_m): (Option<Utilities>, Option<Move>) = (None, None);
+        // the claim is the first candidate; a move replaces it only if strictly better
+        let (mut best_v, mut best_m): (Option<Utilities>, Option<Move>) =
+            (claim.map(|c| c.1), claim.map(|_| RESIGN));
+        let mut won = false;
         for (i, &(m, chk, elim)) in kids.iter().enumerate() {
             let extend = chk && ext > 0;
             if depth == 1 && self.tick() {
@@ -362,8 +398,27 @@ impl Searcher {
                 best_v = Some(sv);
                 best_m = Some(m);
                 if v[me] >= WIN {
+                    won = true;
                     break;          // finishes above everyone (judged before the preferences)
                 }
+            }
+        }
+        // root, three or more players left: resigning is tried after the moves (no width
+        // selection, not counted among the kids). Skipped after a move that already wins.
+        if root && self.resign && !won && pos.active_count() >= 3 {
+            if depth == 1 && self.tick() {
+                return None;
+            }
+            pos.eliminate(me);
+            acc.push(&pos.board).expect("board");
+            let r = self.search(pos, acc, depth - 1, ext, ply + 1);
+            acc.pop().expect("acc pop");
+            pos.pop().expect("pos pop");
+            let (v, _) = r?;
+            let sv = self.shape(v, me, turn, false);
+            if best_v.is_none_or(|b| sv[me] > b[me]) {
+                best_v = Some(sv);
+                best_m = Some(RESIGN);
             }
         }
         let best_v = best_v.unwrap();
@@ -378,6 +433,19 @@ impl Searcher {
             return Some(stand);
         }
         let me = pos.current_player();
+        let turn = pos.turn;
+        let mut best = stand;
+        // the claim, as in `search`: with two players left, resigning ends the game
+        if self.resign && pos.active_count() == 2 {
+            let v = Self::resign_utilities(pos, me);
+            let sv = self.shape(v, me, turn, false);
+            if sv[me] > best[me] {
+                best = sv;
+            }
+            if v[me] >= WIN {
+                return Some(best);
+            }
+        }
         let first = q == self.qdepth;
         let mut moves = pos.legal_moves();
         if !first {
@@ -387,13 +455,11 @@ impl Searcher {
         let mut kids: Vec<(Move, bool, bool)> = moves.into_iter().zip(fl).map(|(m, (c, e))| (m, c, e))
             .filter(|&(m, c, _)| pos.capture_points(m) > 0 || (first && c)).collect();
         if kids.is_empty() {
-            return Some(stand);
+            return Some(best);
         }
         kids.sort_by_key(|&(m, c, _)| (-pos.capture_points(m), -(c as i32)));
         let ms: Vec<Move> = kids.iter().map(|&(m, _, _)| m).collect();
-        let turn = pos.turn;
         let evals = self.children(pos, acc, &ms);
-        let mut best = stand;
         for (i, &m) in ms.iter().enumerate() {
             if self.tick() {
                 return None;
@@ -441,7 +507,7 @@ mod tests {
             pos.push(m).unwrap();
         }
         let before = (pos.board, pos.turn, pos.scores, pos.depth());
-        let mut s = Searcher::new(tiny_net(), None, Some(3), 12, 2, 100_000, 3, 0, 2, 1.0, 0.0, 200).unwrap();
+        let mut s = Searcher::new(tiny_net(), None, Some(3), 12, 2, 100_000, 3, 0, 2, 1.0, 0.0, 200, true).unwrap();
         let r = s.best_move(&mut pos).unwrap();
         assert_eq!((pos.board, pos.turn, pos.scores, pos.depth()), before);
         assert!(pos.legal_moves().contains(&r.best));
@@ -453,11 +519,59 @@ mod tests {
     #[test]
     fn time_budget_is_respected() {
         let mut pos = Position::initial();
-        let mut s = Searcher::new(tiny_net(), Some(50.0), None, 30, 2, 100_000, 3, 0, 2, 1.0, 0.0, 200).unwrap();
+        let mut s = Searcher::new(tiny_net(), Some(50.0), None, 30, 2, 100_000, 3, 0, 2, 1.0, 0.0, 200, true).unwrap();
         let r = s.best_move(&mut pos).unwrap();
         assert!(r.seconds < 0.2, "{}", r.seconds);
         assert!(r.depth >= 1);
         assert_eq!(pos.depth(), 0);
+    }
+
+    /// Two seats (Y, G) resigned from the start, so R (to move) and B are left.
+    fn two_left(scores: [i32; 4]) -> Position {
+        let mut pos = Position::initial();
+        pos.eliminate(2);
+        pos.eliminate(3);
+        pos.scores = scores;
+        pos
+    }
+
+    fn resign_searcher(depth: u32) -> Searcher {
+        Searcher::new(tiny_net(), None, Some(depth), 12, 2, 100_000, 3, 0, 2, 1.0, 0.0, 200, true).unwrap()
+    }
+
+    #[test]
+    fn a_winning_claim_is_played() {
+        // R resigns: B gets +3 for each of the 3 dead kings (9), still far below 100
+        let mut pos = two_left([100, 0, 0, 0]);
+        let depth = pos.depth();
+        let r = resign_searcher(2).best_move(&mut pos).unwrap();
+        assert_eq!(r.best, RESIGN);
+        assert!((r.value.unwrap()[0] - 1.0).abs() < 1e-9);
+        assert_eq!(pos.depth(), depth);
+    }
+
+    #[test]
+    fn a_losing_claim_is_not_played() {
+        // R resigning gives R utility 0. B's claim after any R move gives B 0 too (B loses to
+        // Y and G), so the network's values (> 0) decide and a move beats the claim.
+        let mut pos = two_left([0, 0, 50, 50]);
+        let legal = pos.legal_moves();
+        let r = resign_searcher(1).best_move(&mut pos).unwrap();
+        assert_ne!(r.best, RESIGN);
+        assert!(legal.contains(&r.best));
+        assert!(r.value.unwrap()[0] > 0.0);
+    }
+
+    #[test]
+    fn resign_search_restores_the_position() {
+        let mut pos = two_left([3, 1, 0, 0]);
+        for _ in 0..4 {
+            let m = pos.legal_moves()[0];
+            pos.push(m).unwrap();
+        }
+        let before = (pos.board, pos.turn, pos.scores, pos.eliminated, pos.hash, pos.depth());
+        resign_searcher(3).best_move(&mut pos).unwrap();
+        assert_eq!((pos.board, pos.turn, pos.scores, pos.eliminated, pos.hash, pos.depth()), before);
     }
 
     #[test]

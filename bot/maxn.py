@@ -6,19 +6,20 @@ the compiled core is installed and the network has a core copy (backend="auto").
 
 Every player picks the move that maximizes their own utility: their expected chess.com FFA
 score (mean of P(finish above each opponent), ties half), as the NNUE estimates it at the
-leaves. Nobody is assumed to be on a team, so ganging up on a "prey", breaking off an
-attack or turning on a partner happen exactly when the utilities say they pay.
+leaves. Nobody is assumed to be on a team: each player plays for their own points.
 
   - iterative deepening (depth 1, 2, ...) inside a time budget, or to a fixed depth
+  - resign option: with two players left, the mover may resign, which ends the game with the
+    claimed-win utilities (exact, tried before the moves); with three or more, only at the
+    root, after the moves
   - quiescence on point-scoring captures at the leaves (the mover may also stand pat)
   - sibling leaves are evaluated together in one batched network call (the compiled core
     reads each weight once per batch, which large networks need)
   - a transposition table (position, side to move, scores, eliminated seats)
   - move ordering: the table's best move, then captures by points gained, then checks
   - check extensions: a move that newly attacks an active king is searched one move deeper,
-    up to `check_ext` times along a line, so chains of checks are followed. Checks are where
-    "predator and prey" play happens: two players hunting a third king, or one breaking off
-    to stop the other. The first quiescence step also plays out checks, not only captures
+    up to `check_ext` times along a line, so chains of checks are followed. The first
+    quiescence step also plays out checks, not only captures
   - if the time runs out before depth 1 finishes, the best child by one batched
     evaluation is played (depth 0 in the stats)
   - immediate pruning only: a utility of 1 (finishing above all three) can't be beaten.
@@ -41,8 +42,8 @@ from pathlib import Path
 import numpy as np
 
 from chaturaji.constants import DEAD, PIECE_POINTS, TURN_ORDER
-from chaturaji.game import apply_move, is_game_over
-from chaturaji.moves import Move, kings_attacked_by, legal_moves
+from chaturaji.game import apply_move, eliminate, is_game_over
+from chaturaji.moves import RESIGN, Move, Resign, kings_attacked_by, legal_moves
 from chaturaji.state import ChaturajiState, board_key
 
 from .nnue import Accumulator, NumpyNNUE
@@ -74,8 +75,10 @@ class MaxN:
     def __init__(self, net: NumpyNNUE, time_ms: float | None = 250, depth: int | None = None,
                  max_depth: int = 12, qdepth: int = 2, tt_size: int = 200_000, backend: str = "auto",
                  check_ext: int = 3, width: int = 0, full_plies: int = 2, discount: float = 1.0,
-                 elim_bonus: float = 0.0, elim_horizon: int = 200):
+                 elim_bonus: float = 0.0, elim_horizon: int = 200, resign: bool = True):
         """backend: "auto" (compiled when available), "rust" (require it) or "python".
+
+        resign: the mover may resign (rules_core.RESIGN); see the module docstring.
 
         width: selective depth. From ply `full_plies` on, a node searches only the `width`
         children with the best static evaluation for the mover (plus the table's move);
@@ -94,6 +97,7 @@ class MaxN:
         self.max_depth, self.qdepth, self.tt_size = max_depth, qdepth, tt_size
         self.check_ext, self.width, self.full_plies = check_ext, width, full_plies
         self.discount, self.elim_bonus, self.elim_horizon = discount, elim_bonus, max(1, elim_horizon)
+        self.resign = resign
         self.tt: dict = {}
         self.stats: dict = {}
         self.fast = None
@@ -104,14 +108,14 @@ class MaxN:
             self.fast = chaturaji_engine.MaxN(net.core, time_ms=time_ms, depth=depth, max_depth=max_depth,
                                               qdepth=qdepth, tt_size=tt_size, check_ext=check_ext,
                                               width=width, full_plies=full_plies, discount=discount,
-                                              elim_bonus=elim_bonus, elim_horizon=elim_horizon)
+                                              elim_bonus=elim_bonus, elim_horizon=elim_horizon, resign=resign)
         elif backend == "rust":
             raise RuntimeError("backend='rust' needs the compiled core (engine/README.md)")
         self.backend = "rust" if self.fast is not None else "python"
 
     # --- public ------------------------------------------------------------------------
 
-    def best_move(self, state: ChaturajiState) -> Move:
+    def best_move(self, state: ChaturajiState) -> Move | Resign:
         if self.fast is not None:
             from .rules_core import move_from_code, position_from_state
             code, depth, nodes, value, forced, secs = self.fast.best_move(position_from_state(state))
@@ -121,7 +125,7 @@ class MaxN:
                           **({"forced": True} if forced else {})}
             return move_from_code(code, state.board)
         moves = legal_moves(state)
-        if len(moves) == 1:
+        if len(moves) == 1 and not self.resign:     # resigning is a second option
             self.stats = {"depth": 0, "nodes": 0, "forced": True}
             return moves[0]
         self.deadline = (time.perf_counter() + self.time_ms / 1000.0) if self.time_ms else None
@@ -147,6 +151,10 @@ class MaxN:
                 vals[i] = v
             i = max(range(len(moves)), key=lambda i: (vals[i][me], -i))
             best, value = moves[i], vals[i]
+            if self.resign and len(state.active_players()) == 2:
+                claim = exact_utilities(eliminate(state, state.current_player()))
+                if claim[me] > vals[i][me]:
+                    best, value = RESIGN, claim
         self.stats = {"depth": reached, "nodes": self.nodes,
                       "value": None if value is None else np.round(value, 3).tolist(),
                       "value_full": None if value is None else [float(x) for x in value]}
@@ -213,9 +221,19 @@ class MaxN:
         if hit is not None and hit[0] >= depth and not root:
             return hit[1], hit[2]
         me = _SEAT[state.current_player()]
+        turn = state.turn
         best_v, best_m = None, None
+        # the claim: with two players left, resigning ends the game (exact utilities)
+        if self.resign and len(state.active_players()) == 2:
+            v = exact_utilities(eliminate(state, state.current_player()))
+            best_v, best_m = self._shape(v, me, turn, False), RESIGN
+            if v[me] >= 1.0 - 1e-9:
+                self.tt[key] = (depth, best_v, best_m)
+                return best_v, best_m
         tt_move = hit[2] if hit else None
         kids = self._ordered(state, tt_move)
+        if not kids and best_v is None:
+            return acc.evaluate(state), None
         stands = {}
         if self.width and ply >= self.full_plies and len(kids) > self.width:
             # selective depth: the `width` best children by static evaluation, plus the table's move
@@ -235,7 +253,7 @@ class MaxN:
             self.nodes += len(live)
             for i, v in zip(live, acc.evaluate_children([kids[i][1] for i in live])):
                 stands[i] = v
-        turn = state.turn
+        broke = False
         for i, (m, child, chk, elim) in enumerate(kids):
             extend = chk and ext > 0
             if depth == 1:
@@ -258,7 +276,22 @@ class MaxN:
             if best_v is None or sv[me] > best_v[me]:
                 best_v, best_m = sv, m
                 if v[me] >= 1.0 - 1e-9:
+                    broke = True
                     break                               # immediate pruning (before the preferences)
+        # root, three or more players left: resigning is tried after the moves (no width
+        # selection, not counted among the kids). Skipped after a move that already wins.
+        if root and self.resign and not broke and len(state.active_players()) >= 3:
+            if depth == 1:
+                self._tick()
+            child = eliminate(state, state.current_player())
+            acc.push(child.board)
+            try:
+                v, _ = self._search(child, depth - 1, acc, ext, ply + 1)
+            finally:
+                acc.pop()
+            sv = self._shape(v, me, turn, False)
+            if best_v is None or sv[me] > best_v[me]:
+                best_v, best_m = sv, RESIGN
         self.tt[key] = (depth, best_v, best_m)
         return best_v, best_m
 
@@ -273,6 +306,14 @@ class MaxN:
         me = _SEAT[state.current_player()]
         board = state.board
         best = stand
+        # the claim, as in _search: with two players left, resigning ends the game
+        if self.resign and len(state.active_players()) == 2:
+            v = exact_utilities(eliminate(state, state.current_player()))
+            sv = self._shape(v, me, state.turn, False)
+            if sv[me] > best[me]:
+                best = sv
+            if v[me] >= 1.0 - 1e-9:
+                return best
         first = q == self.qdepth
         moves = legal_moves(state)
         if not first:

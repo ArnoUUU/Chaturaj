@@ -24,7 +24,7 @@ mod python {
 
     use crate::nnue::{AccStack, Layer, Net, NUM_GLOBALS};
     use crate::rules::{self, GameOver, Position};
-    use crate::search::Searcher;
+    use crate::search::{Searcher, RESIGN};
 
     fn vec1(a: &PyReadonlyArray1<f32>) -> Vec<f32> {
         a.as_array().iter().copied().collect()
@@ -367,15 +367,16 @@ mod python {
     #[pymethods]
     impl PyMaxN {
         #[new]
-        #[pyo3(signature = (net, time_ms=None, depth=None, max_depth=12, qdepth=2, tt_size=200_000, check_ext=3, width=0, full_plies=2, discount=1.0, elim_bonus=0.0, elim_horizon=200))]
+        #[pyo3(signature = (net, time_ms=None, depth=None, max_depth=12, qdepth=2, tt_size=200_000, check_ext=3, width=0, full_plies=2, discount=1.0, elim_bonus=0.0, elim_horizon=200, resign=true))]
         fn new(net: &PyNnue, time_ms: Option<f64>, depth: Option<u32>, max_depth: u32, qdepth: u32, tt_size: usize,
                check_ext: u32, width: usize, full_plies: u32, discount: f64, elim_bonus: f64,
-               elim_horizon: u32) -> PyResult<Self> {
-            Ok(PyMaxN { s: Searcher::new(net.net.clone(), time_ms, depth, max_depth, qdepth, tt_size, check_ext, width, full_plies, discount, elim_bonus, elim_horizon).map_err(err)? })
+               elim_horizon: u32, resign: bool) -> PyResult<Self> {
+            Ok(PyMaxN { s: Searcher::new(net.net.clone(), time_ms, depth, max_depth, qdepth, tt_size, check_ext, width, full_plies, discount, elim_bonus, elim_horizon, resign).map_err(err)? })
         }
 
         /// Search a position: returns (move, depth reached, nodes, root utilities R B Y G or
-        /// None, forced, seconds). The position is left unchanged.
+        /// None, forced, seconds). The move is `RESIGN` (65535) when resigning is best. The
+        /// position is left unchanged.
         #[allow(clippy::type_complexity)]
         fn best_move(&mut self, py: Python<'_>, position: &PyPosition)
                      -> PyResult<(u16, u32, u64, Option<Vec<f64>>, bool, f64)> {
@@ -396,6 +397,7 @@ mod python {
         m.add_class::<PyAccumulator>()?;
         m.add_class::<PyPosition>()?;
         m.add_class::<PyMaxN>()?;
+        m.add("RESIGN", RESIGN)?;
         m.add("__version__", env!("CARGO_PKG_VERSION"))?;
         Ok(())
     }

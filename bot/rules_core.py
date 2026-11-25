@@ -24,7 +24,7 @@ import numpy as np
 
 from chaturaji.constants import TURN_ORDER
 from chaturaji.game import apply_move, eliminate, game_over_reason, is_game_over
-from chaturaji.moves import Move, legal_moves
+from chaturaji.moves import RESIGN, Move, Resign, legal_moves
 from chaturaji.state import ChaturajiState, board_key
 
 from .mlp import global_features
@@ -60,7 +60,12 @@ def move_code(move: Move) -> int:
     return (sr * 8 + sc) * 64 + er * 8 + ec
 
 
-def move_from_code(code: int, board) -> Move:
+RESIGN_CODE = 65535          # chaturaji_engine.RESIGN
+
+
+def move_from_code(code: int, board) -> Move | Resign:
+    if int(code) == RESIGN_CODE:
+        return RESIGN
     s, e = divmod(int(code), 64)
     uci = f"{chr(97 + s % 8)}{8 - s // 8}{chr(97 + e % 8)}{8 - e // 8}"
     return Move.from_uci(uci, board)

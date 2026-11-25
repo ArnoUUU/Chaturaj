@@ -11,7 +11,8 @@ from bot.nnue import (
 )
 from bot.mlp import sparse_features
 from chaturaji import ChaturajiState, legal_moves
-from chaturaji.game import apply_move, eliminate, is_game_over
+from chaturaji.game import apply_action, apply_move, eliminate, is_game_over
+from chaturaji.moves import RESIGN
 
 
 def random_game(seed, plies=120):
@@ -166,7 +167,7 @@ def test_maxn_takes_an_outright_win():
                 if is_game_over(after) and exact_utilities(after)[me] == 1.0:
                     wins.append(m)
             if wins:
-                after, _ = apply_move(s, player.best_move(s))
+                after, _ = apply_action(s, player.best_move(s))     # a move or RESIGN
                 assert is_game_over(after) and exact_utilities(after)[me] == 1.0
                 found += 1
     if not found:
@@ -175,7 +176,7 @@ def test_maxn_takes_an_outright_win():
 
 def test_maxn_plays_legal_games_through_evaluate():
     torch.manual_seed(0)
-    player = MaxN(NumpyNNUE.from_model(NNUE()), time_ms=None, depth=1, qdepth=1)
+    player = MaxN(NumpyNNUE.from_model(NNUE()), time_ms=None, depth=1, qdepth=1)   # resign on
     res = evaluate(None, games=4, opponent=None, max_plies=60, seed=0, bot_player=player)
     assert res["games"] == 4 and 0.0 <= res["pairwise"] <= 1.0
     assert player.stats["depth"] in (0, 1)
@@ -188,7 +189,7 @@ def test_maxn_time_budget_and_depth():
     import time as _t
     t = _t.perf_counter()
     m = player.best_move(s)
-    assert m in legal_moves(s)
+    assert m is RESIGN or m in legal_moves(s)
     assert _t.perf_counter() - t < 0.6
     assert player.stats["depth"] >= 1
 
@@ -287,6 +288,45 @@ def test_maxn_same_moves_with_and_without_core():
         exact += a == b
         n += 1
     assert exact >= n - 1
+
+
+def claim_state(scores: dict):
+    """Y and G resigned from the start: R (to move) and B are left, with these scores."""
+    s = eliminate(eliminate(ChaturajiState.initial(), "Y"), "G")
+    s.scores = dict(scores)
+    return s
+
+
+BACKENDS = ["python", pytest.param("rust", marks=needs_core)]
+
+
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_claim_that_wins_outright_is_played(backend):
+    # R resigns: B gets +3 for each of the 3 dead kings (9), still far below 100
+    s = claim_state({"R": 100, "B": 0, "Y": 0, "G": 0})
+    player = MaxN(NumpyNNUE.from_model(NNUE()), time_ms=None, depth=2, qdepth=1, backend=backend)
+    assert player.best_move(s) is RESIGN
+    assert player.stats["value_full"][0] == pytest.approx(1.0)
+
+
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_claim_that_loses_is_not_played(backend):
+    # R resigning gives R utility 0. B's claim after any R move gives B 0 too (B loses to Y
+    # and G), so the network's values (> 0) decide and a move beats the claim.
+    s = claim_state({"R": 0, "B": 0, "Y": 50, "G": 50})
+    player = MaxN(NumpyNNUE.from_model(NNUE()), time_ms=None, depth=1, qdepth=0, backend=backend)
+    m = player.best_move(s)
+    assert m is not RESIGN and m in legal_moves(s)
+
+
+@needs_core
+def test_maxn_resign_same_choice_with_and_without_core():
+    torch.manual_seed(7)
+    m = NNUE().eval()
+    s = claim_state({"R": 3, "B": 1, "Y": 0, "G": 0})     # the claim is in play, not winning
+    slow = MaxN(NumpyNNUE.from_model(m, use_core=False), time_ms=None, depth=2, qdepth=1)
+    fast = MaxN(NumpyNNUE.from_model(m), time_ms=None, depth=2, qdepth=1)
+    assert same_choice(slow, fast, slow.best_move(s), fast.best_move(s))
 
 
 def same_choice(py, rs, a, b) -> bool:

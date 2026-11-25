@@ -5,6 +5,7 @@ import pytest
 from bot.nnue import CORE_AVAILABLE
 from chaturaji import ChaturajiState, legal_moves
 from chaturaji.game import apply_move, is_game_over
+from chaturaji.moves import RESIGN
 
 pytestmark = pytest.mark.skipif(not CORE_AVAILABLE, reason="chaturaji_engine not built (see engine/README.md)")
 
@@ -12,6 +13,10 @@ if CORE_AVAILABLE:
     from bot.rules_core import (
         RECORDS, check, check_game, differences, move_code, move_from_code, position_from_state, random_games,
     )
+
+
+def test_move_from_code_maps_the_resign_code():
+    assert move_from_code(65535, ChaturajiState.initial().board) is RESIGN
 
 
 def test_random_games_with_resignations_match():
@@ -110,7 +115,7 @@ def test_compiled_search_time_budget_and_deeper():
     py = MaxN(net, time_ms=200, backend="python")
     s = _positions(5)[3]
     m = rs.best_move(s)
-    assert m in legal_moves(s) and rs.stats["seconds"] < 0.4
+    assert (m is RESIGN or m in legal_moves(s)) and rs.stats["seconds"] < 0.4
     py.best_move(s)
     assert rs.stats["depth"] >= py.stats["depth"] and rs.stats["nodes"] > 5 * py.stats["nodes"]
 
@@ -165,7 +170,7 @@ def test_elimination_bonus_finds_a_king_capture():
             if any(e[3] for e in kids) and not all(e[3] for e in kids):
                 for backend in ("python", "rust"):
                     p = MaxN(net, time_ms=None, depth=1, qdepth=0, elim_bonus=5.0, elim_horizon=10_000,
-                             backend=backend)
+                             backend=backend, resign=False)     # a resignation isn't a capture
                     m = p.best_move(s)
                     assert dict((e[0], e[3]) for e in kids)[m], backend
                 found += 1

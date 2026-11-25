@@ -45,12 +45,12 @@ def prefs(task: dict) -> dict:
 
 
 def searcher(path: str, depth: int, qdepth: int, check_ext: int, slot: int = 0, width: int = 0,
-             full_plies: int = 2, **pref):
-    key = (path, depth, qdepth, check_ext, width, full_plies, tuple(sorted(pref.items())), slot)
+             full_plies: int = 2, resign: bool = True, **pref):
+    key = (path, depth, qdepth, check_ext, width, full_plies, resign, tuple(sorted(pref.items())), slot)
     if key not in _SEARCHERS:
         net = _NETS.get(path) or load_core_net(path)
         _SEARCHERS[key] = E.MaxN(net, depth=depth, qdepth=qdepth, check_ext=check_ext, width=width,
-                                 full_plies=full_plies, tt_size=1_000_000, **pref)
+                                 full_plies=full_plies, tt_size=1_000_000, resign=resign, **pref)
     return _SEARCHERS[key]
 
 
@@ -69,7 +69,8 @@ def selfplay_game(task: dict) -> dict:
     """
     rng = np.random.default_rng(task["seed"])
     s = searcher(task["weights"], task["depth"], task["qdepth"], task["check_ext"], 0,
-                 task.get("width", 0), task.get("full_plies", 2), **prefs(task))
+                 task.get("width", 0), task.get("full_plies", 2), resign=task.get("resign", True),
+                 **prefs(task))
     s.clear()
     pos = E.Position.initial()
     n_open = int(rng.integers(task["open_lo"], task["open_hi"] + 1))
@@ -86,6 +87,11 @@ def selfplay_game(task: dict) -> dict:
             m = ms[int(rng.integers(len(ms)))]
         else:
             m = s.best_move(pos)[0]
+        if m == E.RESIGN:                          # the mover resigns: no move, no checks or captures
+            pos.eliminate(pos.current_player)
+            moves.append(int(m))
+            ply += 1
+            continue
         mover = pos.current_player
         if pos.gives_check(m):
             checks.append((ply, mover))
@@ -107,8 +113,11 @@ def match_game(task: dict) -> dict:
     search), after a seeded random opening; no exploration."""
     seat = task["seat"]
     w, fp = task.get("width", 0), task.get("full_plies", 2)
-    cand = searcher(task["cand"], task["depth"], task["qdepth"], task["check_ext"], 9, w, fp, **prefs(task))
-    opps = {c: searcher(task["opp"], task["depth"], task["qdepth"], task["check_ext"], c, w, fp, **prefs(task))
+    rs = task.get("resign", True)
+    cand = searcher(task["cand"], task["depth"], task["qdepth"], task["check_ext"], 9, w, fp, resign=rs,
+                    **prefs(task))
+    opps = {c: searcher(task["opp"], task["depth"], task["qdepth"], task["check_ext"], c, w, fp, resign=rs,
+                        **prefs(task))
             for c in range(4) if c != seat}
     for x in (cand, *opps.values()):
         x.clear()
@@ -121,7 +130,10 @@ def match_game(task: dict) -> dict:
             m = ms[int(rng.integers(len(ms)))]
         else:
             m = (cand if pos.current_player == seat else opps[pos.current_player]).best_move(pos)[0]
-        pos.push(m)
+        if m == E.RESIGN:
+            pos.eliminate(pos.current_player)
+        else:
+            pos.push(m)
         ply += 1
     pw, res = _pairwise(pos.scores, seat)
     return {"seat": "RBYG"[seat], "scores": list(pos.scores), "pairwise": pw, "results": res,
@@ -137,7 +149,7 @@ def yardstick_block(task: dict) -> dict:
     from .nnue import NumpyNNUE
     player = MaxN(NumpyNNUE.load(task["weights"]), time_ms=None, depth=task["depth"], qdepth=task["qdepth"],
                   check_ext=task["check_ext"], width=task.get("width", 0),
-                  full_plies=task.get("full_plies", 2), **prefs(task))
+                  full_plies=task.get("full_plies", 2), resign=task.get("resign", True), **prefs(task))
     times = []
 
     def play(state):
