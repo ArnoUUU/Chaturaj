@@ -3,7 +3,10 @@
 //! player holds seat g % 4, so every opening is played from all four seats.
 //!
 //!   arena --weights <dir> --games N --threads T --seed S --out <file.jsonl>
-//!         --test "<spec>" --base "<spec>"
+//!         --test "<spec>" --base "<spec>" [--test-weights <dir>]
+//!
+//! --test-weights <dir>: the test player's searcher uses the net in this dir; the base players
+//! keep --weights. Without it both use --weights (the usual match on one net).
 //!
 //! <dir> holds net.txt and net.bin (export_weights.py). A spec is a comma list of key=value:
 //! depth, nodes, ms, width, full_plies, qdepth, check_ext, discount, elim_bonus, elim_horizon,
@@ -224,12 +227,12 @@ impl GameResult {
     }
 }
 
-fn play(g: usize, net: &Arc<Net>, test: &Spec, base: &Spec, seed: u64) -> Result<GameResult, String> {
+fn play(g: usize, net: &Arc<Net>, test_net: &Arc<Net>, test: &Spec, base: &Spec, seed: u64) -> Result<GameResult, String> {
     let t0 = Instant::now();
     let (o, s) = (g / 4, g % 4);
     let mut pos = opening(o, seed);
     let mut searchers: Vec<Searcher> = (0..4)
-        .map(|seat| if seat == s { test.build(net) } else { base.build(net) })
+        .map(|seat| if seat == s { test.build(test_net) } else { base.build(net) })
         .collect::<Result<_, _>>()?;
     // per side: total nodes, moves, total depth
     let (mut tn, mut tm, mut td) = (0u64, 0u64, 0u64);
@@ -292,6 +295,7 @@ fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let (mut weights, mut games, mut threads, mut seed, mut out, mut test, mut base) =
         (None, None, 1usize, 1u64, None, None, None);
+    let mut test_weights: Option<String> = None;
     let mut i = 0;
     while i < args.len() {
         let k = args[i].as_str();
@@ -304,6 +308,7 @@ fn run() -> Result<(), String> {
             "--out" => out = Some(v),
             "--test" => test = Some(v),
             "--base" => base = Some(v),
+            "--test-weights" => test_weights = Some(v),
             _ => return Err(format!("unknown option {}", k)),
         }
         i += 2;
@@ -318,6 +323,10 @@ fn run() -> Result<(), String> {
     let threads = threads.max(1);
 
     let net = load_net(Path::new(&weights))?;
+    let test_net = match &test_weights {
+        Some(dir) => load_net(Path::new(dir))?,
+        None => net.clone(),
+    };
     if let Some(parent) = Path::new(&out).parent().filter(|p| !p.as_os_str().is_empty()) {
         fs::create_dir_all(parent).map_err(|e| format!("{}: {}", parent.display(), e))?;
     }
@@ -325,8 +334,12 @@ fn run() -> Result<(), String> {
     let file = Mutex::new(file);
 
     eprintln!(
-        "arena: {} games, {} threads, seed {}, test [{}], base [{}], net h={} ({} params)",
-        games, threads, seed, test_text, base_text, net.h, net.num_params()
+        "arena: {} games, {} threads, seed {}, test [{}], base [{}], net h={} ({} params){}",
+        games, threads, seed, test_text, base_text, net.h, net.num_params(),
+        match &test_weights {
+            Some(dir) => format!(", test net {} (h={})", dir, test_net.h),
+            None => String::new(),
+        }
     );
     let t0 = Instant::now();
     let next = AtomicUsize::new(0);
@@ -340,7 +353,7 @@ fn run() -> Result<(), String> {
                 if g >= games {
                     break;
                 }
-                match play(g, &net, &test_spec, &base_spec, seed) {
+                match play(g, &net, &test_net, &test_spec, &base_spec, seed) {
                     Ok(r) => {
                         {
                             let mut f = file.lock().unwrap();
