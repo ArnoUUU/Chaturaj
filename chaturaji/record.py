@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 
 from .game import MoveInfo, apply_move, eliminate, game_over_reason, winners
-from .moves import Move
+from .moves import RESIGN, Move, Resign
 from .notation import move_table, to_san
 from .state import ChaturajiState
 
@@ -24,7 +24,11 @@ class Game:
         self.history: list[dict] = []
         self.metadata: dict = dict(metadata or {})
 
-    def play(self, move: Move) -> MoveInfo:
+    def play(self, move: Move | Resign) -> MoveInfo | None:
+        """Play a move, or `RESIGN` for the player to move (recorded like `eliminate`)."""
+        if move is RESIGN:
+            self.eliminate(self.state.current_player(), "resign")
+            return None
         before = self.state
         after, info = apply_move(before, move)
         self.history.append({

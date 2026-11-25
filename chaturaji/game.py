@@ -14,7 +14,7 @@ from .constants import (
     REPETITION_POINTS,
     TURN_ORDER,
 )
-from .moves import Move, kings_attacked_by, legal_moves
+from .moves import RESIGN, Move, Resign, kings_attacked_by, legal_moves
 from .state import ChaturajiState, board_key
 
 
@@ -118,6 +118,14 @@ def eliminate(state: ChaturajiState, color: str) -> ChaturajiState:
         _advance_turn(new)
     _award_end_bonus(new)
     return new
+
+
+def apply_action(state: ChaturajiState, action: Move | Resign) -> tuple[ChaturajiState, MoveInfo | None]:
+    """Play a move, or resign for the player to move (`RESIGN`). Returns the new state and
+    the move's info (None for a resignation)."""
+    if action is RESIGN:
+        return eliminate(state, state.current_player()), None
+    return apply_move(state, action)
 
 
 def _advance_turn(state: ChaturajiState) -> None:

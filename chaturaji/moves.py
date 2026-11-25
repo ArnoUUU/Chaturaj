@@ -29,7 +29,9 @@ class Move:
         return index_to_square(*self.start) + index_to_square(*self.end)
 
     @classmethod
-    def from_uci(cls, text: str, board: Board) -> "Move":
+    def from_uci(cls, text: str, board: Board) -> "Move | Resign":
+        if text == Resign.uci:
+            return RESIGN       # "resign" in game records
         start = square_to_index(text[:2])
         end = square_to_index(text[2:4])
         piece = board[start[0]][start[1]]
@@ -38,6 +40,30 @@ class Move:
 
     def __str__(self) -> str:
         return self.uci
+
+
+class Resign:
+    """The other action a player has besides a move: resigning (chess.com's "R").
+
+    The player is out, their pieces (king included) become dead, and their score is frozen.
+    With two players left it ends the game ("claimed the win" on chess.com): the other
+    player is the last king standing and gets the dead-king bonus, then the higher score
+    wins. Use the single instance `RESIGN`.
+    """
+
+    __slots__ = ()
+    uci = "resign"
+
+    def __repr__(self) -> str:
+        return "RESIGN"
+
+    __str__ = __repr__
+
+    def __reduce__(self):
+        return "RESIGN"         # pickles (worker processes) back to the same instance
+
+
+RESIGN = Resign()
 
 
 def _on_board(r: int, c: int) -> bool:
