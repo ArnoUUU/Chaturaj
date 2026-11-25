@@ -259,6 +259,8 @@ pub struct MoveInfo {
     pub captured: u8,      // captured piece code (0 = none)
     pub check_bonus: i32,
     pub eliminated: Option<usize>,
+    /// After the move the mover attacks an active king it did not attack before.
+    pub gives_check: bool,
 }
 
 #[derive(Clone)]
@@ -494,6 +496,7 @@ impl Position {
             }
         }
         let after = kings_attacked_by(&self.board, color, self.eliminated);
+        info.gives_check = after & !before != 0;
         if after & !before != 0 {
             info.check_bonus = match after.count_ones() {
                 2 => 1,

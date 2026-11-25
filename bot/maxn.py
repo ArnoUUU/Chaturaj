@@ -14,7 +14,11 @@ attack or turning on a partner happen exactly when the utilities say they pay.
   - sibling leaves are evaluated together in one batched network call (the compiled core
     reads each weight once per batch, which large networks need)
   - a transposition table (position, side to move, scores, eliminated seats)
-  - move ordering: the table's best move, then captures by points gained
+  - move ordering: the table's best move, then captures by points gained, then checks
+  - check extensions: a move that newly attacks an active king is searched one move deeper,
+    up to `check_ext` times along a line, so chains of checks are followed. Checks are where
+    "predator and prey" play happens: two players hunting a third king, or one breaking off
+    to stop the other. The first quiescence step also plays out checks, not only captures
   - if the time runs out before depth 1 finishes, the best child by one batched
     evaluation is played (depth 0 in the stats)
   - immediate pruning only: a utility of 1 (finishing above all three) can't be beaten.
@@ -38,7 +42,7 @@ import numpy as np
 
 from chaturaji.constants import DEAD, PIECE_POINTS, TURN_ORDER
 from chaturaji.game import apply_move, is_game_over
-from chaturaji.moves import Move, legal_moves
+from chaturaji.moves import Move, kings_attacked_by, legal_moves
 from chaturaji.state import ChaturajiState, board_key
 
 from .nnue import Accumulator, NumpyNNUE
@@ -68,12 +72,14 @@ def capture_points(board, move: Move) -> int:
 
 class MaxN:
     def __init__(self, net: NumpyNNUE, time_ms: float | None = 250, depth: int | None = None,
-                 max_depth: int = 12, qdepth: int = 2, tt_size: int = 200_000, backend: str = "auto"):
+                 max_depth: int = 12, qdepth: int = 2, tt_size: int = 200_000, backend: str = "auto",
+                 check_ext: int = 3):
         """backend: "auto" (compiled when available), "rust" (require it) or "python"."""
         if time_ms is None and depth is None:
             raise ValueError("give a time budget or a fixed depth")
         self.net, self.time_ms, self.depth = net, time_ms, depth
         self.max_depth, self.qdepth, self.tt_size = max_depth, qdepth, tt_size
+        self.check_ext = check_ext
         self.tt: dict = {}
         self.stats: dict = {}
         self.fast = None
@@ -82,7 +88,7 @@ class MaxN:
         if backend != "python" and getattr(net, "core", None) is not None:
             import chaturaji_engine
             self.fast = chaturaji_engine.MaxN(net.core, time_ms=time_ms, depth=depth, max_depth=max_depth,
-                                              qdepth=qdepth, tt_size=tt_size)
+                                              qdepth=qdepth, tt_size=tt_size, check_ext=check_ext)
         elif backend == "rust":
             raise RuntimeError("backend='rust' needs the compiled core (engine/README.md)")
         self.backend = "rust" if self.fast is not None else "python"
@@ -95,6 +101,7 @@ class MaxN:
             code, depth, nodes, value, forced, secs = self.fast.best_move(position_from_state(state))
             self.stats = {"depth": depth, "nodes": nodes, "seconds": round(secs, 4),
                           "value": None if value is None else np.round(value, 3).tolist(),
+                          "value_full": None if value is None else list(value),
                           **({"forced": True} if forced else {})}
             return move_from_code(code, state.board)
         moves = legal_moves(state)
@@ -109,7 +116,7 @@ class MaxN:
         best, value, reached = moves[0], None, 0
         for d in range(1, (self.depth or self.max_depth) + 1):
             try:
-                v, m = self._search(state, d, acc, root=True)
+                v, m = self._search(state, d, acc, self.check_ext, root=True)
             except _Timeout:
                 break
             best, value, reached = m, v, d
@@ -125,7 +132,8 @@ class MaxN:
             i = max(range(len(moves)), key=lambda i: (vals[i][me], -i))
             best, value = moves[i], vals[i]
         self.stats = {"depth": reached, "nodes": self.nodes,
-                      "value": None if value is None else np.round(value, 3).tolist()}
+                      "value": None if value is None else np.round(value, 3).tolist(),
+                      "value_full": None if value is None else [float(x) for x in value]}
         return best
 
     def __call__(self, state: ChaturajiState) -> Move:
@@ -143,16 +151,31 @@ class MaxN:
         return (board_key(state.board), state.turn % 4, tuple(state.scores[c] for c in TURN_ORDER),
                 tuple(sorted(state.eliminated)))
 
-    def _ordered(self, state: ChaturajiState, tt_move: Move | None) -> list[Move]:
-        moves = legal_moves(state)
-        board = state.board
-        keyed = sorted(moves, key=lambda m: -capture_points(board, m))
-        if tt_move is not None and tt_move in keyed:
-            keyed.remove(tt_move)
-            keyed.insert(0, tt_move)
-        return keyed
+    @staticmethod
+    def _expand(state: ChaturajiState, moves: list[Move]) -> list[tuple[Move, ChaturajiState, bool]]:
+        """(move, child, gives check) for each move. A move gives check when, after it, the
+        mover attacks an active king it did not attack before."""
+        before = kings_attacked_by(state.board, state.current_player(), state.active_players())
+        out = []
+        for m in moves:
+            child, info = apply_move(state, m)
+            out.append((m, child, bool(info.checked - before)))
+        return out
 
-    def _search(self, state: ChaturajiState, depth: int, acc: Accumulator, root: bool = False):
+    def _ordered(self, state: ChaturajiState, tt_move: Move | None):
+        """Children in search order: the table's move, then captures by points, then checks."""
+        board = state.board
+        kids = self._expand(state, legal_moves(state))
+        kids.sort(key=lambda e: (-capture_points(board, e[0]), -int(e[2])))   # stable
+        if tt_move is not None:
+            for i, e in enumerate(kids):
+                if e[0] == tt_move:
+                    kids.insert(0, kids.pop(i))
+                    break
+        return kids
+
+    def _search(self, state: ChaturajiState, depth: int, acc: Accumulator, ext: int, root: bool = False):
+        """`ext`: check extensions still allowed on this line."""
         self._tick()
         if is_game_over(state):
             return exact_utilities(state), None
@@ -164,29 +187,29 @@ class MaxN:
             return hit[1], hit[2]
         me = _SEAT[state.current_player()]
         best_v, best_m = None, None
-        moves = self._ordered(state, hit[2] if hit else None)
-        children = [apply_move(state, m)[0] for m in moves]
+        kids = self._ordered(state, hit[2] if hit else None)
         stands = {}
-        if depth == 1:                    # every child is a leaf: one batched evaluation
-            live = [i for i, c in enumerate(children) if not is_game_over(c)]
+        if depth == 1:        # leaves (no extension): one batched evaluation
+            live = [i for i, (_, c, chk) in enumerate(kids) if not is_game_over(c) and not (chk and ext > 0)]
             self.nodes += len(live)
-            for i, v in zip(live, acc.evaluate_children([children[i] for i in live])):
+            for i, v in zip(live, acc.evaluate_children([kids[i][1] for i in live])):
                 stands[i] = v
-        for i, (m, child) in enumerate(zip(moves, children)):
+        for i, (m, child, chk) in enumerate(kids):
+            extend = chk and ext > 0
             if depth == 1:
                 self._tick()
-                if is_game_over(child):
-                    v = exact_utilities(child)
-                else:
-                    acc.push(child.board)
-                    try:
-                        v = self._quiesce(child, self.qdepth, acc, stands[i])
-                    finally:
-                        acc.pop()
+            if is_game_over(child):
+                v = exact_utilities(child)
+            elif depth == 1 and not extend:
+                acc.push(child.board)
+                try:
+                    v = self._quiesce(child, self.qdepth, acc, stands[i])
+                finally:
+                    acc.pop()
             else:
                 acc.push(child.board)
                 try:
-                    v, _ = self._search(child, depth - 1, acc)
+                    v, _ = self._search(child, depth if extend else depth - 1, acc, ext - 1 if extend else ext)
                 finally:
                     acc.pop()
             if best_v is None or v[me] > best_v[me]:
@@ -198,8 +221,8 @@ class MaxN:
 
     def _quiesce(self, state: ChaturajiState, q: int, acc: Accumulator,
                  stand: np.ndarray | None = None) -> np.ndarray:
-        """Stand pat or play a point-scoring capture; `stand` is this position's evaluation
-        when the caller already has it (from a batched sibling evaluation)."""
+        """Stand pat or play a point-scoring capture (on the first step also a check);
+        `stand` is this position's evaluation when the caller already has it."""
         if stand is None:
             stand = acc.evaluate(state)
         if q == 0:
@@ -207,15 +230,18 @@ class MaxN:
         me = _SEAT[state.current_player()]
         board = state.board
         best = stand
-        caps = [m for m in legal_moves(state) if capture_points(board, m) > 0]
-        if not caps:
+        first = q == self.qdepth
+        moves = legal_moves(state)
+        if not first:
+            moves = [m for m in moves if capture_points(board, m) > 0]
+        kids = [e for e in self._expand(state, moves) if capture_points(board, e[0]) > 0 or (first and e[2])]
+        if not kids:
             return best
-        caps.sort(key=lambda m: -capture_points(board, m))
-        children = [apply_move(state, m)[0] for m in caps]
-        live = [i for i, c in enumerate(children) if not is_game_over(c)]
-        evals = dict(zip(live, acc.evaluate_children([children[i] for i in live])))
+        kids.sort(key=lambda e: (-capture_points(board, e[0]), -int(e[2])))
+        live = [i for i, e in enumerate(kids) if not is_game_over(e[1])]
+        evals = dict(zip(live, acc.evaluate_children([kids[i][1] for i in live])))
         self.nodes += len(live)
-        for i, child in enumerate(children):
+        for i, (m, child, _) in enumerate(kids):
             self._tick()
             if is_game_over(child):
                 v = exact_utilities(child)

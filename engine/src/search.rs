@@ -9,7 +9,10 @@
 //! - iterative deepening (depth 1, 2, ...) inside a time budget, or to a fixed depth
 //! - quiescence on point-scoring captures at the leaves (the mover may also stand pat)
 //! - a transposition table keyed by board, side to move, scores and eliminated seats
-//! - move ordering: the table's move first, then captures by points (stable, like Python)
+//! - move ordering: the table's move first, then captures by points, then checks (stable)
+//! - check extensions: a move that newly attacks an active king is searched one move deeper,
+//!   up to `check_ext` times along a line, so chains of checks are followed; the first
+//!   quiescence step also plays out checks (where "predator and prey" play happens)
 //! - immediate pruning: a utility of 1 (above all three) can't be beaten
 //! - all sibling leaves are evaluated together in one batched network pass
 //! - if the time runs out before depth 1 finishes, the best child by one batched evaluation
@@ -84,6 +87,7 @@ pub struct Searcher {
     pub max_depth: u32,
     pub qdepth: u32,
     pub tt_size: usize,
+    pub check_ext: u32,
     tt: HashMap<u64, Entry>,
     nodes: u64,
     deadline: Option<Instant>,
@@ -91,11 +95,12 @@ pub struct Searcher {
 
 impl Searcher {
     pub fn new(net: Arc<Net>, time_ms: Option<f64>, depth: Option<u32>, max_depth: u32, qdepth: u32,
-               tt_size: usize) -> Result<Self, String> {
+               tt_size: usize, check_ext: u32) -> Result<Self, String> {
         if time_ms.is_none() && depth.is_none() {
             return Err("give a time budget or a fixed depth".into());
         }
-        Ok(Searcher { net, time_ms, depth, max_depth, qdepth, tt_size, tt: HashMap::new(), nodes: 0, deadline: None })
+        Ok(Searcher { net, time_ms, depth, max_depth, qdepth, tt_size, check_ext, tt: HashMap::new(), nodes: 0,
+                      deadline: None })
     }
 
     pub fn clear(&mut self) {
@@ -120,7 +125,7 @@ impl Searcher {
         let me = pos.current_player();
         let mut res = SearchResult { best: moves[0], ..Default::default() };
         for d in 1..=self.depth.unwrap_or(self.max_depth) {
-            match self.search(pos, &mut acc, d, true) {
+            match self.search(pos, &mut acc, d, self.check_ext, true) {
                 None => break, // out of time: keep the last completed depth
                 Some((v, m)) => {
                     res.best = m.unwrap_or(moves[0]);
@@ -160,16 +165,29 @@ impl Searcher {
         pos.hash ^ h
     }
 
-    fn ordered(pos: &Position, tt_move: Option<Move>) -> Vec<Move> {
-        let mut moves = pos.legal_moves();
-        moves.sort_by_key(|&m| -pos.capture_points(m)); // stable, like Python's sorted
+    /// Whether each move gives check (make + unmake).
+    fn checks(pos: &mut Position, moves: &[Move]) -> Vec<bool> {
+        moves.iter().map(|&m| {
+            let c = pos.push(m).expect("legal move").gives_check;
+            pos.pop().expect("pop");
+            c
+        }).collect()
+    }
+
+    /// Moves in search order with their gives-check flags: the table's move, then captures by
+    /// points, then checks (stable, like Python's sort).
+    fn ordered(pos: &mut Position, tt_move: Option<Move>) -> Vec<(Move, bool)> {
+        let moves = pos.legal_moves();
+        let chk = Self::checks(pos, &moves);
+        let mut kids: Vec<(Move, bool)> = moves.into_iter().zip(chk).collect();
+        kids.sort_by_key(|&(m, c)| (-pos.capture_points(m), -(c as i32)));
         if let Some(t) = tt_move {
-            if let Some(i) = moves.iter().position(|&m| m == t) {
-                let m = moves.remove(i);
-                moves.insert(0, m);
+            if let Some(i) = kids.iter().position(|&(m, _)| m == t) {
+                let e = kids.remove(i);
+                kids.insert(0, e);
             }
         }
-        moves
+        kids
     }
 
     fn evaluate(&self, pos: &Position, acc: &mut AccStack) -> Utilities {
@@ -216,7 +234,9 @@ impl Searcher {
     }
 
     /// None when the time ran out (the position and accumulators are restored either way).
-    fn search(&mut self, pos: &mut Position, acc: &mut AccStack, depth: u32, root: bool) -> Option<(Utilities, Option<Move>)> {
+    /// `ext`: check extensions still allowed on this line.
+    fn search(&mut self, pos: &mut Position, acc: &mut AccStack, depth: u32, ext: u32, root: bool)
+              -> Option<(Utilities, Option<Move>)> {
         if self.tick() {
             return None;
         }
@@ -235,18 +255,26 @@ impl Searcher {
             }
         }
         let me = pos.current_player();
-        let moves = Self::ordered(pos, hit.and_then(|h| h.best));
-        if moves.is_empty() {
+        let kids = Self::ordered(pos, hit.and_then(|h| h.best));
+        if kids.is_empty() {
             return Some((self.evaluate(pos, acc), None));
         }
-        let leaves = if depth == 1 { self.children(pos, acc, &moves) } else { Vec::new() };
+        // depth 1: every child that isn't extended is a leaf, evaluated in one batch
+        let mut leaves: Vec<Option<(bool, Utilities)>> = vec![None; kids.len()];
+        if depth == 1 {
+            let idx: Vec<usize> = (0..kids.len()).filter(|&i| !(kids[i].1 && ext > 0)).collect();
+            let ms: Vec<Move> = idx.iter().map(|&i| kids[i].0).collect();
+            for (j, r) in self.children(pos, acc, &ms).into_iter().enumerate() {
+                leaves[idx[j]] = Some(r);
+            }
+        }
         let (mut best_v, mut best_m): (Option<Utilities>, Option<Move>) = (None, None);
-        for (i, &m) in moves.iter().enumerate() {
-            let v = if depth == 1 {
-                if self.tick() {
-                    return None;
-                }
-                let (finished, stand) = leaves[i];
+        for (i, &(m, chk)) in kids.iter().enumerate() {
+            let extend = chk && ext > 0;
+            if depth == 1 && self.tick() {
+                return None;
+            }
+            let v = if let Some((finished, stand)) = leaves[i] {
                 if finished {
                     stand
                 } else {
@@ -257,7 +285,13 @@ impl Searcher {
                 }
             } else {
                 Self::push(pos, acc, m);
-                let r = self.search(pos, acc, depth - 1, false);
+                let r = if pos.game_over().is_some() {
+                    Some((exact_utilities(pos), None))
+                } else if extend {
+                    self.search(pos, acc, depth, ext - 1, false)
+                } else {
+                    self.search(pos, acc, depth - 1, ext, false)
+                };
                 Self::pop(pos, acc);
                 r?.0
             };
@@ -274,24 +308,33 @@ impl Searcher {
         Some((best_v, best_m))
     }
 
-    /// Stand pat (`stand`, this position's evaluation) or play a point-scoring capture.
+    /// Stand pat (`stand`, this position's evaluation) or play a point-scoring capture; on
+    /// the first quiescence step also a check.
     fn quiesce(&mut self, pos: &mut Position, acc: &mut AccStack, q: u32, stand: Utilities) -> Option<Utilities> {
         if q == 0 {
             return Some(stand);
         }
         let me = pos.current_player();
-        let mut caps: Vec<Move> = pos.legal_moves().into_iter().filter(|&m| pos.capture_points(m) > 0).collect();
-        if caps.is_empty() {
+        let first = q == self.qdepth;
+        let mut moves = pos.legal_moves();
+        if !first {
+            moves.retain(|&m| pos.capture_points(m) > 0);
+        }
+        let chk = Self::checks(pos, &moves);
+        let mut kids: Vec<(Move, bool)> = moves.into_iter().zip(chk)
+            .filter(|&(m, c)| pos.capture_points(m) > 0 || (first && c)).collect();
+        if kids.is_empty() {
             return Some(stand);
         }
-        caps.sort_by_key(|&m| -pos.capture_points(m));
-        let kids = self.children(pos, acc, &caps);
+        kids.sort_by_key(|&(m, c)| (-pos.capture_points(m), -(c as i32)));
+        let ms: Vec<Move> = kids.iter().map(|&(m, _)| m).collect();
+        let evals = self.children(pos, acc, &ms);
         let mut best = stand;
-        for (i, &m) in caps.iter().enumerate() {
+        for (i, &m) in ms.iter().enumerate() {
             if self.tick() {
                 return None;
             }
-            let (finished, ev) = kids[i];
+            let (finished, ev) = evals[i];
             let v = if finished || q == 1 {
                 ev
             } else {
@@ -333,7 +376,7 @@ mod tests {
             pos.push(m).unwrap();
         }
         let before = (pos.board, pos.turn, pos.scores, pos.depth());
-        let mut s = Searcher::new(tiny_net(), None, Some(3), 12, 2, 100_000).unwrap();
+        let mut s = Searcher::new(tiny_net(), None, Some(3), 12, 2, 100_000, 3).unwrap();
         let r = s.best_move(&mut pos).unwrap();
         assert_eq!((pos.board, pos.turn, pos.scores, pos.depth()), before);
         assert!(pos.legal_moves().contains(&r.best));
@@ -345,7 +388,7 @@ mod tests {
     #[test]
     fn time_budget_is_respected() {
         let mut pos = Position::initial();
-        let mut s = Searcher::new(tiny_net(), Some(50.0), None, 30, 2, 100_000).unwrap();
+        let mut s = Searcher::new(tiny_net(), Some(50.0), None, 30, 2, 100_000, 3).unwrap();
         let r = s.best_move(&mut pos).unwrap();
         assert!(r.seconds < 0.2, "{}", r.seconds);
         assert!(r.depth >= 1);

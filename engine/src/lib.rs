@@ -299,6 +299,13 @@ mod python {
             self.pos.capture_points(m)
         }
 
+        /// Whether a move would newly attack an active king (the position is unchanged).
+        fn gives_check(&mut self, m: u16) -> PyResult<bool> {
+            let c = self.pos.push(m).map_err(err)?.gives_check;
+            self.pos.pop().map_err(PyIndexError::new_err)?;
+            Ok(c)
+        }
+
         /// The 16 network globals from seat k's view (bot.mlp.global_features).
         fn globals<'py>(&self, py: Python<'py>, k: usize) -> Bound<'py, numpy::PyArray1<f32>> {
             numpy::PyArray1::from_slice(py, &self.pos.globals(k % 4))
@@ -360,9 +367,10 @@ mod python {
     #[pymethods]
     impl PyMaxN {
         #[new]
-        #[pyo3(signature = (net, time_ms=None, depth=None, max_depth=12, qdepth=2, tt_size=200_000))]
-        fn new(net: &PyNnue, time_ms: Option<f64>, depth: Option<u32>, max_depth: u32, qdepth: u32, tt_size: usize) -> PyResult<Self> {
-            Ok(PyMaxN { s: Searcher::new(net.net.clone(), time_ms, depth, max_depth, qdepth, tt_size).map_err(err)? })
+        #[pyo3(signature = (net, time_ms=None, depth=None, max_depth=12, qdepth=2, tt_size=200_000, check_ext=3))]
+        fn new(net: &PyNnue, time_ms: Option<f64>, depth: Option<u32>, max_depth: u32, qdepth: u32, tt_size: usize,
+               check_ext: u32) -> PyResult<Self> {
+            Ok(PyMaxN { s: Searcher::new(net.net.clone(), time_ms, depth, max_depth, qdepth, tt_size, check_ext).map_err(err)? })
         }
 
         /// Search a position: returns (move, depth reached, nodes, root utilities R B Y G or
