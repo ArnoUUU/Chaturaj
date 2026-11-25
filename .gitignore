@@ -7,11 +7,38 @@ bot/runs/
 !models/opponent_pool/*.pt
 # run logs and Slurm output stay local (they can get large)
 logs/
-scraper/.selenium-profile/
-scraper/.firefox-profile/
 gui/.cache/
 scraper/data/
-cluster/site.env
+
+# Local credentials, authenticated browser profiles, and session exports
+.env
+.env.*
+*.env
+*.env.*
+!.env.example
+!.env.sample
+!.env.template
+!*.env.example
+!*.env.sample
+!*.env.template
+.aws/
+.ssh/
+.git-credentials
+.netrc
+_netrc
+id_rsa
+id_ecdsa
+id_ed25519
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
+.selenium-profile/
+.firefox-profile/
+chesscom-cookies*.json
+*.har
 
 # Rust build output
 engine/target/
