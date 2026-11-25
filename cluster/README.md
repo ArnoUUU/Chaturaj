@@ -15,19 +15,17 @@ from its official CUDA wheels with pip inside that env.
     handles non-Python packages better if you need them later.
 
 ## Copy the repo to Tillicum (from Windows PowerShell)
-The archive leaves out the scraper's browser profiles (they hold your chess.com login),
-scraped data, logs and caches. Replace `NETID` with your UW NetID.
+Run these commands from the Chaturaj repository root. The archive contains files from
+the current Git commit. Replace `NETID` with your UW NetID.
 ```powershell
-cd C:\Users\Arnav\Downloads
-tar -czf chaturaj.tgz --exclude=Chaturaj/scraper/.firefox-profile --exclude=Chaturaj/scraper/.selenium-profile --exclude=Chaturaj/scraper/data --exclude=Chaturaj/logs --exclude=Chaturaj/gui/.cache --exclude=Chaturaj/engine/target --exclude=__pycache__ --exclude=.pytest_cache --exclude=Chaturaj/.claude Chaturaj
-scp chaturaj.tgz NETID@tillicum.hyak.uw.edu:~/
+git archive --format=tar.gz --prefix=Chaturaj/ --output="$env:TEMP\chaturaj.tgz" HEAD -- . ':!.claude'
+scp "$env:TEMP\chaturaj.tgz" NETID@tillicum.hyak.uw.edu:~/
 ssh NETID@tillicum.hyak.uw.edu "tar -xzf chaturaj.tgz && rm chaturaj.tgz && mkdir -p Chaturaj/logs/slurm"
 ```
 
 ## Copy results back (no git)
-On Tillicum, `ls -t ~/Chaturaj/models | head` shows the newest run label. Then on Windows:
+On Tillicum, `ls -t ~/Chaturaj/models | head` shows the newest run label. On Windows, run these commands from the repository root.
 ```powershell
-cd C:\Users\Arnav\Downloads\Chaturaj
 scp -r NETID@tillicum.hyak.uw.edu:~/Chaturaj/models/LABEL models/
 scp -r NETID@tillicum.hyak.uw.edu:~/Chaturaj/logs/LABEL logs/
 scp -r NETID@tillicum.hyak.uw.edu:~/Chaturaj/logs/slurm logs/
@@ -93,9 +91,8 @@ Build the Rust core once (it installs Rust into `/gpfs/scrubbed/$USER` the first
 bash cluster/build_engine.sh
 ```
 The NNUE trains on the scraped games and the self-play logs, which the archive leaves out
-(`scraper/data`, `logs`). Copy them separately, about 60 MB (from Windows PowerShell):
+(`scraper/data`, `logs`). Copy them separately from the repository root in Windows PowerShell (about 60 MB).
 ```powershell
-cd C:\Users\Arnav\Downloads\Chaturaj
 ssh NETID@tillicum.hyak.uw.edu "mkdir -p Chaturaj/scraper/data Chaturaj/logs/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu"
 scp -r scraper/data/records NETID@tillicum.hyak.uw.edu:~/Chaturaj/scraper/data/
 scp logs/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu/games.jsonl NETID@tillicum.hyak.uw.edu:~/Chaturaj/logs/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu/

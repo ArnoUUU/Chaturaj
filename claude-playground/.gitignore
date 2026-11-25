@@ -1,4 +1,0 @@
-target/
-results/*.jsonl.tmp
-# exported network (regenerate with export_weights.py)
-weights/
