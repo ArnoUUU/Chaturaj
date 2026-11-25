@@ -126,6 +126,22 @@ def pairwise_summary(pw: list[float], seats: list[str]) -> dict:
             "per_seat_pairwise": per_seat}
 
 
+@torch.no_grad()
+def eval_loss(model, parts_fn, n: int, chunk: int = 4096) -> float | None:
+    """Mean pairwise loss over rows 0..n-1 of a data source (no training)."""
+    if n == 0:
+        return None
+    was = model.training
+    model.eval()
+    tot = 0.0
+    for a in range(0, n, chunk):
+        rows = np.arange(a, min(n, a + chunk))
+        inputs, y = make_batch([parts_fn(rows)])
+        tot += pairwise_loss(model(*inputs), y).item() * len(rows)
+    model.train(was)
+    return tot / n
+
+
 def run(args) -> str:
     from . import selfplay_worker as W
     if W.E is None:
@@ -161,6 +177,14 @@ def run(args) -> str:
             "args": vars(args), "environment": registry.environment_info("cpu"), "init": str(args.init),
             "history": [], "checks": [], "status": "running"}
 
+    def plot_curves() -> None:
+        try:                           # the standard training-curves figure (bot/plot_run.py)
+            from .plot_run import plot_meta
+            plot_meta(meta, ldir / "curves.png")
+            shutil.copy(ldir / "curves.png", mdir / "curves.png")
+        except Exception as e:         # never stop training over a figure
+            print(f"(curves not drawn: {e})", flush=True)
+
     def save_current(name: str) -> str:
         path = wdir / f"{name}.npz"
         save_weights(model, path)
@@ -177,8 +201,19 @@ def run(args) -> str:
         if args.cache:
             np.savez(args.cache, **base.save(args.cache, "train"), counts=json.dumps(counts), n_val=n_val)
     replay = Replay(args.buffer)
-    print(f"base positions: {len(base):,} ({time.time() - tb:.0f} s); model {config}, "
-          f"{meta['params']:,} weights", flush=True)
+    val_replay = Replay(args.val_buffer)    # held-out self-play games, never trained on
+    # base validation: every `val_every`-th earlier game, held out of the training batches
+    held = (base.game % args.val_every) == 0 if args.val_every else np.zeros(len(base), dtype=bool)
+    base_train = np.flatnonzero(~held)
+    base_val = np.flatnonzero(held)
+    rng_v = np.random.default_rng(args.seed + 1)
+    if len(base_val) > args.val_base:
+        base_val = np.sort(rng_v.choice(base_val, args.val_base, replace=False))
+    base_val_fn = lambda rows: base_parts(base, base_val[rows])  # noqa: E731
+    meta["validation"] = {"base_positions": int(len(base_val)), "base_every": args.val_every,
+                          "selfplay_every": args.val_selfplay_every, "selfplay_buffer": args.val_buffer}
+    print(f"base positions: {len(base):,} ({len(base_train):,} for training, {len(base_val):,} held out) "
+          f"({time.time() - tb:.0f} s); model {config}, {meta['params']:,} weights", flush=True)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     if init_ckpt.get("optimizer") and init_ckpt.get("kind") == "nnue":
         try:                           # continuing a self-play run: keep its optimizer state
@@ -252,7 +287,12 @@ def run(args) -> str:
             v = entry["vs_mcts"]
             line += f" | vs MCTS+MLP {v['pairwise']:.3f} ± {2 * v['pairwise_se']:.3f} (max^n {v['maxn_seconds_per_move']:.3f} s/move)"
         print(line + f" [{entry['seconds']:.0f} s]", flush=True)
+        plot_curves()
 
+    v0 = eval_loss(model, base_val_fn, len(base_val))
+    meta["history"].append({"iteration": 0, "hours": 0.0, "steps": 0, "lr": args.lr,
+                            "val_base_loss": round(v0, 5) if v0 is not None else None})
+    print(f"start | val loss (held-out earlier games) {v0}", flush=True)
     check("start", 0)
     reserve = lambda: 1.15 * meta.get("check_sec", 300)  # noqa: E731
     it, last_check, last_iter = 0, time.time(), 0.0
@@ -265,11 +305,13 @@ def run(args) -> str:
         results = pool.map(W.selfplay_game, tasks)
         tg = time.time() - ti
         endings, plies, prey, gang, n_pos = Counter(), [], [], [], 0
-        for r in results:
+        for gi, r in enumerate(results):
             scores = np.array(r["scores"], dtype=np.float32)
+            held_out = bool(args.val_selfplay_every) and gi % args.val_selfplay_every == 0
             for b, k, g in zip(r["boards"], r["ks"], r["globals"]):
                 k = int(k)
-                replay.add(features_from_codes(b, k), g, pairwise_targets(np.roll(scores, -k)))
+                (val_replay if held_out else replay).add(features_from_codes(b, k), g,
+                                                         pairwise_targets(np.roll(scores, -k)))
                 n_pos += 1
             st = game_stats(r)
             endings[r["reason"]] += 1
@@ -281,28 +323,36 @@ def run(args) -> str:
                                         "scores": r["scores"], "reason": r["reason"], "plies": r["plies"],
                                         "moves": r["moves"], "captures": r["captures"], "checks": r["checks"]}) + "\n")
         games_log.flush()
-        losses = []
+        losses, gnorms = [], []
         if len(replay) >= args.min_buffer:
             nb = int(args.batch * args.base_frac)
             for _ in range(args.steps):
                 parts = [replay.parts(np.random.randint(0, len(replay), args.batch - nb))]
                 if nb:
-                    parts.append(base_parts(base, np.random.randint(0, len(base), nb)))
+                    parts.append(base_parts(base, base_train[np.random.randint(0, len(base_train), nb)]))
                 inputs, y = make_batch(parts)
                 loss = pairwise_loss(model(*inputs), y)
                 opt.zero_grad()
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                gnorms.append(float(torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)))
                 opt.step()
                 losses.append(loss.item())
+                total_steps += 1
         prev = current
         current = save_current(f"it{it:05d}")
         if Path(prev).name.startswith("it") and prev != current:
             Path(prev).unlink(missing_ok=True)
+        vb = eval_loss(model, base_val_fn, len(base_val))
+        vsp = eval_loss(model, val_replay.parts, len(val_replay))
         last_iter = time.time() - ti
         entry = {"iteration": it, "hours": round(hours(), 3), "games": len(results), "positions": n_pos,
                  "buffer": len(replay), "selfplay_sec": round(tg, 1), "train_sec": round(last_iter - tg, 1),
-                 "loss": round(float(np.mean(losses)), 4) if losses else None, "endings": dict(endings),
+                 "loss": round(float(np.mean(losses)), 4) if losses else None,
+                 "val_base_loss": round(vb, 5) if vb is not None else None,
+                 "val_selfplay_loss": round(vsp, 5) if vsp is not None else None,
+                 "val_selfplay_positions": len(val_replay),
+                 "lr": opt.param_groups[0]["lr"], "steps": total_steps,
+                 "grad_norm": round(float(np.mean(gnorms)), 4) if gnorms else None, "endings": dict(endings),
                  "mean_plies": round(float(np.mean(plies)), 1),
                  "prey_share": round(float(np.mean(prey)), 3) if prey else None,
                  "gang_rate": round(float(np.mean(gang)), 3)}
@@ -311,7 +361,7 @@ def run(args) -> str:
         log.log("iteration", **entry)
         registry.save_model(model, kind, config, label, meta, opt)
         print(f"it {it} | {entry['hours']:.2f}h | games {len(results)} ({tg:.0f} s) | buffer {len(replay):,} | "
-              f"loss {entry['loss']} | plies {entry['mean_plies']} | prey {entry['prey_share']} | "
+              f"loss {entry['loss']} | val {entry['val_base_loss']} / {entry['val_selfplay_loss']} | plies {entry['mean_plies']} | prey {entry['prey_share']} | "
               f"gang {entry['gang_rate']}", flush=True)
         if time.time() - last_check >= args.check_min * 60 and time.time() - t0 + reserve() * 2 < budget:
             check(f"h{hours():.1f}", it)
@@ -328,6 +378,7 @@ def run(args) -> str:
     registry.save_model(model, kind, config, label, meta, opt)
     save_weights(model, mdir / "nnue.npz")
     registry.register(label, meta)
+    plot_curves()
     log.log("done", label=label)
     games_log.close()
     print(f"done {label}", flush=True)
@@ -357,6 +408,10 @@ def parse_args(argv=None):
     ap.add_argument("--lr", type=float, default=3e-4)
     ap.add_argument("--weight-decay", type=float, default=1e-5)
     ap.add_argument("--check-min", type=float, default=60)
+    ap.add_argument("--val-every", type=int, default=20, help="hold out every n-th earlier game for validation")
+    ap.add_argument("--val-base", type=int, default=20_000, help="held-out earlier positions to validate on")
+    ap.add_argument("--val-selfplay-every", type=int, default=10, help="hold out every n-th self-play game")
+    ap.add_argument("--val-buffer", type=int, default=40_000, help="latest held-out self-play positions kept")
     ap.add_argument("--check-games", type=int, default=48)
     ap.add_argument("--yard-games", type=int, default=40)
     ap.add_argument("--yard-workers", type=int, default=4)
