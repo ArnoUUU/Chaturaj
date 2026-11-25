@@ -5,7 +5,7 @@ chess.com game scraper.
 | Folder | What it is |
 |---|---|
 | [`chaturaji/`](chaturaji/README.md) | Board state and rules: move generation, scoring, game records, notation, terminal viewer |
-| [`bot/`](bot/README.md) | AlphaZero-style bot: PyTorch network, MCTS, self-play and training |
+| [`bot/`](bot/README.md) | AlphaZero-style bot: PyTorch network, MCTS, self-play and training; the NNUE + max^n engine and its training: [bot/README_NNUE.md](bot/README_NNUE.md) |
 | [`scraper/`](scraper/README.md) | Scrapes chess.com Chaturaji games by player and time control (over the chess.com variants WebSocket; Selenium only to log in) and converts them to game records |
 | [`cluster/`](cluster/README.md) | GPU runs on the Tillicum cluster: Miniforge conda env, Slurm job scripts |
 | [`models/`](models/README.md) | Saved, labelled bot models (one folder per training run) |
