@@ -15,10 +15,12 @@ Panels, all against hours of training (iterations from meta.json "history", chec
 2. Learning rate.
 3. Gradient norm (mean per iteration, before clipping at 1.0).
 4. Checks: pairwise score ±2 SE vs the best weights and vs MCTS + MLP; 0.5 = even.
-5. Predator and prey: prey share and gang rate.
-6. Mean game length and mean ply of the first elimination.
+5. Mean game length (plies).
+6. Mean ply of the first elimination.
 
 Older runs (before validation and learning-rate logging) simply leave those panels empty.
+Old meta.json files that still hold the retired predator/prey keys (prey_share, gang_rate)
+are read fine: those keys are ignored.
 """
 
 from __future__ import annotations
@@ -115,26 +117,20 @@ def plot_meta(meta: dict, out: str | Path) -> Path:
             ax.legend(fontsize=7.5, loc="lower right")
 
         ax = axes[1, 1]
-        for key, col, name in (("prey_share", BLUE, "prey share"), ("gang_rate", ORANGE, "gang rate")):
-            x, y = _series(hist, key)
-            if x:
-                ax.plot(x, y, color=col, lw=1.2, label=name)
-        ax.axhline(0.25, color=MUTED, lw=1, ls=":")
-        ax.text(0.01, 0.255, "0.25 = captures spread evenly", transform=ax.get_yaxis_transform(), fontsize=7,
-                color=INK2, va="bottom")
-        ax.set_ylim(0, 1)
-        ax.set_title("Predator and prey", loc="left", fontsize=10)
-        if ax.get_legend_handles_labels()[0]:
-            ax.legend(fontsize=7.5, loc="lower right")
+        x, y = _series(hist, "mean_plies")
+        if x:
+            ax.plot(x, y, color=BLUE, lw=1.2)
+        else:
+            ax.text(0.5, 0.5, "not logged in this run", ha="center", transform=ax.transAxes, color=MUTED)
+        ax.set_title("Mean game length (plies)", loc="left", fontsize=10)
 
         ax = axes[1, 2]
-        for key, col, name in (("mean_plies", BLUE, "game length"), ("first_elim_ply", ORANGE, "first elimination")):
-            x, y = _series(hist, key)
-            if x:
-                ax.plot(x, y, color=col, lw=1.2, label=name)
-        ax.set_title("Game length and first elimination (plies, mean)", loc="left", fontsize=10)
-        if ax.get_legend_handles_labels()[0]:
-            ax.legend(fontsize=7.5, loc="best")
+        x, y = _series(hist, "first_elim_ply")
+        if x:
+            ax.plot(x, y, color=ORANGE, lw=1.2)
+        else:
+            ax.text(0.5, 0.5, "not logged in this run", ha="center", transform=ax.transAxes, color=MUTED)
+        ax.set_title("Mean ply of first elimination", loc="left", fontsize=10)
 
         for a in axes.flat:
             a.set_xlabel("hours", fontsize=8)

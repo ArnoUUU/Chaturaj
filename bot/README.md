@@ -1,8 +1,7 @@
 # bot — self-play engine (PyTorch)
 
 A neural network evaluates positions for a 4-player Monte Carlo Tree Search, and learns
-from games it plays against itself. Details: [PLAN.md](PLAN.md); coordination between
-colors: [COORDINATION.md](COORDINATION.md).
+from games it plays against itself. Details: [PLAN.md](PLAN.md).
 
 The newer engine (NNUE value network + max^n search, compiled core in `engine/`), with the
 whole training process and model specs: [README_NNUE.md](README_NNUE.md).

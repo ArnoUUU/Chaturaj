@@ -23,11 +23,8 @@ Checks (at the start, every `--check-min` minutes and at the end):
 
 Logged per game (logs/<label>/games.jsonl): seed, opening length, scores, ending, plies,
 every move, every capture of an active piece (ply, attacker, victim, points) and every
-check (ply, checker). Per iteration: losses, endings, and two "predator and prey" numbers:
-  prey_share   share of a game's captures that hit its most-captured seat (0.25 if spread
-               evenly over the four seats, 1 if one seat took every capture)
-  gang_rate    share of games where two different players captured from the same victim
-               within 12 plies of each other
+check (ply, checker). Per iteration: losses, endings, mean game length, and the mean ply of
+the first elimination (`first_elim_ply`).
 
     python -m bot.selfplay_nnue --hours 5
     python -m bot.selfplay_nnue --init models/<nnue> --hours 1 --workers 8 --tag try
@@ -101,24 +98,10 @@ def make_batch(parts_list):
 
 
 def game_stats(rec: dict) -> dict:
-    """Predator / prey numbers for one game from its captures of active pieces, and the ply
-    of its first elimination."""
+    """The ply of the game's first elimination (None if no one was eliminated)."""
     el = rec.get("eliminations") or []
     first = min(p for p, _, _ in el) if el else None
-    caps = rec["captures"]
-    if not caps:
-        return {"prey_share": None, "ganged": False, "first_elim": first}
-    victims = Counter(v for _, _, v, _ in caps)
-    share = victims.most_common(1)[0][1] / len(caps)
-    ganged = False
-    by_victim: dict = {}
-    for ply, att, vic, _ in caps:
-        by_victim.setdefault(vic, []).append((ply, att))
-    for hits in by_victim.values():
-        for i, (p1, a1) in enumerate(hits):
-            if any(a2 != a1 and abs(p2 - p1) <= 12 for p2, a2 in hits[i + 1:]):
-                ganged = True
-    return {"prey_share": share, "ganged": ganged, "first_elim": first}
+    return {"first_elim": first}
 
 
 def pairwise_summary(pw: list[float], seats: list[str]) -> dict:
@@ -308,7 +291,7 @@ def run(args) -> str:
                   "explore": args.explore, "explore_plies": 30, "stride": 1} for g in range(args.games)]
         results = pool.map(W.selfplay_game, tasks)
         tg = time.time() - ti
-        endings, plies, prey, gang, first_el, n_pos = Counter(), [], [], [], [], 0
+        endings, plies, first_el, n_pos = Counter(), [], [], 0
         for gi, r in enumerate(results):
             scores = np.array(r["scores"], dtype=np.float32)
             held_out = bool(args.val_selfplay_every) and gi % args.val_selfplay_every == 0
@@ -320,9 +303,6 @@ def run(args) -> str:
             st = game_stats(r)
             endings[r["reason"]] += 1
             plies.append(r["plies"])
-            if st["prey_share"] is not None:
-                prey.append(st["prey_share"])
-            gang.append(st["ganged"])
             if st["first_elim"] is not None:
                 first_el.append(st["first_elim"])
             games_log.write(json.dumps({"type": "selfplay", "iteration": it, "seed": r["seed"], "opening": r["opening"],
@@ -361,16 +341,14 @@ def run(args) -> str:
                  "lr": opt.param_groups[0]["lr"], "steps": total_steps,
                  "grad_norm": round(float(np.mean(gnorms)), 4) if gnorms else None, "endings": dict(endings),
                  "mean_plies": round(float(np.mean(plies)), 1),
-                 "prey_share": round(float(np.mean(prey)), 3) if prey else None,
-                 "gang_rate": round(float(np.mean(gang)), 3),
                  "first_elim_ply": round(float(np.mean(first_el)), 1) if first_el else None}
         meta["history"].append(entry)
         meta["iteration"] = it
         log.log("iteration", **entry)
         registry.save_model(model, kind, config, label, meta, opt)
         print(f"it {it} | {entry['hours']:.2f}h | games {len(results)} ({tg:.0f} s) | buffer {len(replay):,} | "
-              f"loss {entry['loss']} | val {entry['val_base_loss']} / {entry['val_selfplay_loss']} | plies {entry['mean_plies']} | prey {entry['prey_share']} | "
-              f"gang {entry['gang_rate']} | first elim {entry['first_elim_ply']}", flush=True)
+              f"loss {entry['loss']} | val {entry['val_base_loss']} / {entry['val_selfplay_loss']} | plies {entry['mean_plies']} | "
+              f"first elim {entry['first_elim_ply']}", flush=True)
         if time.time() - last_check >= args.check_min * 60 and time.time() - t0 + reserve() * 2 < budget:
             check(f"h{hours():.1f}", it)
             last_check = time.time()
