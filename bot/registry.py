@@ -140,6 +140,23 @@ def make_label(kind: str, config: dict, selection: str, sims: int, iterations: i
     return "_".join(parts)
 
 
+def resolve_device(name: str = "auto") -> str:
+    """"auto" -> "cuda" when PyTorch sees a GPU, else "cpu"; "cuda" (or "cuda:N") and "cpu"
+    pass through. Asking for CUDA without one exits with a message instead of failing later."""
+    if name == "auto":
+        return "cuda" if torch.cuda.is_available() else "cpu"
+    if name == "cpu":
+        return "cpu"
+    if name == "cuda" or name.startswith("cuda:"):
+        if not torch.cuda.is_available():
+            raise SystemExit(f"--device {name}: PyTorch sees no CUDA GPU here "
+                             f"(torch {torch.__version__}, built for CUDA {torch.version.cuda}). "
+                             "Use --device auto or cpu, or run `python scripts/gpu.py setup` "
+                             "to install the CUDA build of PyTorch.")
+        return name
+    raise SystemExit(f"unknown device {name!r}: use auto, cpu or cuda")
+
+
 def environment_info(device: str) -> dict:
     info = {
         "host": platform.node(), "python": platform.python_version(),

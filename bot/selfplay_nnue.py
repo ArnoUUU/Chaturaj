@@ -52,6 +52,7 @@ import os
 import shutil
 import time
 from collections import Counter
+from contextlib import nullcontext
 from pathlib import Path
 
 import numpy as np
@@ -99,14 +100,14 @@ def base_parts(ps: PositionSet, rows: np.ndarray):
             ps.g[rows], ps.y[rows])
 
 
-def make_batch(parts_list):
+def make_batch(parts_list, device="cpu"):
     idx = [a for p in parts_list for a in p[0]]
     lengths = np.concatenate([p[1] for p in parts_list])
     indices = torch.from_numpy(np.concatenate(idx).astype(np.int64))
     offsets = torch.from_numpy(np.concatenate([[0], np.cumsum(lengths)[:-1]]).astype(np.int64))
     g = torch.from_numpy(np.concatenate([p[2] for p in parts_list]))
     y = torch.from_numpy(np.concatenate([p[3] for p in parts_list]))
-    return (indices, offsets, g), y
+    return (indices.to(device), offsets.to(device), g.to(device)), y.to(device)
 
 
 def game_stats(rec: dict) -> dict:
@@ -131,10 +132,11 @@ def eval_loss(model, parts_fn, n: int, chunk: int = 4096) -> float | None:
         return None
     was = model.training
     model.eval()
+    dev = next(model.parameters()).device
     tot = 0.0
     for a in range(0, n, chunk):
         rows = np.arange(a, min(n, a + chunk))
-        inputs, y = make_batch([parts_fn(rows)])
+        inputs, y = make_batch([parts_fn(rows)], dev)
         tot += pairwise_loss(model(*inputs), y).item() * len(rows)
     model.train(was)
     return tot / n
@@ -159,11 +161,14 @@ def run(args) -> str:
     def hours() -> float:
         return (time.time() - t0) / 3600
 
-    model, kind, config, init_ckpt = registry.load_model(args.init)
+    device = registry.resolve_device(args.device)
+    use_amp = bool(args.amp and device.startswith("cuda"))
+    model, kind, config, init_ckpt = registry.load_model(args.init, device)
     if kind != "nnue":
         raise SystemExit(f"--init must be an nnue model, got {kind}")
     model.train()
-    label = registry.make_label(kind, config, "maxn", args.depth, 0, "cpu", args.tag)
+    print(f"device: {device}" + (" (fp16 autocast)" if use_amp else ""), flush=True)
+    label = registry.make_label(kind, config, "maxn", args.depth, 0, device, args.tag)
     mdir = registry.model_dir(label)
     ldir = ROOT / "logs" / label
     wdir = ldir / "weights"
@@ -178,7 +183,7 @@ def run(args) -> str:
         steps_log.write("iteration,step,global_step,loss,grad_norm,lr\n")
         steps_log.flush()
     meta = {"label": label, "kind": kind, "config": config, "params": registry.param_count(model),
-            "args": vars(args), "environment": registry.environment_info("cpu"), "init": str(args.init),
+            "args": vars(args), "environment": registry.environment_info(device), "init": str(args.init),
             "history": [], "checks": [], "status": "running"}
 
     def plot_curves() -> None:
@@ -219,6 +224,7 @@ def run(args) -> str:
     print(f"base positions: {len(base):,} ({len(base_train):,} for training, {len(base_val):,} held out) "
           f"({time.time() - tb:.0f} s); model {config}, {meta['params']:,} weights", flush=True)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)   # a no-op pass-through when off
     if init_ckpt.get("optimizer") and init_ckpt.get("kind") == "nnue":
         try:                           # continuing a self-play run: keep its optimizer state
             opt.load_state_dict(init_ckpt["optimizer"])
@@ -328,8 +334,8 @@ def run(args) -> str:
             for rs in r["resigns"]:
                 n_claims += rs["active"] == 2
                 n_early += rs["active"] >= 3
-            for kind, d, nd, sec in zip(r["kinds"], r["depths"], r["nodes"], r["secs"]):
-                n_random += kind in ("opening", "explore")
+            for mk, d, nd, sec in zip(r["kinds"], r["depths"], r["nodes"], r["secs"]):   # not `kind`: the model's
+                n_random += mk in ("opening", "explore")
                 if d is not None:
                     s_depth.append(d)
                     s_nodes.append(nd)
@@ -347,12 +353,15 @@ def run(args) -> str:
                 parts = [replay.parts(np.random.randint(0, len(replay), args.batch - nb))]
                 if nb:
                     parts.append(base_parts(base, base_train[np.random.randint(0, len(base_train), nb)]))
-                inputs, y = make_batch(parts)
-                loss = pairwise_loss(model(*inputs), y)
+                inputs, y = make_batch(parts, device)
+                with (torch.autocast("cuda", dtype=torch.float16) if use_amp else nullcontext()):
+                    loss = pairwise_loss(model(*inputs), y)
                 opt.zero_grad()
-                loss.backward()
+                scaler.scale(loss).backward()
+                scaler.unscale_(opt)
                 gnorms.append(float(torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)))
-                opt.step()
+                scaler.step(opt)
+                scaler.update()
                 losses.append(loss.item())
                 total_steps += 1
         if losses:                     # one row per optimiser step, written in one go
@@ -465,6 +474,12 @@ def parse_args(argv=None):
     ap.add_argument("--no-resign", action="store_true",
                     help="the mover may not resign (the default: resigning is an action, see the rules)")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--device", default="auto",
+                    help="training device: auto (CUDA when available), cpu or cuda. The self-play "
+                         "and check workers always run on CPU (max^n in the compiled core)")
+    ap.add_argument("--amp", action="store_true",
+                    help="mixed precision (fp16 autocast + gradient scaling) for the training steps; "
+                         "only on CUDA")
     return ap.parse_args(argv)
 
 
