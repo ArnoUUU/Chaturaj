@@ -15,3 +15,6 @@ cluster/site.env
 
 # Rust build output
 engine/target/
+
+#misc.
+claude-playground/
