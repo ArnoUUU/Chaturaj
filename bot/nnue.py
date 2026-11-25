@@ -102,6 +102,16 @@ def board_diff(old: Board, new: Board) -> tuple[list[tuple], list[tuple]]:
     return removed, added
 
 
+def features_from_codes(codes: np.ndarray, k: int) -> list[np.ndarray]:
+    """nnue_features' four index arrays (mover-relative order) from 64 piece codes and the
+    mover k, without the Python rules engine (for positions from the compiled core)."""
+    codes = np.asarray(codes)
+    sq = np.flatnonzero(codes)
+    c = codes[sq].astype(np.int64) - 1
+    per = FEATURE[:, c // 5, c % 5, sq // 8, sq % 8]           # (4, pieces), same order as the board scan
+    return [per[(k + i) % 4] for i in range(4)]
+
+
 def board_codes(board: Board) -> np.ndarray:
     """64 bytes for the compiled core: 0 = empty, else 1 + owner (R B Y G X = 0..4) * 5 + type."""
     return np.fromiter((0 if p is None else 1 + _OWNER_CODE[p[0]] * 5 + _TYPE_IDX[p[1]]

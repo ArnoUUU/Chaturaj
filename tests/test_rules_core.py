@@ -107,6 +107,17 @@ def test_compiled_search_time_budget_and_deeper():
     assert rs.stats["depth"] >= py.stats["depth"] and rs.stats["nodes"] > 5 * py.stats["nodes"]
 
 
+def test_features_from_codes_match_python_features():
+    from bot.nnue import features_from_codes, nnue_features
+    from bot.rules_core import position_from_state
+    for s in _positions(31, 120, 7):
+        pos = position_from_state(s)
+        want, g = nnue_features(s)
+        got = features_from_codes(np.asarray(pos.board), pos.current_player)
+        assert all(np.array_equal(a, b) for a, b in zip(got, want))
+        assert np.array_equal(np.asarray(pos.globals(pos.current_player)), g)
+
+
 def test_gives_check_matches_python():
     from chaturaji.moves import kings_attacked_by
     from bot.rules_core import move_code, position_from_state
