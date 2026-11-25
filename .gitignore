@@ -5,6 +5,7 @@ bot/runs/
 *.pt
 # saved, labelled models are kept in git (see models/README.md)
 !models/**/model.pt
+!models/opponent_pool/*.pt
 # run logs and Slurm output stay local (they can get large)
 logs/
 scraper/.selenium-profile/
@@ -16,5 +17,5 @@ cluster/site.env
 # Rust build output
 engine/target/
 
-#misc.
+# misc.
 claude-playground/
