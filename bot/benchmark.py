@@ -149,9 +149,11 @@ def main(argv=None) -> None:
     c.add_argument("--sims", type=int, default=32)
     c.add_argument("--opening-plies", type=int, default=4)
     c.add_argument("--seed", type=int, default=0)
-    c.add_argument("--device", default="cpu")
+    c.add_argument("--device", default="auto", help="auto (CUDA when available), cpu or cuda")
     c.add_argument("--no-promote", action="store_true", help="report only; keep the benchmark")
     args = ap.parse_args(argv)
+    if args.cmd == "challenge":
+        args.device = registry.resolve_device(args.device)
     if args.cmd == "show":
         print(json.dumps(current(), indent=1))
     elif args.cmd == "set":

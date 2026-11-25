@@ -220,8 +220,10 @@ def main(argv=None) -> None:
     ap.add_argument("--selection", default="puct")
     ap.add_argument("--max-plies", type=int, default=300)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--device", default="cpu")
+    ap.add_argument("--device", default="auto", help="auto (CUDA when available), cpu or cuda")
     args = ap.parse_args(argv)
+    from . import registry
+    args.device = registry.resolve_device(args.device)
     ev = load_evaluator(args.model, args.device)
     for opp in args.opponent:
         result = evaluate_vs(ev, opp, args.device, games=args.games, sims=args.sims,

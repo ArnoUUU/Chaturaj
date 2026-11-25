@@ -170,6 +170,8 @@ def validate(model, data: PositionSet, device: str, batch: int = 4096) -> dict:
 
 
 def run(args) -> str:
+    args.device = registry.resolve_device(args.device)
+    print(f"device: {args.device}", flush=True)
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -266,7 +268,7 @@ def parse_args(argv=None):
     ap.add_argument("--cache", default=None, help="positions .npz: written after building, read if present")
     ap.add_argument("--tag", default="nnue")
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--device", default="cpu")
+    ap.add_argument("--device", default="auto", help="auto (CUDA when available), cpu or cuda")
     return ap.parse_args(argv)
 
 

@@ -62,24 +62,27 @@ def run(device: str, batch: int, sims: int) -> dict:
         opt = torch.optim.AdamW(model.parameters(), 1e-3)
 
         def step():
-            p, v, s = model(*inputs)
-            loss = p.float().logsumexp(1).mean() + v.float().logsumexp(1).mean() + s.float().pow(2).mean()
+            out = model(*inputs)          # (policy, value, score) heads, or the NNUE's pairwise logits
+            outs = out if isinstance(out, (tuple, list)) else (out,)
+            loss = sum(o.float().pow(2).mean() for o in outs)   # a stand-in loss, for timing only
             opt.zero_grad()
             loss.backward()
             opt.step()
         train_sec = time_it(step, device, 5)
         model.eval()
-        mcts = MCTS(registry.evaluator(kind, model, device), num_simulations=sims,
-                    rng=np.random.default_rng(0))
-        t0 = time.perf_counter()
-        mcts.search(Node(state))
-        search_sec = time.perf_counter() - t0
         report["checks"][kind] = {
             "params": registry.param_count(model),
             "inference_positions_per_sec": round(batch / sec),
             "train_step_ms": round(train_sec * 1000, 1),
-            "mcts_sims_per_sec": round(sims / search_sec, 1),
         }
+        try:                          # MCTS needs a policy head; the NNUE (value only) is searched by max^n
+            mcts = MCTS(registry.evaluator(kind, model, device), num_simulations=sims,
+                        rng=np.random.default_rng(0))
+            t0 = time.perf_counter()
+            mcts.search(Node(state))
+            report["checks"][kind]["mcts_sims_per_sec"] = round(sims / (time.perf_counter() - t0), 1)
+        except Exception as e:
+            report["checks"][kind]["mcts"] = f"skipped: {type(e).__name__}"
     return report
 
 
