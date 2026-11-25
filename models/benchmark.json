@@ -1,7 +1,0 @@
-{
- "label": "2026-11-22_2357_sup-taran0915-v2_mlp-e512-w1024x512x256_sup-ep8_cpu",
- "model": "opponent_pool/BEST_taran0915_model.pt",
- "since": "2026-11-23T15:22:52",
- "reason": "best model of the opponent pool (BEST_ marker)",
- "previous": "2026-11-22_1647_sup-arnav2007-blitz-small_mlp-e256-w512x256x128_sup-ep4_cpu"
-}

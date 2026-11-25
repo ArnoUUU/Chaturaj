@@ -39,11 +39,11 @@ FAIR = 0.5   # pairwise score of an even match
 
 
 def bench_file() -> Path:
-    return registry.MODELS_DIR / "benchmark.json"
+    return registry.RUNS_DIR / "benchmark.json"
 
 
 def history_file() -> Path:
-    return registry.MODELS_DIR / "benchmark_history.jsonl"
+    return registry.RUNS_DIR / "benchmark_history.jsonl"
 
 
 def _store_ref(path: Path) -> str:

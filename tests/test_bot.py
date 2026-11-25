@@ -164,6 +164,7 @@ def test_chunked_logger(tmp_path):
 def test_training_run_saves_labelled_model(tmp_path, monkeypatch, kind, selection):
     from bot import registry, train as train_mod
     monkeypatch.setattr(registry, "MODELS_DIR", tmp_path / "models")
+    monkeypatch.setattr(registry, "RUNS_DIR", tmp_path / "models")
     monkeypatch.setattr(registry, "LOGS_DIR", tmp_path / "logs")
     args = train_mod.parse_args([
         "--tag", "unit", "--device", "cpu", "--model", kind, "--selection", selection,
@@ -181,6 +182,7 @@ def test_timed_run_stops_on_budget_and_keeps_snapshots(tmp_path, monkeypatch):
     import types
     from bot import registry, train as train_mod
     monkeypatch.setattr(registry, "MODELS_DIR", tmp_path / "models")
+    monkeypatch.setattr(registry, "RUNS_DIR", tmp_path / "models")
     monkeypatch.setattr(registry, "LOGS_DIR", tmp_path / "logs")
     clock = {"t": 1_000_000.0}
 
@@ -209,6 +211,7 @@ def test_supervised_on_records(tmp_path, monkeypatch):
     from bot import registry, supervised
     from chaturaji.simulate import random_game
     monkeypatch.setattr(registry, "MODELS_DIR", tmp_path / "models")
+    monkeypatch.setattr(registry, "RUNS_DIR", tmp_path / "models")
     monkeypatch.setattr(registry, "LOGS_DIR", tmp_path / "logs")
     rec = tmp_path / "records"
     rec.mkdir()
@@ -252,6 +255,8 @@ def test_evaluate_against_saved_model_and_resolve_opponent(tmp_path, monkeypatch
     assert evaluate.model_name("models/run_a/model.pt") == "run_a"
 
     monkeypatch.setattr(registry, "MODELS_DIR", tmp_path)
+
+    monkeypatch.setattr(registry, "RUNS_DIR", tmp_path)
     args = lambda **kw: SimpleNamespace(**{"eval_opponent": None, "init": None, "resume": None, **kw})
     assert train.resolve_eval_opponent(args(init="models/sup"), "x") == "models/sup"
     assert train.resolve_eval_opponent(args(init="models/sup", eval_opponent="random"), "x") == "random"
@@ -284,6 +289,7 @@ def test_evaluate_paired_openings_and_per_seat():
 def test_benchmark_verdict_and_ladder(tmp_path, monkeypatch):
     from bot import benchmark, evaluate, registry
     monkeypatch.setattr(registry, "MODELS_DIR", tmp_path)
+    monkeypatch.setattr(registry, "RUNS_DIR", tmp_path)
     good = {"games": 40, "pairwise": 0.62, "pairwise_se": 0.04,
             "per_seat_pairwise": {"R": 0.6, "B": 0.7, "Y": 0.66, "G": 0.45}}
     assert benchmark.verdict(good)[0]
@@ -323,6 +329,7 @@ def test_league_training_with_hourly_checks(tmp_path, monkeypatch):
     import types
     from bot import registry, train as train_mod
     monkeypatch.setattr(registry, "MODELS_DIR", tmp_path / "models")
+    monkeypatch.setattr(registry, "RUNS_DIR", tmp_path / "models")
     monkeypatch.setattr(registry, "LOGS_DIR", tmp_path / "logs")
     tiny = ["--device", "cpu", "--embed", "16", "--widths", "32", "16", "8", "--sims", "2",
             "--max-plies", "16", "--steps", "2", "--batch", "8", "--eval-games", "0"]
@@ -360,6 +367,7 @@ def test_league_pool_grows_once_learner_beats_it(tmp_path, monkeypatch):
     import types
     from bot import benchmark, registry, train as train_mod
     monkeypatch.setattr(registry, "MODELS_DIR", tmp_path / "models")
+    monkeypatch.setattr(registry, "RUNS_DIR", tmp_path / "models")
     monkeypatch.setattr(registry, "LOGS_DIR", tmp_path / "logs")
     tiny = ["--device", "cpu", "--embed", "16", "--widths", "32", "16", "8", "--sims", "2",
             "--max-plies", "16", "--steps", "2", "--batch", "8", "--eval-games", "0"]
@@ -385,6 +393,7 @@ def test_league_pool_grows_once_learner_beats_it(tmp_path, monkeypatch):
 def test_model_references_resolve_pool_and_archive(tmp_path, monkeypatch):
     from bot import benchmark, registry
     monkeypatch.setattr(registry, "MODELS_DIR", tmp_path / "models")
+    monkeypatch.setattr(registry, "RUNS_DIR", tmp_path / "logs" / "models")
     monkeypatch.setattr(registry, "LOGS_DIR", tmp_path / "logs")
     pool = tmp_path / "models" / "opponent_pool"
     pool.mkdir(parents=True)

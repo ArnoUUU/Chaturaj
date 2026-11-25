@@ -9,8 +9,8 @@ chess.com game scraper.
 | [`scraper/`](scraper/README.md) | Scrapes chess.com Chaturaji games by player and time control (over the chess.com variants WebSocket; Selenium only to log in) and converts them to game records |
 | [`cluster/`](cluster/README.md) | GPU runs on the Tillicum cluster: Miniforge conda env, Slurm job scripts |
 | [`gui/`](gui/README.md) | Browser game viewer (`python -m gui.viewer`) and timed play against bots (`python -m gui.play`) |
-| [`models/`](models/README.md) | Saved, labelled bot models (one folder per training run) |
-| `logs/` | Chunked run logs, GPU check reports, Slurm output (not committed) |
+| `models/` | The opponent pool (`models/opponent_pool/`): bot models used as league opponents, kept in git |
+| `logs/` | Chunked run logs, training runs (`logs/models/`: run folders, `index.jsonl`, benchmark files), GPU check reports, Slurm output (not committed) |
 | `tests/` | pytest suite |
 
 Rules and design decisions are in [PLAN.md](PLAN.md). The model plan is in [bot/PLAN.md](bot/PLAN.md).
@@ -41,6 +41,18 @@ python -m chaturaji.simulate --games 1 --seed 0 --out games
 ```powershell
 python -m chaturaji.viewer games/game_0.json
 ```
+
+## Turn yourself into a bot
+[`turn_me_into_a_bot.py`](turn_me_into_a_bot.py) scrapes your chess.com Chaturaji games, trains a bot
+on them (2 to 4 epochs, fewer for bigger samples; blitz games only by default, `--tc-type` to change) and adds it to the opponent pool as
+`models/opponent_pool/<username>_model.pt`:
+
+```powershell
+python turn_me_into_a_bot.py --username your_chesscom_name
+```
+
+Leave out `--username` and it asks for one. It needs a chess.com login for the scraper (it opens
+Firefox once if none is saved). Then play it with `python -m gui.play --engine <username>_model`.
 
 ## Browser GUI
 `gui/` runs in your browser on this machine, with no packages beyond the repo's own.
