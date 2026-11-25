@@ -1,0 +1,40 @@
+== e1_paranoid_n10k
+games 48  secs 1085.6
+test score 0.6840 +- 0.0948 (2 SE)   [nodes=10000,paranoid=1]
+test: nodes/move 9595  depth 4.23    base [nodes=10000]: nodes/move 9812  depth 2.92
+test score by seat:  seat 0 0.764 (n=12)  seat 1 0.639 (n=12)  seat 2 0.764 (n=12)  seat 3 0.569 (n=12)
+[44/48] game 42 opening 10 seat 2: score 1.000 turns 183 test nodes 9784 depth 4.69 | base nodes 10004 depth 3.05 | 181.2s
+[45/48] game 44 opening 11 seat 0: score 1.000 turns 135 test nodes 9442 depth 4.09 | base nodes 9750 depth 2.92 | 69.2s
+[46/48] game 47 opening 11 seat 3: score 0.333 turns 46 test nodes 10004 depth 3.00 | base nodes 10004 depth 2.71 | 30.6s
+[47/48] game 46 opening 11 seat 2: score 1.000 turns 73 test nodes 10006 depth 4.06 | base nodes 10004 depth 2.64 | 71.8s
+[48/48] game 45 opening 11 seat 1: score 0.333 turns 261 test nodes 10005 depth 5.31 | base nodes 9913 depth 3.15 | 137.1s
+== e2_width6_n10k
+games 48  secs 920.9
+test score 0.3715 +- 0.1061 (2 SE)   [nodes=10000,width=6]
+test: nodes/move 9700  depth 2.09    base [nodes=10000]: nodes/move 9745  depth 2.85
+test score by seat:  seat 0 0.333 (n=12)  seat 1 0.333 (n=12)  seat 2 0.264 (n=12)  seat 3 0.556 (n=12)
+[44/48] game 45 opening 11 seat 1: score 0.833 turns 56 test nodes 10002 depth 2.08 | base nodes 8286 depth 2.35 | 20.8s
+[45/48] game 39 opening 9 seat 3: score 1.000 turns 400 test nodes 10003 depth 2.61 | base nodes 10005 depth 3.98 | 205.7s
+[46/48] game 43 opening 10 seat 3: score 0.833 turns 224 test nodes 10003 depth 2.62 | base nodes 10004 depth 2.86 | 113.5s
+[47/48] game 46 opening 11 seat 2: score 0.167 turns 172 test nodes 10002 depth 2.00 | base nodes 9610 depth 2.88 | 53.3s
+[48/48] game 47 opening 11 seat 3: score 1.000 turns 169 test nodes 9761 depth 2.78 | base nodes 10004 depth 3.37 | 60.4s
+== e3_width3_n10k
+games 48  secs 1018.4
+test score 0.5035 +- 0.1067 (2 SE)   [nodes=10000,width=3]
+test: nodes/move 9486  depth 3.09    base [nodes=10000]: nodes/move 9688  depth 2.87
+test score by seat:  seat 0 0.472 (n=12)  seat 1 0.500 (n=12)  seat 2 0.542 (n=12)  seat 3 0.500 (n=12)
+[44/48] game 45 opening 11 seat 1: score 0.833 turns 28 test nodes 10004 depth 3.00 | base nodes 10003 depth 2.77 | 20.0s
+[45/48] game 44 opening 11 seat 0: score 0.833 turns 95 test nodes 7913 depth 2.96 | base nodes 9846 depth 3.00 | 41.3s
+[46/48] game 47 opening 11 seat 3: score 1.000 turns 132 test nodes 8039 depth 2.72 | base nodes 9891 depth 3.06 | 77.6s
+[47/48] game 43 opening 10 seat 3: score 0.333 turns 245 test nodes 10005 depth 3.49 | base nodes 10004 depth 3.02 | 179.5s
+[48/48] game 46 opening 11 seat 2: score 0.333 turns 285 test nodes 10004 depth 4.28 | base nodes 9940 depth 3.33 | 155.9s
+== e4_qdepth4_n10k
+games 48  secs 979.7
+test score 0.4132 +- 0.1036 (2 SE)   [nodes=10000,qdepth=4]
+test: nodes/move 9625  depth 2.32    base [nodes=10000]: nodes/move 9606  depth 2.89
+test score by seat:  seat 0 0.431 (n=12)  seat 1 0.333 (n=12)  seat 2 0.319 (n=12)  seat 3 0.569 (n=12)
+[44/48] game 46 opening 11 seat 2: score 0.000 turns 48 test nodes 10001 depth 2.00 | base nodes 9232 depth 3.46 | 17.1s
+[45/48] game 39 opening 9 seat 3: score 1.000 turns 361 test nodes 9893 depth 4.49 | base nodes 10005 depth 3.17 | 196.8s
+[46/48] game 40 opening 10 seat 0: score 0.667 turns 400 test nodes 10003 depth 3.67 | base nodes 10004 depth 2.96 | 198.4s
+[47/48] game 47 opening 11 seat 3: score 0.833 turns 96 test nodes 10005 depth 2.78 | base nodes 10005 depth 2.85 | 43.8s
+[48/48] game 45 opening 11 seat 1: score 0.333 turns 191 test nodes 10004 depth 1.22 | base nodes 9836 depth 3.13 | 74.7s

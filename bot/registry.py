@@ -3,6 +3,8 @@
 Two model kinds share one interface:
   "mlp"    : encoding layer + 3 fully connected layers (bot/mlp.py), sparse inputs
   "resnet" : convolutional baseline (bot/model.py), dense 35x8x8 planes
+  "nnue"   : value-only NNUE for alpha-beta (bot/nnue.py), 4 perspective accumulators;
+             it outputs 6 pairwise logits instead of (policy, value, score)
 
 Each saved model lives in its own folder, named by a label built from the run:
 
@@ -10,6 +12,11 @@ Each saved model lives in its own folder, named by a label built from the run:
   models/<label>/meta.json    run arguments, environment (GPU, versions, git commit),
                               per-iteration losses, evaluation results, status
   models/index.jsonl          one line per saved model (label, kind, metrics)
+
+Opponent pool and archive (see models/README.md):
+  models/opponent_pool/<name>.pt + .meta.json   league opponents; BEST_ in the name marks the best
+  logs/models/<label>/                          retired model folders (weights, meta, snapshots)
+find_model() turns any of these references into a weights file.
 
 Logs for the same run go to logs/<label>/, split into numbered chunks.
 """
@@ -29,7 +36,7 @@ import torch
 ROOT = Path(__file__).resolve().parent.parent
 MODELS_DIR = ROOT / "models"
 LOGS_DIR = ROOT / "logs"
-KINDS = ("mlp", "resnet")
+KINDS = ("mlp", "resnet", "nnue")
 
 
 # --- building, encoding, evaluating ---------------------------------------------------
@@ -37,6 +44,8 @@ KINDS = ("mlp", "resnet")
 def default_config(kind: str) -> dict:
     if kind == "mlp":
         return {"embed": 512, "widths": [1024, 512, 256], "dropout": 0.1}
+    if kind == "nnue":
+        return {"acc": 256, "hidden": [32, 32]}
     if kind == "resnet":
         return {"channels": 64, "blocks": 4, "value_hidden": 256}
     raise ValueError(f"unknown model kind {kind!r}")
@@ -46,6 +55,10 @@ def build_model(kind: str, config: dict) -> torch.nn.Module:
     if kind == "mlp":
         from .mlp import ChaturajiMLP
         return ChaturajiMLP(config["embed"], tuple(config["widths"]), config.get("dropout", 0.1))
+    if kind == "nnue":
+        from .nnue import NNUE
+        return NNUE(config["acc"], tuple(config["hidden"]), config.get("residual", False),
+                    config.get("dropout", 0.0))
     from .model import ChaturajiNet, NetConfig
     return ChaturajiNet(NetConfig(**config))
 
@@ -55,6 +68,9 @@ def encoder(kind: str):
     if kind == "mlp":
         from .mlp import sparse_features
         return sparse_features
+    if kind == "nnue":
+        from .nnue import nnue_features
+        return nnue_features
     from .features import encode
     return encode
 
@@ -64,6 +80,9 @@ def collate(kind: str, xs: list, device: str) -> tuple:
     if kind == "mlp":
         from .mlp import collate_sparse
         return collate_sparse(xs, device)
+    if kind == "nnue":
+        from .nnue import collate_nnue
+        return collate_nnue(xs, device)
     return (torch.from_numpy(np.stack(xs)).to(device),)
 
 
@@ -72,6 +91,9 @@ def evaluator(kind: str, model: torch.nn.Module, device: str):
     if kind == "mlp":
         from .mlp import MLPEvaluator
         return MLPEvaluator(model, device)
+    if kind == "nnue":
+        from .nnue import NNUEEvaluator
+        return NNUEEvaluator(model, device)
     from .mcts import NetEvaluator
     return NetEvaluator(model, device)
 
@@ -97,6 +119,10 @@ def git_commit() -> str:
 def size_tag(kind: str, config: dict) -> str:
     if kind == "mlp":
         return f"e{config['embed']}-w{'x'.join(str(w) for w in config['widths'])}"
+    if kind == "nnue":
+        h = config["hidden"]
+        hs = f"{h[0]}x{len(h)}" if len(h) > 2 and len(set(h)) == 1 else "x".join(str(x) for x in h)
+        return f"a{config['acc']}-h{hs}" + ("-res" if config.get("residual") else "")
     return f"c{config['channels']}-b{config['blocks']}"
 
 
@@ -134,6 +160,35 @@ def environment_info(device: str) -> dict:
 
 def model_dir(label: str, root: Path | None = None) -> Path:
     return (root or MODELS_DIR) / label
+
+
+def label_for(path: str | Path) -> str:
+    """The run label of a model file: models/<label>/model.pt, a pool file (its meta.json
+    holds the label) or a snapshot (named by its file)."""
+    p = Path(path)
+    if p.name == "model.pt":
+        return p.parent.name
+    meta = p.with_name(p.stem + ".meta.json")
+    if meta.is_file():
+        return json.loads(meta.read_text(encoding="utf-8")).get("label") or p.stem
+    return p.stem
+
+
+def find_model(ref: str | Path) -> Path:
+    """Resolve a model reference to its weights file. Accepts a .pt file (model.pt, a pool
+    file or a snapshot), a folder, a label, or a pool name with or without BEST_. Searches
+    models/, models/opponent_pool/, logs/models/ (retired models) and the repo root."""
+    p = Path(ref)
+    if p.is_file():
+        return p
+    if p.is_dir() and (p / "model.pt").is_file():
+        return p / "model.pt"
+    stem = p.parent.name if p.name == "model.pt" else (p.name[:-3] if p.name.endswith(".pt") else p.name)
+    for base in (MODELS_DIR, MODELS_DIR / "opponent_pool", LOGS_DIR / "models", ROOT):
+        for c in (base / p, base / stem / "model.pt", base / f"{stem}.pt", base / f"BEST_{stem}.pt"):
+            if c.is_file():
+                return c
+    raise FileNotFoundError(f"no model for {str(ref)!r} in models/, models/opponent_pool/ or logs/models/")
 
 
 def _checkpoint(model, kind: str, config: dict, label: str, meta: dict, optimizer=None) -> dict:

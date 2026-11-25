@@ -151,3 +151,44 @@ def test_scrape_player_filters_and_skips_known(data_dir):
     sock3 = FakeSocket(rows[:1])
     assert ws.scrape_player(sock3, "justinberner", None, max_per_tc=5, delay=0) == {"1+5": 1}
     assert sock3.fetched == [] and gs.read_index("justinberner", "1 | 5")[0]["place"] == 3
+
+
+def test_scrape_player_min_seek(data_dir):
+    base = archive_game()
+    rows = [{**base, "gameNr": 1, "q": {**base["q"], "minRating": 2200, "maxRating": 4000}},
+            {**base, "gameNr": 2, "q": {**base["q"], "minRating": "1500"}},
+            {**base, "gameNr": 3},                                   # no minimum
+            {**base, "gameNr": 4, "q": {**base["q"], "minRating": "2000"}}]
+    assert ws.seek_range(rows[0]) == (2200, 4000) and ws.seek_range(rows[2]) == (None, None)
+    sock = FakeSocket(rows)
+    assert ws.scrape_player(sock, "griffinlc", None, max_per_tc=10, delay=0, min_seek=2000) == {"1+5": 2}
+    assert sock.fetched == ["1", "4"]
+    assert [e["seek_min"] for e in gs.read_index("griffinlc", "1 | 5")] == [2200, 2000]
+
+
+def test_scrape_player_rapid_and_opponent_rating(data_dir):
+    base = archive_game()   # griffinlc (1773) vs 1624 / 1499 / 1500
+    strong = {"rating1": 2100, "rating3": 1950, "rating4": 1900}
+    rows = [{**base, "gameNr": 1, **strong, "q": {**base["q"], "timeControlType": "rapid"}},
+            {**base, "gameNr": 2, **strong, "q": {**base["q"], "timeControlType": "blitz"}},
+            {**base, "gameNr": 3, "q": {**base["q"], "timeControlType": "rapid"}},   # weak opponents
+            {**base, "gameNr": 4, **strong, "rating4": 1899, "q": {**base["q"], "timeControlType": "rapid"}}]
+    row = ws.archive_row(rows[0], searched="griffinlc")
+    assert row["tc_type"] == "rapid" and ws.min_opponent_rating(row, "griffinlc") == 1900
+    # game 2 was indexed earlier, before tc_type was recorded
+    gs.store_game(ws.game_data({**rows[1], "gameNr": 2}), {**ws.archive_row(rows[1]), "tc_type": None},
+                  player="griffinlc")
+    sock = FakeSocket(rows)
+    assert ws.scrape_player(sock, "griffinlc", None, max_per_tc=10, delay=0,
+                            tc_types=["Rapid"], min_opp_rating=1900) == {"1+5": 1}
+    assert sock.fetched == ["1"]
+    by_id = {e["game_id"]: e for e in gs.read_index("griffinlc", "1 | 5")}
+    assert by_id["1"]["tc_type"] == "rapid" and by_id["2"]["tc_type"] == "blitz"   # back-filled
+
+
+def test_scrape_player_skips_games_without_the_player(data_dir):
+    base = archive_game()
+    other = {**base, "gameNr": 9, "username2": "someoneelse"}
+    sock = FakeSocket([other, {**base, "gameNr": 1}])
+    assert ws.scrape_player(sock, "griffinlc", None, max_per_tc=10, delay=0) == {"1+5": 1}
+    assert sock.fetched == ["1"]

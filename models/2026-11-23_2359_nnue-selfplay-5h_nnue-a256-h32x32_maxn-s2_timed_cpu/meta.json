@@ -1,0 +1,4140 @@
+{
+ "label": "2026-11-23_2359_nnue-selfplay-5h_nnue-a256-h32x32_maxn-s2_timed_cpu",
+ "kind": "nnue",
+ "config": {
+  "acc": 256,
+  "hidden": [
+   32,
+   32
+  ]
+ },
+ "params": 444422,
+ "args": {
+  "init": "models/2026-11-23_1607_nnue-v1_nnue-a256-h32x32_ep8_cpu",
+  "tag": "nnue-selfplay-5h",
+  "hours": 5.0,
+  "workers": 10,
+  "games": 48,
+  "depth": 2,
+  "qdepth": 2,
+  "check_ext": 3,
+  "explore": 0.05,
+  "steps": 80,
+  "batch": 1024,
+  "base_frac": 0.5,
+  "buffer": 400000,
+  "min_buffer": 20000,
+  "lr": 0.0003,
+  "weight_decay": 1e-05,
+  "check_min": 60,
+  "check_games": 48,
+  "yard_games": 40,
+  "yard_workers": 4,
+  "yard_sims": 32,
+  "mlp": "models/opponent_pool/league_model.pt",
+  "records": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\scraper\\data\\records",
+  "base_selfplay": [
+   "logs/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu/games.jsonl"
+  ],
+  "cache": "logs/nnue_cache.npz",
+  "seed": 0
+ },
+ "environment": {
+  "host": "arnavjyoga7",
+  "python": "3.14.0",
+  "torch": "2.9.1+cpu",
+  "device": "cpu",
+  "git_commit": "d864e82-dirty",
+  "cuda_available": false
+ },
+ "init": "models/2026-11-23_1607_nnue-v1_nnue-a256-h32x32_ep8_cpu",
+ "history": [
+  {
+   "iteration": 1,
+   "hours": 0.032,
+   "games": 48,
+   "positions": 4765,
+   "buffer": 4765,
+   "selfplay_sec": 61.1,
+   "train_sec": 0.1,
+   "loss": null,
+   "endings": {
+    "repetition": 4,
+    "ply_cap": 3,
+    "last_king": 41
+   },
+   "mean_plies": 99.3,
+   "prey_share": 0.411,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 2,
+   "hours": 0.061,
+   "games": 48,
+   "positions": 5433,
+   "buffer": 10198,
+   "selfplay_sec": 103.6,
+   "train_sec": 0.1,
+   "loss": null,
+   "endings": {
+    "last_king": 42,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "mean_plies": 113.2,
+   "prey_share": 0.396,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 3,
+   "hours": 0.081,
+   "games": 48,
+   "positions": 5324,
+   "buffer": 15522,
+   "selfplay_sec": 71.7,
+   "train_sec": 0.1,
+   "loss": null,
+   "endings": {
+    "last_king": 38,
+    "ply_cap": 1,
+    "repetition": 9
+   },
+   "mean_plies": 110.9,
+   "prey_share": 0.387,
+   "gang_rate": 0.958
+  },
+  {
+   "iteration": 4,
+   "hours": 0.103,
+   "games": 48,
+   "positions": 5495,
+   "buffer": 21017,
+   "selfplay_sec": 78.7,
+   "train_sec": 1.8,
+   "loss": 0.3783,
+   "endings": {
+    "last_king": 42,
+    "repetition": 2,
+    "ply_cap": 4
+   },
+   "mean_plies": 114.5,
+   "prey_share": 0.388,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 5,
+   "hours": 0.121,
+   "games": 48,
+   "positions": 5384,
+   "buffer": 26401,
+   "selfplay_sec": 62.9,
+   "train_sec": 1.8,
+   "loss": 0.3609,
+   "endings": {
+    "repetition": 9,
+    "last_king": 36,
+    "ply_cap": 3
+   },
+   "mean_plies": 112.2,
+   "prey_share": 0.378,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 6,
+   "hours": 0.135,
+   "games": 48,
+   "positions": 4932,
+   "buffer": 31333,
+   "selfplay_sec": 49.3,
+   "train_sec": 1.9,
+   "loss": 0.3537,
+   "endings": {
+    "last_king": 38,
+    "ply_cap": 3,
+    "repetition": 7
+   },
+   "mean_plies": 102.8,
+   "prey_share": 0.388,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 7,
+   "hours": 0.157,
+   "games": 48,
+   "positions": 4601,
+   "buffer": 35934,
+   "selfplay_sec": 77.1,
+   "train_sec": 2.0,
+   "loss": 0.3473,
+   "endings": {
+    "repetition": 5,
+    "last_king": 42,
+    "ply_cap": 1
+   },
+   "mean_plies": 95.9,
+   "prey_share": 0.398,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 8,
+   "hours": 0.191,
+   "games": 48,
+   "positions": 4461,
+   "buffer": 40395,
+   "selfplay_sec": 120.3,
+   "train_sec": 1.9,
+   "loss": 0.343,
+   "endings": {
+    "last_king": 44,
+    "repetition": 4
+   },
+   "mean_plies": 92.9,
+   "prey_share": 0.395,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 9,
+   "hours": 0.222,
+   "games": 48,
+   "positions": 5098,
+   "buffer": 45493,
+   "selfplay_sec": 109.5,
+   "train_sec": 1.9,
+   "loss": 0.3404,
+   "endings": {
+    "last_king": 39,
+    "repetition": 5,
+    "ply_cap": 4
+   },
+   "mean_plies": 106.2,
+   "prey_share": 0.365,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 10,
+   "hours": 0.248,
+   "games": 48,
+   "positions": 4893,
+   "buffer": 50386,
+   "selfplay_sec": 91.7,
+   "train_sec": 1.9,
+   "loss": 0.3339,
+   "endings": {
+    "repetition": 8,
+    "last_king": 39,
+    "ply_cap": 1
+   },
+   "mean_plies": 101.9,
+   "prey_share": 0.38,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 11,
+   "hours": 0.273,
+   "games": 48,
+   "positions": 4291,
+   "buffer": 54677,
+   "selfplay_sec": 86.0,
+   "train_sec": 1.9,
+   "loss": 0.3295,
+   "endings": {
+    "last_king": 43,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "mean_plies": 89.4,
+   "prey_share": 0.378,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 12,
+   "hours": 0.304,
+   "games": 48,
+   "positions": 4038,
+   "buffer": 58715,
+   "selfplay_sec": 111.4,
+   "train_sec": 2.0,
+   "loss": 0.3265,
+   "endings": {
+    "last_king": 40,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "mean_plies": 84.1,
+   "prey_share": 0.398,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 13,
+   "hours": 0.348,
+   "games": 48,
+   "positions": 4130,
+   "buffer": 62845,
+   "selfplay_sec": 155.1,
+   "train_sec": 2.0,
+   "loss": 0.3239,
+   "endings": {
+    "last_king": 41,
+    "repetition": 5,
+    "ply_cap": 2
+   },
+   "mean_plies": 86.0,
+   "prey_share": 0.375,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 14,
+   "hours": 0.372,
+   "games": 48,
+   "positions": 4363,
+   "buffer": 67208,
+   "selfplay_sec": 85.9,
+   "train_sec": 2.1,
+   "loss": 0.3207,
+   "endings": {
+    "last_king": 41,
+    "repetition": 5,
+    "ply_cap": 2
+   },
+   "mean_plies": 90.9,
+   "prey_share": 0.391,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 15,
+   "hours": 0.406,
+   "games": 48,
+   "positions": 4254,
+   "buffer": 71462,
+   "selfplay_sec": 118.2,
+   "train_sec": 2.0,
+   "loss": 0.3202,
+   "endings": {
+    "last_king": 40,
+    "repetition": 5,
+    "ply_cap": 3
+   },
+   "mean_plies": 88.6,
+   "prey_share": 0.399,
+   "gang_rate": 0.771
+  },
+  {
+   "iteration": 16,
+   "hours": 0.437,
+   "games": 48,
+   "positions": 4200,
+   "buffer": 75662,
+   "selfplay_sec": 112.0,
+   "train_sec": 2.0,
+   "loss": 0.3184,
+   "endings": {
+    "last_king": 42,
+    "repetition": 6
+   },
+   "mean_plies": 87.5,
+   "prey_share": 0.404,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 17,
+   "hours": 0.464,
+   "games": 48,
+   "positions": 4406,
+   "buffer": 80068,
+   "selfplay_sec": 94.9,
+   "train_sec": 2.0,
+   "loss": 0.3155,
+   "endings": {
+    "last_king": 40,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "mean_plies": 91.8,
+   "prey_share": 0.386,
+   "gang_rate": 0.771
+  },
+  {
+   "iteration": 18,
+   "hours": 0.488,
+   "games": 48,
+   "positions": 4024,
+   "buffer": 84092,
+   "selfplay_sec": 84.0,
+   "train_sec": 2.6,
+   "loss": 0.3152,
+   "endings": {
+    "last_king": 39,
+    "repetition": 8,
+    "ply_cap": 1
+   },
+   "mean_plies": 83.8,
+   "prey_share": 0.392,
+   "gang_rate": 0.771
+  },
+  {
+   "iteration": 19,
+   "hours": 0.519,
+   "games": 48,
+   "positions": 4334,
+   "buffer": 88426,
+   "selfplay_sec": 107.2,
+   "train_sec": 1.7,
+   "loss": 0.3131,
+   "endings": {
+    "last_king": 42,
+    "repetition": 3,
+    "ply_cap": 3
+   },
+   "mean_plies": 90.3,
+   "prey_share": 0.384,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 20,
+   "hours": 0.539,
+   "games": 48,
+   "positions": 4453,
+   "buffer": 92879,
+   "selfplay_sec": 73.4,
+   "train_sec": 1.7,
+   "loss": 0.312,
+   "endings": {
+    "last_king": 40,
+    "repetition": 5,
+    "ply_cap": 3
+   },
+   "mean_plies": 92.8,
+   "prey_share": 0.385,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 21,
+   "hours": 0.567,
+   "games": 48,
+   "positions": 5032,
+   "buffer": 97911,
+   "selfplay_sec": 95.9,
+   "train_sec": 1.7,
+   "loss": 0.3127,
+   "endings": {
+    "last_king": 40,
+    "repetition": 5,
+    "ply_cap": 3
+   },
+   "mean_plies": 104.8,
+   "prey_share": 0.367,
+   "gang_rate": 1.0
+  },
+  {
+   "iteration": 22,
+   "hours": 0.588,
+   "games": 48,
+   "positions": 4024,
+   "buffer": 101935,
+   "selfplay_sec": 73.6,
+   "train_sec": 1.7,
+   "loss": 0.309,
+   "endings": {
+    "last_king": 40,
+    "repetition": 8
+   },
+   "mean_plies": 83.8,
+   "prey_share": 0.383,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 23,
+   "hours": 0.614,
+   "games": 48,
+   "positions": 3797,
+   "buffer": 105732,
+   "selfplay_sec": 94.3,
+   "train_sec": 1.7,
+   "loss": 0.3074,
+   "endings": {
+    "last_king": 40,
+    "repetition": 8
+   },
+   "mean_plies": 79.1,
+   "prey_share": 0.395,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 24,
+   "hours": 0.637,
+   "games": 48,
+   "positions": 4106,
+   "buffer": 109838,
+   "selfplay_sec": 78.7,
+   "train_sec": 1.7,
+   "loss": 0.3069,
+   "endings": {
+    "last_king": 44,
+    "repetition": 2,
+    "ply_cap": 2
+   },
+   "mean_plies": 85.5,
+   "prey_share": 0.415,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 25,
+   "hours": 0.66,
+   "games": 48,
+   "positions": 4240,
+   "buffer": 114078,
+   "selfplay_sec": 83.4,
+   "train_sec": 1.7,
+   "loss": 0.3077,
+   "endings": {
+    "last_king": 43,
+    "ply_cap": 2,
+    "repetition": 3
+   },
+   "mean_plies": 88.3,
+   "prey_share": 0.387,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 26,
+   "hours": 0.681,
+   "games": 48,
+   "positions": 3619,
+   "buffer": 117697,
+   "selfplay_sec": 74.2,
+   "train_sec": 1.7,
+   "loss": 0.304,
+   "endings": {
+    "last_king": 43,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "mean_plies": 75.4,
+   "prey_share": 0.396,
+   "gang_rate": 0.729
+  },
+  {
+   "iteration": 27,
+   "hours": 0.708,
+   "games": 48,
+   "positions": 4248,
+   "buffer": 121945,
+   "selfplay_sec": 93.5,
+   "train_sec": 1.7,
+   "loss": 0.305,
+   "endings": {
+    "last_king": 41,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "mean_plies": 88.5,
+   "prey_share": 0.372,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 28,
+   "hours": 0.739,
+   "games": 48,
+   "positions": 3994,
+   "buffer": 125939,
+   "selfplay_sec": 109.4,
+   "train_sec": 1.7,
+   "loss": 0.3043,
+   "endings": {
+    "ply_cap": 1,
+    "last_king": 42,
+    "repetition": 5
+   },
+   "mean_plies": 83.2,
+   "prey_share": 0.407,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 29,
+   "hours": 0.766,
+   "games": 48,
+   "positions": 4684,
+   "buffer": 130623,
+   "selfplay_sec": 97.5,
+   "train_sec": 1.7,
+   "loss": 0.3024,
+   "endings": {
+    "last_king": 42,
+    "repetition": 6
+   },
+   "mean_plies": 97.6,
+   "prey_share": 0.373,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 30,
+   "hours": 0.789,
+   "games": 48,
+   "positions": 4007,
+   "buffer": 134630,
+   "selfplay_sec": 81.3,
+   "train_sec": 1.7,
+   "loss": 0.3041,
+   "endings": {
+    "last_king": 41,
+    "repetition": 5,
+    "ply_cap": 2
+   },
+   "mean_plies": 83.5,
+   "prey_share": 0.367,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 31,
+   "hours": 0.809,
+   "games": 48,
+   "positions": 4533,
+   "buffer": 139163,
+   "selfplay_sec": 70.4,
+   "train_sec": 1.6,
+   "loss": 0.3009,
+   "endings": {
+    "last_king": 41,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "mean_plies": 94.4,
+   "prey_share": 0.398,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 32,
+   "hours": 0.828,
+   "games": 48,
+   "positions": 4121,
+   "buffer": 143284,
+   "selfplay_sec": 65.7,
+   "train_sec": 1.7,
+   "loss": 0.2997,
+   "endings": {
+    "last_king": 42,
+    "repetition": 4,
+    "ply_cap": 2
+   },
+   "mean_plies": 85.9,
+   "prey_share": 0.406,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 33,
+   "hours": 0.85,
+   "games": 48,
+   "positions": 3784,
+   "buffer": 147068,
+   "selfplay_sec": 78.0,
+   "train_sec": 1.7,
+   "loss": 0.2998,
+   "endings": {
+    "last_king": 40,
+    "ply_cap": 1,
+    "repetition": 7
+   },
+   "mean_plies": 78.8,
+   "prey_share": 0.397,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 34,
+   "hours": 0.871,
+   "games": 48,
+   "positions": 3960,
+   "buffer": 151028,
+   "selfplay_sec": 74.3,
+   "train_sec": 1.7,
+   "loss": 0.2985,
+   "endings": {
+    "last_king": 39,
+    "ply_cap": 1,
+    "repetition": 8
+   },
+   "mean_plies": 82.5,
+   "prey_share": 0.397,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 35,
+   "hours": 0.892,
+   "games": 48,
+   "positions": 4087,
+   "buffer": 155115,
+   "selfplay_sec": 72.7,
+   "train_sec": 1.7,
+   "loss": 0.2998,
+   "endings": {
+    "last_king": 42,
+    "repetition": 6
+   },
+   "mean_plies": 85.1,
+   "prey_share": 0.383,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 36,
+   "hours": 0.914,
+   "games": 48,
+   "positions": 4070,
+   "buffer": 159185,
+   "selfplay_sec": 77.1,
+   "train_sec": 1.7,
+   "loss": 0.2984,
+   "endings": {
+    "last_king": 41,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "mean_plies": 84.8,
+   "prey_share": 0.406,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 37,
+   "hours": 0.945,
+   "games": 48,
+   "positions": 4661,
+   "buffer": 163846,
+   "selfplay_sec": 110.4,
+   "train_sec": 1.7,
+   "loss": 0.2993,
+   "endings": {
+    "last_king": 44,
+    "repetition": 3,
+    "ply_cap": 1
+   },
+   "mean_plies": 97.1,
+   "prey_share": 0.371,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 38,
+   "hours": 0.964,
+   "games": 48,
+   "positions": 4348,
+   "buffer": 168194,
+   "selfplay_sec": 66.0,
+   "train_sec": 1.7,
+   "loss": 0.3004,
+   "endings": {
+    "last_king": 41,
+    "ply_cap": 3,
+    "repetition": 4
+   },
+   "mean_plies": 90.6,
+   "prey_share": 0.415,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 39,
+   "hours": 0.986,
+   "games": 48,
+   "positions": 4029,
+   "buffer": 172223,
+   "selfplay_sec": 77.4,
+   "train_sec": 1.7,
+   "loss": 0.2993,
+   "endings": {
+    "last_king": 40,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "mean_plies": 83.9,
+   "prey_share": 0.385,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 40,
+   "hours": 1.017,
+   "games": 48,
+   "positions": 4275,
+   "buffer": 176498,
+   "selfplay_sec": 110.3,
+   "train_sec": 1.7,
+   "loss": 0.2976,
+   "endings": {
+    "last_king": 45,
+    "repetition": 3
+   },
+   "mean_plies": 89.1,
+   "prey_share": 0.385,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 41,
+   "hours": 1.103,
+   "games": 48,
+   "positions": 4507,
+   "buffer": 181005,
+   "selfplay_sec": 101.3,
+   "train_sec": 1.7,
+   "loss": 0.4195,
+   "endings": {
+    "last_king": 43,
+    "repetition": 3,
+    "ply_cap": 2
+   },
+   "mean_plies": 93.9,
+   "prey_share": 0.378,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 42,
+   "hours": 1.12,
+   "games": 48,
+   "positions": 5944,
+   "buffer": 186949,
+   "selfplay_sec": 58.6,
+   "train_sec": 1.7,
+   "loss": 0.4113,
+   "endings": {
+    "repetition": 6,
+    "last_king": 36,
+    "ply_cap": 6
+   },
+   "mean_plies": 123.8,
+   "prey_share": 0.394,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 43,
+   "hours": 1.144,
+   "games": 48,
+   "positions": 4782,
+   "buffer": 191731,
+   "selfplay_sec": 84.8,
+   "train_sec": 1.7,
+   "loss": 0.4045,
+   "endings": {
+    "last_king": 43,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "mean_plies": 99.6,
+   "prey_share": 0.382,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 44,
+   "hours": 1.163,
+   "games": 48,
+   "positions": 5539,
+   "buffer": 197270,
+   "selfplay_sec": 66.7,
+   "train_sec": 1.8,
+   "loss": 0.4011,
+   "endings": {
+    "last_king": 43,
+    "repetition": 2,
+    "ply_cap": 3
+   },
+   "mean_plies": 115.4,
+   "prey_share": 0.373,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 45,
+   "hours": 1.181,
+   "games": 48,
+   "positions": 5706,
+   "buffer": 202976,
+   "selfplay_sec": 64.6,
+   "train_sec": 1.7,
+   "loss": 0.3952,
+   "endings": {
+    "last_king": 36,
+    "repetition": 10,
+    "ply_cap": 2
+   },
+   "mean_plies": 118.9,
+   "prey_share": 0.377,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 46,
+   "hours": 1.197,
+   "games": 48,
+   "positions": 5088,
+   "buffer": 208064,
+   "selfplay_sec": 55.4,
+   "train_sec": 1.6,
+   "loss": 0.392,
+   "endings": {
+    "last_king": 38,
+    "repetition": 9,
+    "ply_cap": 1
+   },
+   "mean_plies": 106.0,
+   "prey_share": 0.385,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 47,
+   "hours": 1.217,
+   "games": 48,
+   "positions": 5118,
+   "buffer": 213182,
+   "selfplay_sec": 68.3,
+   "train_sec": 1.7,
+   "loss": 0.3882,
+   "endings": {
+    "last_king": 36,
+    "repetition": 12
+   },
+   "mean_plies": 106.6,
+   "prey_share": 0.385,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 48,
+   "hours": 1.229,
+   "games": 48,
+   "positions": 4623,
+   "buffer": 217805,
+   "selfplay_sec": 42.9,
+   "train_sec": 1.6,
+   "loss": 0.385,
+   "endings": {
+    "last_king": 41,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "mean_plies": 96.3,
+   "prey_share": 0.378,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 49,
+   "hours": 1.248,
+   "games": 48,
+   "positions": 4947,
+   "buffer": 222752,
+   "selfplay_sec": 67.2,
+   "train_sec": 1.7,
+   "loss": 0.3802,
+   "endings": {
+    "repetition": 8,
+    "last_king": 39,
+    "ply_cap": 1
+   },
+   "mean_plies": 103.1,
+   "prey_share": 0.376,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 50,
+   "hours": 1.265,
+   "games": 48,
+   "positions": 4924,
+   "buffer": 227676,
+   "selfplay_sec": 57.7,
+   "train_sec": 1.7,
+   "loss": 0.378,
+   "endings": {
+    "last_king": 38,
+    "repetition": 7,
+    "ply_cap": 3
+   },
+   "mean_plies": 102.6,
+   "prey_share": 0.399,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 51,
+   "hours": 1.277,
+   "games": 48,
+   "positions": 4985,
+   "buffer": 232661,
+   "selfplay_sec": 44.0,
+   "train_sec": 1.7,
+   "loss": 0.3759,
+   "endings": {
+    "last_king": 34,
+    "ply_cap": 4,
+    "repetition": 10
+   },
+   "mean_plies": 103.9,
+   "prey_share": 0.405,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 52,
+   "hours": 1.296,
+   "games": 48,
+   "positions": 5725,
+   "buffer": 238386,
+   "selfplay_sec": 65.2,
+   "train_sec": 1.7,
+   "loss": 0.3723,
+   "endings": {
+    "repetition": 10,
+    "last_king": 35,
+    "ply_cap": 3
+   },
+   "mean_plies": 119.3,
+   "prey_share": 0.375,
+   "gang_rate": 0.958
+  },
+  {
+   "iteration": 53,
+   "hours": 1.324,
+   "games": 48,
+   "positions": 5508,
+   "buffer": 243894,
+   "selfplay_sec": 98.4,
+   "train_sec": 1.7,
+   "loss": 0.37,
+   "endings": {
+    "last_king": 37,
+    "repetition": 9,
+    "ply_cap": 2
+   },
+   "mean_plies": 114.8,
+   "prey_share": 0.375,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 54,
+   "hours": 1.34,
+   "games": 48,
+   "positions": 5334,
+   "buffer": 249228,
+   "selfplay_sec": 55.6,
+   "train_sec": 1.7,
+   "loss": 0.3676,
+   "endings": {
+    "last_king": 39,
+    "repetition": 5,
+    "ply_cap": 4
+   },
+   "mean_plies": 111.1,
+   "prey_share": 0.399,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 55,
+   "hours": 1.353,
+   "games": 48,
+   "positions": 4760,
+   "buffer": 253988,
+   "selfplay_sec": 47.9,
+   "train_sec": 1.7,
+   "loss": 0.3655,
+   "endings": {
+    "last_king": 39,
+    "repetition": 8,
+    "ply_cap": 1
+   },
+   "mean_plies": 99.2,
+   "prey_share": 0.389,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 56,
+   "hours": 1.381,
+   "games": 48,
+   "positions": 5452,
+   "buffer": 259440,
+   "selfplay_sec": 99.1,
+   "train_sec": 1.7,
+   "loss": 0.3612,
+   "endings": {
+    "last_king": 36,
+    "ply_cap": 3,
+    "repetition": 9
+   },
+   "mean_plies": 113.6,
+   "prey_share": 0.385,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 57,
+   "hours": 1.396,
+   "games": 48,
+   "positions": 4991,
+   "buffer": 264431,
+   "selfplay_sec": 49.8,
+   "train_sec": 1.7,
+   "loss": 0.3597,
+   "endings": {
+    "last_king": 35,
+    "repetition": 10,
+    "ply_cap": 3
+   },
+   "mean_plies": 104.0,
+   "prey_share": 0.386,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 58,
+   "hours": 1.425,
+   "games": 48,
+   "positions": 5048,
+   "buffer": 269479,
+   "selfplay_sec": 103.7,
+   "train_sec": 1.7,
+   "loss": 0.3579,
+   "endings": {
+    "last_king": 37,
+    "repetition": 9,
+    "ply_cap": 2
+   },
+   "mean_plies": 105.2,
+   "prey_share": 0.365,
+   "gang_rate": 0.958
+  },
+  {
+   "iteration": 59,
+   "hours": 1.443,
+   "games": 48,
+   "positions": 4621,
+   "buffer": 274100,
+   "selfplay_sec": 62.3,
+   "train_sec": 1.6,
+   "loss": 0.3557,
+   "endings": {
+    "last_king": 43,
+    "repetition": 3,
+    "ply_cap": 2
+   },
+   "mean_plies": 96.3,
+   "prey_share": 0.391,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 60,
+   "hours": 1.462,
+   "games": 48,
+   "positions": 4910,
+   "buffer": 279010,
+   "selfplay_sec": 68.2,
+   "train_sec": 1.8,
+   "loss": 0.354,
+   "endings": {
+    "last_king": 39,
+    "repetition": 5,
+    "ply_cap": 4
+   },
+   "mean_plies": 102.3,
+   "prey_share": 0.385,
+   "gang_rate": 0.979
+  },
+  {
+   "iteration": 61,
+   "hours": 1.48,
+   "games": 48,
+   "positions": 4926,
+   "buffer": 283936,
+   "selfplay_sec": 61.4,
+   "train_sec": 1.7,
+   "loss": 0.3518,
+   "endings": {
+    "last_king": 43,
+    "ply_cap": 3,
+    "repetition": 2
+   },
+   "mean_plies": 102.6,
+   "prey_share": 0.373,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 62,
+   "hours": 1.494,
+   "games": 48,
+   "positions": 4549,
+   "buffer": 288485,
+   "selfplay_sec": 51.1,
+   "train_sec": 1.7,
+   "loss": 0.3509,
+   "endings": {
+    "last_king": 41,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "mean_plies": 94.8,
+   "prey_share": 0.385,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 63,
+   "hours": 1.515,
+   "games": 48,
+   "positions": 5346,
+   "buffer": 293831,
+   "selfplay_sec": 73.2,
+   "train_sec": 1.7,
+   "loss": 0.3458,
+   "endings": {
+    "last_king": 39,
+    "ply_cap": 3,
+    "repetition": 6
+   },
+   "mean_plies": 111.4,
+   "prey_share": 0.371,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 64,
+   "hours": 1.536,
+   "games": 48,
+   "positions": 5026,
+   "buffer": 298857,
+   "selfplay_sec": 74.8,
+   "train_sec": 1.7,
+   "loss": 0.3459,
+   "endings": {
+    "last_king": 43,
+    "repetition": 2,
+    "ply_cap": 3
+   },
+   "mean_plies": 104.7,
+   "prey_share": 0.38,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 65,
+   "hours": 1.552,
+   "games": 48,
+   "positions": 4543,
+   "buffer": 303400,
+   "selfplay_sec": 54.4,
+   "train_sec": 1.7,
+   "loss": 0.3428,
+   "endings": {
+    "last_king": 40,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "mean_plies": 94.6,
+   "prey_share": 0.394,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 66,
+   "hours": 1.568,
+   "games": 48,
+   "positions": 5107,
+   "buffer": 308507,
+   "selfplay_sec": 57.0,
+   "train_sec": 1.7,
+   "loss": 0.3443,
+   "endings": {
+    "last_king": 38,
+    "repetition": 10
+   },
+   "mean_plies": 106.4,
+   "prey_share": 0.406,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 67,
+   "hours": 1.587,
+   "games": 48,
+   "positions": 5557,
+   "buffer": 314064,
+   "selfplay_sec": 67.0,
+   "train_sec": 1.7,
+   "loss": 0.3405,
+   "endings": {
+    "repetition": 6,
+    "last_king": 39,
+    "ply_cap": 3
+   },
+   "mean_plies": 115.8,
+   "prey_share": 0.409,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 68,
+   "hours": 1.601,
+   "games": 48,
+   "positions": 4504,
+   "buffer": 318568,
+   "selfplay_sec": 48.7,
+   "train_sec": 1.7,
+   "loss": 0.3383,
+   "endings": {
+    "last_king": 41,
+    "repetition": 4,
+    "ply_cap": 3
+   },
+   "mean_plies": 93.8,
+   "prey_share": 0.406,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 69,
+   "hours": 1.621,
+   "games": 48,
+   "positions": 5024,
+   "buffer": 323592,
+   "selfplay_sec": 67.1,
+   "train_sec": 1.7,
+   "loss": 0.3386,
+   "endings": {
+    "last_king": 38,
+    "repetition": 9,
+    "ply_cap": 1
+   },
+   "mean_plies": 104.7,
+   "prey_share": 0.369,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 70,
+   "hours": 1.64,
+   "games": 48,
+   "positions": 4217,
+   "buffer": 327809,
+   "selfplay_sec": 68.8,
+   "train_sec": 1.7,
+   "loss": 0.3363,
+   "endings": {
+    "repetition": 6,
+    "last_king": 42
+   },
+   "mean_plies": 87.9,
+   "prey_share": 0.392,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 71,
+   "hours": 1.657,
+   "games": 48,
+   "positions": 4122,
+   "buffer": 331931,
+   "selfplay_sec": 60.3,
+   "train_sec": 1.7,
+   "loss": 0.3354,
+   "endings": {
+    "last_king": 42,
+    "repetition": 4,
+    "ply_cap": 2
+   },
+   "mean_plies": 85.9,
+   "prey_share": 0.397,
+   "gang_rate": 0.75
+  },
+  {
+   "iteration": 72,
+   "hours": 1.681,
+   "games": 48,
+   "positions": 4344,
+   "buffer": 336275,
+   "selfplay_sec": 82.0,
+   "train_sec": 1.7,
+   "loss": 0.3333,
+   "endings": {
+    "last_king": 39,
+    "repetition": 6,
+    "ply_cap": 3
+   },
+   "mean_plies": 90.5,
+   "prey_share": 0.391,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 73,
+   "hours": 1.702,
+   "games": 48,
+   "positions": 3746,
+   "buffer": 340021,
+   "selfplay_sec": 74.1,
+   "train_sec": 1.7,
+   "loss": 0.3333,
+   "endings": {
+    "last_king": 40,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "mean_plies": 78.0,
+   "prey_share": 0.41,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 74,
+   "hours": 1.718,
+   "games": 48,
+   "positions": 4198,
+   "buffer": 344219,
+   "selfplay_sec": 59.0,
+   "train_sec": 1.7,
+   "loss": 0.3316,
+   "endings": {
+    "last_king": 40,
+    "ply_cap": 2,
+    "repetition": 6
+   },
+   "mean_plies": 87.5,
+   "prey_share": 0.38,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 75,
+   "hours": 1.739,
+   "games": 48,
+   "positions": 4376,
+   "buffer": 348595,
+   "selfplay_sec": 72.7,
+   "train_sec": 1.7,
+   "loss": 0.329,
+   "endings": {
+    "last_king": 38,
+    "repetition": 9,
+    "ply_cap": 1
+   },
+   "mean_plies": 91.2,
+   "prey_share": 0.417,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 76,
+   "hours": 1.755,
+   "games": 48,
+   "positions": 5090,
+   "buffer": 353685,
+   "selfplay_sec": 56.7,
+   "train_sec": 1.7,
+   "loss": 0.3291,
+   "endings": {
+    "last_king": 38,
+    "repetition": 5,
+    "ply_cap": 5
+   },
+   "mean_plies": 106.0,
+   "prey_share": 0.398,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 77,
+   "hours": 1.776,
+   "games": 48,
+   "positions": 3707,
+   "buffer": 357392,
+   "selfplay_sec": 71.1,
+   "train_sec": 1.7,
+   "loss": 0.3285,
+   "endings": {
+    "last_king": 41,
+    "ply_cap": 1,
+    "repetition": 6
+   },
+   "mean_plies": 77.2,
+   "prey_share": 0.395,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 78,
+   "hours": 1.8,
+   "games": 48,
+   "positions": 4301,
+   "buffer": 361693,
+   "selfplay_sec": 84.6,
+   "train_sec": 1.7,
+   "loss": 0.3259,
+   "endings": {
+    "last_king": 39,
+    "repetition": 8,
+    "ply_cap": 1
+   },
+   "mean_plies": 89.6,
+   "prey_share": 0.395,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 79,
+   "hours": 1.826,
+   "games": 48,
+   "positions": 3883,
+   "buffer": 365576,
+   "selfplay_sec": 95.0,
+   "train_sec": 1.7,
+   "loss": 0.3271,
+   "endings": {
+    "last_king": 45,
+    "repetition": 2,
+    "ply_cap": 1
+   },
+   "mean_plies": 80.9,
+   "prey_share": 0.394,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 80,
+   "hours": 1.853,
+   "games": 48,
+   "positions": 4766,
+   "buffer": 370342,
+   "selfplay_sec": 95.7,
+   "train_sec": 1.7,
+   "loss": 0.3242,
+   "endings": {
+    "last_king": 35,
+    "ply_cap": 2,
+    "repetition": 11
+   },
+   "mean_plies": 99.3,
+   "prey_share": 0.386,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 81,
+   "hours": 1.873,
+   "games": 48,
+   "positions": 4626,
+   "buffer": 374968,
+   "selfplay_sec": 68.6,
+   "train_sec": 1.6,
+   "loss": 0.3233,
+   "endings": {
+    "last_king": 40,
+    "repetition": 8
+   },
+   "mean_plies": 96.4,
+   "prey_share": 0.378,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 82,
+   "hours": 1.892,
+   "games": 48,
+   "positions": 4388,
+   "buffer": 379356,
+   "selfplay_sec": 67.9,
+   "train_sec": 1.7,
+   "loss": 0.3221,
+   "endings": {
+    "last_king": 40,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "mean_plies": 91.4,
+   "prey_share": 0.388,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 83,
+   "hours": 1.936,
+   "games": 48,
+   "positions": 4196,
+   "buffer": 383552,
+   "selfplay_sec": 154.2,
+   "train_sec": 1.7,
+   "loss": 0.3207,
+   "endings": {
+    "last_king": 43,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "mean_plies": 87.4,
+   "prey_share": 0.386,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 84,
+   "hours": 1.955,
+   "games": 48,
+   "positions": 5394,
+   "buffer": 388946,
+   "selfplay_sec": 68.8,
+   "train_sec": 1.7,
+   "loss": 0.3222,
+   "endings": {
+    "last_king": 40,
+    "repetition": 5,
+    "ply_cap": 3
+   },
+   "mean_plies": 112.4,
+   "prey_share": 0.392,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 85,
+   "hours": 1.974,
+   "games": 48,
+   "positions": 4428,
+   "buffer": 393374,
+   "selfplay_sec": 66.6,
+   "train_sec": 1.7,
+   "loss": 0.3214,
+   "endings": {
+    "last_king": 43,
+    "repetition": 5
+   },
+   "mean_plies": 92.2,
+   "prey_share": 0.415,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 86,
+   "hours": 1.995,
+   "games": 48,
+   "positions": 4417,
+   "buffer": 397791,
+   "selfplay_sec": 73.7,
+   "train_sec": 1.6,
+   "loss": 0.3205,
+   "endings": {
+    "last_king": 42,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "mean_plies": 92.0,
+   "prey_share": 0.408,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 87,
+   "hours": 2.019,
+   "games": 48,
+   "positions": 4588,
+   "buffer": 400000,
+   "selfplay_sec": 82.5,
+   "train_sec": 1.7,
+   "loss": 0.3197,
+   "endings": {
+    "last_king": 37,
+    "repetition": 8,
+    "ply_cap": 3
+   },
+   "mean_plies": 95.6,
+   "prey_share": 0.397,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 88,
+   "hours": 2.038,
+   "games": 48,
+   "positions": 4202,
+   "buffer": 400000,
+   "selfplay_sec": 67.1,
+   "train_sec": 1.9,
+   "loss": 0.3201,
+   "endings": {
+    "last_king": 44,
+    "repetition": 4
+   },
+   "mean_plies": 87.5,
+   "prey_share": 0.392,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 89,
+   "hours": 2.068,
+   "games": 48,
+   "positions": 4773,
+   "buffer": 400000,
+   "selfplay_sec": 106.4,
+   "train_sec": 1.7,
+   "loss": 0.3169,
+   "endings": {
+    "last_king": 38,
+    "repetition": 9,
+    "ply_cap": 1
+   },
+   "mean_plies": 99.4,
+   "prey_share": 0.377,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 90,
+   "hours": 2.088,
+   "games": 48,
+   "positions": 4514,
+   "buffer": 400000,
+   "selfplay_sec": 71.8,
+   "train_sec": 1.7,
+   "loss": 0.3195,
+   "endings": {
+    "last_king": 40,
+    "ply_cap": 2,
+    "repetition": 6
+   },
+   "mean_plies": 94.0,
+   "prey_share": 0.391,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 91,
+   "hours": 2.135,
+   "games": 48,
+   "positions": 4184,
+   "buffer": 400000,
+   "selfplay_sec": 66.1,
+   "train_sec": 1.7,
+   "loss": 0.4197,
+   "endings": {
+    "last_king": 42,
+    "repetition": 4,
+    "ply_cap": 2
+   },
+   "mean_plies": 87.2,
+   "prey_share": 0.397,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 92,
+   "hours": 2.161,
+   "games": 48,
+   "positions": 6711,
+   "buffer": 400000,
+   "selfplay_sec": 90.8,
+   "train_sec": 1.7,
+   "loss": 0.4134,
+   "endings": {
+    "last_king": 34,
+    "ply_cap": 8,
+    "repetition": 6
+   },
+   "mean_plies": 139.8,
+   "prey_share": 0.372,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 93,
+   "hours": 2.184,
+   "games": 48,
+   "positions": 6201,
+   "buffer": 400000,
+   "selfplay_sec": 81.7,
+   "train_sec": 1.7,
+   "loss": 0.4095,
+   "endings": {
+    "last_king": 34,
+    "repetition": 7,
+    "ply_cap": 7
+   },
+   "mean_plies": 129.2,
+   "prey_share": 0.363,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 94,
+   "hours": 2.202,
+   "games": 48,
+   "positions": 5705,
+   "buffer": 400000,
+   "selfplay_sec": 64.6,
+   "train_sec": 1.7,
+   "loss": 0.404,
+   "endings": {
+    "last_king": 38,
+    "repetition": 9,
+    "ply_cap": 1
+   },
+   "mean_plies": 118.9,
+   "prey_share": 0.396,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 95,
+   "hours": 2.218,
+   "games": 48,
+   "positions": 5200,
+   "buffer": 400000,
+   "selfplay_sec": 53.2,
+   "train_sec": 1.7,
+   "loss": 0.4003,
+   "endings": {
+    "last_king": 38,
+    "repetition": 9,
+    "ply_cap": 1
+   },
+   "mean_plies": 108.3,
+   "prey_share": 0.392,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 96,
+   "hours": 2.24,
+   "games": 48,
+   "positions": 4744,
+   "buffer": 400000,
+   "selfplay_sec": 78.2,
+   "train_sec": 1.7,
+   "loss": 0.3984,
+   "endings": {
+    "ply_cap": 1,
+    "last_king": 41,
+    "repetition": 6
+   },
+   "mean_plies": 98.8,
+   "prey_share": 0.398,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 97,
+   "hours": 2.261,
+   "games": 48,
+   "positions": 5512,
+   "buffer": 400000,
+   "selfplay_sec": 75.9,
+   "train_sec": 1.8,
+   "loss": 0.3926,
+   "endings": {
+    "repetition": 9,
+    "last_king": 37,
+    "ply_cap": 2
+   },
+   "mean_plies": 114.8,
+   "prey_share": 0.397,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 98,
+   "hours": 2.292,
+   "games": 48,
+   "positions": 5114,
+   "buffer": 400000,
+   "selfplay_sec": 109.5,
+   "train_sec": 1.7,
+   "loss": 0.3917,
+   "endings": {
+    "repetition": 10,
+    "last_king": 37,
+    "ply_cap": 1
+   },
+   "mean_plies": 106.5,
+   "prey_share": 0.369,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 99,
+   "hours": 2.312,
+   "games": 48,
+   "positions": 5605,
+   "buffer": 400000,
+   "selfplay_sec": 69.0,
+   "train_sec": 1.7,
+   "loss": 0.3891,
+   "endings": {
+    "last_king": 32,
+    "repetition": 11,
+    "ply_cap": 5
+   },
+   "mean_plies": 116.8,
+   "prey_share": 0.387,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 100,
+   "hours": 2.33,
+   "games": 48,
+   "positions": 5074,
+   "buffer": 400000,
+   "selfplay_sec": 64.3,
+   "train_sec": 1.6,
+   "loss": 0.3854,
+   "endings": {
+    "last_king": 41,
+    "repetition": 4,
+    "ply_cap": 3
+   },
+   "mean_plies": 105.7,
+   "prey_share": 0.383,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 101,
+   "hours": 2.361,
+   "games": 48,
+   "positions": 6281,
+   "buffer": 400000,
+   "selfplay_sec": 110.5,
+   "train_sec": 1.7,
+   "loss": 0.3827,
+   "endings": {
+    "repetition": 14,
+    "last_king": 31,
+    "ply_cap": 3
+   },
+   "mean_plies": 130.9,
+   "prey_share": 0.363,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 102,
+   "hours": 2.381,
+   "games": 48,
+   "positions": 5226,
+   "buffer": 400000,
+   "selfplay_sec": 67.7,
+   "train_sec": 1.7,
+   "loss": 0.3817,
+   "endings": {
+    "repetition": 9,
+    "last_king": 38,
+    "ply_cap": 1
+   },
+   "mean_plies": 108.9,
+   "prey_share": 0.375,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 103,
+   "hours": 2.402,
+   "games": 48,
+   "positions": 4632,
+   "buffer": 400000,
+   "selfplay_sec": 74.5,
+   "train_sec": 1.7,
+   "loss": 0.3789,
+   "endings": {
+    "ply_cap": 2,
+    "last_king": 41,
+    "repetition": 5
+   },
+   "mean_plies": 96.5,
+   "prey_share": 0.379,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 104,
+   "hours": 2.429,
+   "games": 48,
+   "positions": 5316,
+   "buffer": 400000,
+   "selfplay_sec": 97.6,
+   "train_sec": 1.7,
+   "loss": 0.3781,
+   "endings": {
+    "last_king": 35,
+    "repetition": 9,
+    "ply_cap": 4
+   },
+   "mean_plies": 110.8,
+   "prey_share": 0.381,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 105,
+   "hours": 2.447,
+   "games": 48,
+   "positions": 5131,
+   "buffer": 400000,
+   "selfplay_sec": 60.4,
+   "train_sec": 1.7,
+   "loss": 0.3749,
+   "endings": {
+    "last_king": 37,
+    "repetition": 8,
+    "ply_cap": 3
+   },
+   "mean_plies": 106.9,
+   "prey_share": 0.376,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 106,
+   "hours": 2.479,
+   "games": 48,
+   "positions": 5453,
+   "buffer": 400000,
+   "selfplay_sec": 116.1,
+   "train_sec": 1.7,
+   "loss": 0.3715,
+   "endings": {
+    "last_king": 39,
+    "repetition": 6,
+    "ply_cap": 3
+   },
+   "mean_plies": 113.6,
+   "prey_share": 0.388,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 107,
+   "hours": 2.5,
+   "games": 48,
+   "positions": 4493,
+   "buffer": 400000,
+   "selfplay_sec": 72.9,
+   "train_sec": 1.7,
+   "loss": 0.3692,
+   "endings": {
+    "last_king": 37,
+    "repetition": 10,
+    "ply_cap": 1
+   },
+   "mean_plies": 93.6,
+   "prey_share": 0.401,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 108,
+   "hours": 2.514,
+   "games": 48,
+   "positions": 5166,
+   "buffer": 400000,
+   "selfplay_sec": 48.5,
+   "train_sec": 1.6,
+   "loss": 0.3669,
+   "endings": {
+    "last_king": 37,
+    "repetition": 8,
+    "ply_cap": 3
+   },
+   "mean_plies": 107.6,
+   "prey_share": 0.385,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 109,
+   "hours": 2.541,
+   "games": 48,
+   "positions": 4699,
+   "buffer": 400000,
+   "selfplay_sec": 97.3,
+   "train_sec": 1.7,
+   "loss": 0.3664,
+   "endings": {
+    "last_king": 37,
+    "repetition": 10,
+    "ply_cap": 1
+   },
+   "mean_plies": 97.9,
+   "prey_share": 0.391,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 110,
+   "hours": 2.569,
+   "games": 48,
+   "positions": 5058,
+   "buffer": 400000,
+   "selfplay_sec": 96.3,
+   "train_sec": 1.7,
+   "loss": 0.3642,
+   "endings": {
+    "last_king": 40,
+    "repetition": 5,
+    "ply_cap": 3
+   },
+   "mean_plies": 105.4,
+   "prey_share": 0.396,
+   "gang_rate": 0.979
+  },
+  {
+   "iteration": 111,
+   "hours": 2.589,
+   "games": 48,
+   "positions": 5925,
+   "buffer": 400000,
+   "selfplay_sec": 72.8,
+   "train_sec": 1.7,
+   "loss": 0.3616,
+   "endings": {
+    "last_king": 39,
+    "repetition": 4,
+    "ply_cap": 5
+   },
+   "mean_plies": 123.4,
+   "prey_share": 0.377,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 112,
+   "hours": 2.608,
+   "games": 48,
+   "positions": 4786,
+   "buffer": 400000,
+   "selfplay_sec": 67.1,
+   "train_sec": 1.7,
+   "loss": 0.3573,
+   "endings": {
+    "last_king": 35,
+    "repetition": 12,
+    "ply_cap": 1
+   },
+   "mean_plies": 99.7,
+   "prey_share": 0.398,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 113,
+   "hours": 2.644,
+   "games": 48,
+   "positions": 5809,
+   "buffer": 400000,
+   "selfplay_sec": 127.6,
+   "train_sec": 1.7,
+   "loss": 0.3554,
+   "endings": {
+    "last_king": 37,
+    "ply_cap": 4,
+    "repetition": 7
+   },
+   "mean_plies": 121.0,
+   "prey_share": 0.382,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 114,
+   "hours": 2.665,
+   "games": 48,
+   "positions": 4951,
+   "buffer": 400000,
+   "selfplay_sec": 72.0,
+   "train_sec": 1.7,
+   "loss": 0.3517,
+   "endings": {
+    "last_king": 40,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "mean_plies": 103.1,
+   "prey_share": 0.41,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 115,
+   "hours": 2.684,
+   "games": 48,
+   "positions": 4633,
+   "buffer": 400000,
+   "selfplay_sec": 68.2,
+   "train_sec": 1.8,
+   "loss": 0.3529,
+   "endings": {
+    "last_king": 38,
+    "repetition": 8,
+    "ply_cap": 2
+   },
+   "mean_plies": 96.5,
+   "prey_share": 0.396,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 116,
+   "hours": 2.707,
+   "games": 48,
+   "positions": 5200,
+   "buffer": 400000,
+   "selfplay_sec": 79.9,
+   "train_sec": 1.7,
+   "loss": 0.3492,
+   "endings": {
+    "last_king": 37,
+    "repetition": 7,
+    "ply_cap": 4
+   },
+   "mean_plies": 108.3,
+   "prey_share": 0.403,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 117,
+   "hours": 2.72,
+   "games": 48,
+   "positions": 5198,
+   "buffer": 400000,
+   "selfplay_sec": 44.4,
+   "train_sec": 1.6,
+   "loss": 0.3482,
+   "endings": {
+    "last_king": 37,
+    "repetition": 10,
+    "ply_cap": 1
+   },
+   "mean_plies": 108.3,
+   "prey_share": 0.41,
+   "gang_rate": 0.771
+  },
+  {
+   "iteration": 118,
+   "hours": 2.735,
+   "games": 48,
+   "positions": 4694,
+   "buffer": 400000,
+   "selfplay_sec": 51.9,
+   "train_sec": 1.8,
+   "loss": 0.3464,
+   "endings": {
+    "last_king": 39,
+    "ply_cap": 2,
+    "repetition": 7
+   },
+   "mean_plies": 97.8,
+   "prey_share": 0.405,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 119,
+   "hours": 2.753,
+   "games": 48,
+   "positions": 4944,
+   "buffer": 400000,
+   "selfplay_sec": 65.3,
+   "train_sec": 1.7,
+   "loss": 0.3452,
+   "endings": {
+    "last_king": 40,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "mean_plies": 103.0,
+   "prey_share": 0.389,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 120,
+   "hours": 2.771,
+   "games": 48,
+   "positions": 4790,
+   "buffer": 400000,
+   "selfplay_sec": 61.9,
+   "train_sec": 1.7,
+   "loss": 0.3421,
+   "endings": {
+    "last_king": 39,
+    "ply_cap": 2,
+    "repetition": 7
+   },
+   "mean_plies": 99.8,
+   "prey_share": 0.396,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 121,
+   "hours": 2.787,
+   "games": 48,
+   "positions": 4161,
+   "buffer": 400000,
+   "selfplay_sec": 57.5,
+   "train_sec": 1.7,
+   "loss": 0.3413,
+   "endings": {
+    "last_king": 41,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "mean_plies": 86.7,
+   "prey_share": 0.395,
+   "gang_rate": 0.729
+  },
+  {
+   "iteration": 122,
+   "hours": 2.807,
+   "games": 48,
+   "positions": 4618,
+   "buffer": 400000,
+   "selfplay_sec": 68.1,
+   "train_sec": 1.7,
+   "loss": 0.3385,
+   "endings": {
+    "last_king": 45,
+    "repetition": 3
+   },
+   "mean_plies": 96.2,
+   "prey_share": 0.374,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 123,
+   "hours": 2.825,
+   "games": 48,
+   "positions": 5670,
+   "buffer": 400000,
+   "selfplay_sec": 64.4,
+   "train_sec": 1.7,
+   "loss": 0.3387,
+   "endings": {
+    "last_king": 36,
+    "repetition": 10,
+    "ply_cap": 2
+   },
+   "mean_plies": 118.1,
+   "prey_share": 0.409,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 124,
+   "hours": 2.852,
+   "games": 48,
+   "positions": 4744,
+   "buffer": 400000,
+   "selfplay_sec": 94.6,
+   "train_sec": 1.7,
+   "loss": 0.338,
+   "endings": {
+    "last_king": 40,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "mean_plies": 98.8,
+   "prey_share": 0.38,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 125,
+   "hours": 2.879,
+   "games": 48,
+   "positions": 5258,
+   "buffer": 400000,
+   "selfplay_sec": 96.5,
+   "train_sec": 1.7,
+   "loss": 0.3346,
+   "endings": {
+    "last_king": 36,
+    "ply_cap": 3,
+    "repetition": 9
+   },
+   "mean_plies": 109.5,
+   "prey_share": 0.391,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 126,
+   "hours": 2.899,
+   "games": 48,
+   "positions": 4704,
+   "buffer": 400000,
+   "selfplay_sec": 70.8,
+   "train_sec": 1.7,
+   "loss": 0.3338,
+   "endings": {
+    "last_king": 39,
+    "repetition": 6,
+    "ply_cap": 3
+   },
+   "mean_plies": 98.0,
+   "prey_share": 0.386,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 127,
+   "hours": 2.928,
+   "games": 48,
+   "positions": 4852,
+   "buffer": 400000,
+   "selfplay_sec": 100.4,
+   "train_sec": 1.7,
+   "loss": 0.3335,
+   "endings": {
+    "last_king": 42,
+    "repetition": 4,
+    "ply_cap": 2
+   },
+   "mean_plies": 101.1,
+   "prey_share": 0.39,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 128,
+   "hours": 2.95,
+   "games": 48,
+   "positions": 5217,
+   "buffer": 400000,
+   "selfplay_sec": 79.0,
+   "train_sec": 1.7,
+   "loss": 0.3327,
+   "endings": {
+    "last_king": 36,
+    "repetition": 11,
+    "ply_cap": 1
+   },
+   "mean_plies": 108.7,
+   "prey_share": 0.37,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 129,
+   "hours": 2.966,
+   "games": 48,
+   "positions": 4572,
+   "buffer": 400000,
+   "selfplay_sec": 53.8,
+   "train_sec": 1.7,
+   "loss": 0.3282,
+   "endings": {
+    "repetition": 5,
+    "last_king": 41,
+    "ply_cap": 2
+   },
+   "mean_plies": 95.2,
+   "prey_share": 0.376,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 130,
+   "hours": 2.996,
+   "games": 48,
+   "positions": 4673,
+   "buffer": 400000,
+   "selfplay_sec": 107.1,
+   "train_sec": 1.7,
+   "loss": 0.3287,
+   "endings": {
+    "last_king": 39,
+    "repetition": 7,
+    "ply_cap": 2
+   },
+   "mean_plies": 97.4,
+   "prey_share": 0.379,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 131,
+   "hours": 3.017,
+   "games": 48,
+   "positions": 4618,
+   "buffer": 400000,
+   "selfplay_sec": 75.0,
+   "train_sec": 1.6,
+   "loss": 0.3283,
+   "endings": {
+    "last_king": 42,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "mean_plies": 96.2,
+   "prey_share": 0.396,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 132,
+   "hours": 3.037,
+   "games": 48,
+   "positions": 4726,
+   "buffer": 400000,
+   "selfplay_sec": 70.8,
+   "train_sec": 1.6,
+   "loss": 0.3269,
+   "endings": {
+    "last_king": 40,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "mean_plies": 98.5,
+   "prey_share": 0.4,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 133,
+   "hours": 3.081,
+   "games": 48,
+   "positions": 4915,
+   "buffer": 400000,
+   "selfplay_sec": 157.3,
+   "train_sec": 1.8,
+   "loss": 0.325,
+   "endings": {
+    "last_king": 36,
+    "repetition": 10,
+    "ply_cap": 2
+   },
+   "mean_plies": 102.4,
+   "prey_share": 0.375,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 134,
+   "hours": 3.106,
+   "games": 48,
+   "positions": 5090,
+   "buffer": 400000,
+   "selfplay_sec": 86.6,
+   "train_sec": 1.6,
+   "loss": 0.3253,
+   "endings": {
+    "ply_cap": 3,
+    "last_king": 38,
+    "repetition": 7
+   },
+   "mean_plies": 106.0,
+   "prey_share": 0.378,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 135,
+   "hours": 3.123,
+   "games": 48,
+   "positions": 4732,
+   "buffer": 400000,
+   "selfplay_sec": 59.7,
+   "train_sec": 1.7,
+   "loss": 0.3242,
+   "endings": {
+    "last_king": 39,
+    "repetition": 7,
+    "ply_cap": 2
+   },
+   "mean_plies": 98.6,
+   "prey_share": 0.382,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 136,
+   "hours": 3.174,
+   "games": 48,
+   "positions": 4407,
+   "buffer": 400000,
+   "selfplay_sec": 70.4,
+   "train_sec": 1.7,
+   "loss": 0.4165,
+   "endings": {
+    "last_king": 41,
+    "repetition": 7
+   },
+   "mean_plies": 91.8,
+   "prey_share": 0.395,
+   "gang_rate": 0.771
+  },
+  {
+   "iteration": 137,
+   "hours": 3.19,
+   "games": 48,
+   "positions": 5860,
+   "buffer": 400000,
+   "selfplay_sec": 56.6,
+   "train_sec": 1.7,
+   "loss": 0.4077,
+   "endings": {
+    "last_king": 33,
+    "repetition": 14,
+    "ply_cap": 1
+   },
+   "mean_plies": 122.1,
+   "prey_share": 0.381,
+   "gang_rate": 0.958
+  },
+  {
+   "iteration": 138,
+   "hours": 3.204,
+   "games": 48,
+   "positions": 5157,
+   "buffer": 400000,
+   "selfplay_sec": 49.0,
+   "train_sec": 1.7,
+   "loss": 0.4045,
+   "endings": {
+    "last_king": 39,
+    "repetition": 5,
+    "ply_cap": 4
+   },
+   "mean_plies": 107.4,
+   "prey_share": 0.396,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 139,
+   "hours": 3.225,
+   "games": 48,
+   "positions": 6618,
+   "buffer": 400000,
+   "selfplay_sec": 72.6,
+   "train_sec": 1.7,
+   "loss": 0.3995,
+   "endings": {
+    "last_king": 37,
+    "ply_cap": 4,
+    "repetition": 7
+   },
+   "mean_plies": 137.9,
+   "prey_share": 0.37,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 140,
+   "hours": 3.239,
+   "games": 48,
+   "positions": 5044,
+   "buffer": 400000,
+   "selfplay_sec": 48.8,
+   "train_sec": 1.6,
+   "loss": 0.3952,
+   "endings": {
+    "last_king": 40,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "mean_plies": 105.1,
+   "prey_share": 0.388,
+   "gang_rate": 0.958
+  },
+  {
+   "iteration": 141,
+   "hours": 3.256,
+   "games": 48,
+   "positions": 4819,
+   "buffer": 400000,
+   "selfplay_sec": 60.2,
+   "train_sec": 1.7,
+   "loss": 0.3925,
+   "endings": {
+    "last_king": 42,
+    "ply_cap": 3,
+    "repetition": 3
+   },
+   "mean_plies": 100.4,
+   "prey_share": 0.383,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 142,
+   "hours": 3.275,
+   "games": 48,
+   "positions": 5496,
+   "buffer": 400000,
+   "selfplay_sec": 67.8,
+   "train_sec": 1.8,
+   "loss": 0.3888,
+   "endings": {
+    "last_king": 38,
+    "repetition": 9,
+    "ply_cap": 1
+   },
+   "mean_plies": 114.5,
+   "prey_share": 0.385,
+   "gang_rate": 0.771
+  },
+  {
+   "iteration": 143,
+   "hours": 3.29,
+   "games": 48,
+   "positions": 4914,
+   "buffer": 400000,
+   "selfplay_sec": 53.0,
+   "train_sec": 1.7,
+   "loss": 0.387,
+   "endings": {
+    "last_king": 35,
+    "repetition": 12,
+    "ply_cap": 1
+   },
+   "mean_plies": 102.4,
+   "prey_share": 0.395,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 144,
+   "hours": 3.306,
+   "games": 48,
+   "positions": 5628,
+   "buffer": 400000,
+   "selfplay_sec": 54.7,
+   "train_sec": 1.7,
+   "loss": 0.3826,
+   "endings": {
+    "last_king": 40,
+    "repetition": 5,
+    "ply_cap": 3
+   },
+   "mean_plies": 117.2,
+   "prey_share": 0.391,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 145,
+   "hours": 3.326,
+   "games": 48,
+   "positions": 5744,
+   "buffer": 400000,
+   "selfplay_sec": 71.9,
+   "train_sec": 1.7,
+   "loss": 0.3801,
+   "endings": {
+    "ply_cap": 4,
+    "last_king": 38,
+    "repetition": 6
+   },
+   "mean_plies": 119.7,
+   "prey_share": 0.386,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 146,
+   "hours": 3.34,
+   "games": 48,
+   "positions": 5239,
+   "buffer": 400000,
+   "selfplay_sec": 46.6,
+   "train_sec": 1.6,
+   "loss": 0.377,
+   "endings": {
+    "last_king": 36,
+    "ply_cap": 2,
+    "repetition": 10
+   },
+   "mean_plies": 109.1,
+   "prey_share": 0.37,
+   "gang_rate": 0.958
+  },
+  {
+   "iteration": 147,
+   "hours": 3.369,
+   "games": 48,
+   "positions": 5739,
+   "buffer": 400000,
+   "selfplay_sec": 102.1,
+   "train_sec": 1.7,
+   "loss": 0.3769,
+   "endings": {
+    "last_king": 34,
+    "ply_cap": 5,
+    "repetition": 9
+   },
+   "mean_plies": 119.6,
+   "prey_share": 0.366,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 148,
+   "hours": 3.386,
+   "games": 48,
+   "positions": 4885,
+   "buffer": 400000,
+   "selfplay_sec": 59.2,
+   "train_sec": 1.7,
+   "loss": 0.3745,
+   "endings": {
+    "repetition": 6,
+    "last_king": 42
+   },
+   "mean_plies": 101.8,
+   "prey_share": 0.379,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 149,
+   "hours": 3.402,
+   "games": 48,
+   "positions": 5105,
+   "buffer": 400000,
+   "selfplay_sec": 57.5,
+   "train_sec": 1.7,
+   "loss": 0.3699,
+   "endings": {
+    "last_king": 40,
+    "repetition": 8
+   },
+   "mean_plies": 106.4,
+   "prey_share": 0.367,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 150,
+   "hours": 3.42,
+   "games": 48,
+   "positions": 4927,
+   "buffer": 400000,
+   "selfplay_sec": 62.2,
+   "train_sec": 1.7,
+   "loss": 0.3694,
+   "endings": {
+    "ply_cap": 2,
+    "last_king": 38,
+    "repetition": 8
+   },
+   "mean_plies": 102.6,
+   "prey_share": 0.413,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 151,
+   "hours": 3.446,
+   "games": 48,
+   "positions": 5308,
+   "buffer": 400000,
+   "selfplay_sec": 93.1,
+   "train_sec": 1.7,
+   "loss": 0.3656,
+   "endings": {
+    "last_king": 38,
+    "repetition": 8,
+    "ply_cap": 2
+   },
+   "mean_plies": 110.6,
+   "prey_share": 0.378,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 152,
+   "hours": 3.465,
+   "games": 48,
+   "positions": 5409,
+   "buffer": 400000,
+   "selfplay_sec": 67.5,
+   "train_sec": 1.7,
+   "loss": 0.3631,
+   "endings": {
+    "last_king": 36,
+    "ply_cap": 4,
+    "repetition": 8
+   },
+   "mean_plies": 112.7,
+   "prey_share": 0.392,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 153,
+   "hours": 3.494,
+   "games": 48,
+   "positions": 5584,
+   "buffer": 400000,
+   "selfplay_sec": 99.8,
+   "train_sec": 1.7,
+   "loss": 0.3627,
+   "endings": {
+    "repetition": 8,
+    "last_king": 35,
+    "ply_cap": 5
+   },
+   "mean_plies": 116.3,
+   "prey_share": 0.384,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 154,
+   "hours": 3.518,
+   "games": 48,
+   "positions": 4641,
+   "buffer": 400000,
+   "selfplay_sec": 84.8,
+   "train_sec": 1.6,
+   "loss": 0.36,
+   "endings": {
+    "last_king": 37,
+    "repetition": 9,
+    "ply_cap": 2
+   },
+   "mean_plies": 96.7,
+   "prey_share": 0.393,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 155,
+   "hours": 3.544,
+   "games": 48,
+   "positions": 4687,
+   "buffer": 400000,
+   "selfplay_sec": 94.4,
+   "train_sec": 1.6,
+   "loss": 0.3579,
+   "endings": {
+    "last_king": 43,
+    "repetition": 4,
+    "ply_cap": 1
+   },
+   "mean_plies": 97.6,
+   "prey_share": 0.392,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 156,
+   "hours": 3.559,
+   "games": 48,
+   "positions": 4973,
+   "buffer": 400000,
+   "selfplay_sec": 53.5,
+   "train_sec": 1.6,
+   "loss": 0.3551,
+   "endings": {
+    "last_king": 33,
+    "repetition": 13,
+    "ply_cap": 2
+   },
+   "mean_plies": 103.6,
+   "prey_share": 0.385,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 157,
+   "hours": 3.577,
+   "games": 48,
+   "positions": 4690,
+   "buffer": 400000,
+   "selfplay_sec": 59.8,
+   "train_sec": 1.6,
+   "loss": 0.3534,
+   "endings": {
+    "last_king": 43,
+    "repetition": 5
+   },
+   "mean_plies": 97.7,
+   "prey_share": 0.372,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 158,
+   "hours": 3.6,
+   "games": 48,
+   "positions": 5526,
+   "buffer": 400000,
+   "selfplay_sec": 83.4,
+   "train_sec": 1.7,
+   "loss": 0.3507,
+   "endings": {
+    "last_king": 39,
+    "ply_cap": 3,
+    "repetition": 6
+   },
+   "mean_plies": 115.1,
+   "prey_share": 0.37,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 159,
+   "hours": 3.621,
+   "games": 48,
+   "positions": 4503,
+   "buffer": 400000,
+   "selfplay_sec": 74.7,
+   "train_sec": 1.7,
+   "loss": 0.3475,
+   "endings": {
+    "repetition": 13,
+    "last_king": 35
+   },
+   "mean_plies": 93.8,
+   "prey_share": 0.398,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 160,
+   "hours": 3.644,
+   "games": 48,
+   "positions": 4575,
+   "buffer": 400000,
+   "selfplay_sec": 79.1,
+   "train_sec": 1.7,
+   "loss": 0.3465,
+   "endings": {
+    "last_king": 39,
+    "repetition": 8,
+    "ply_cap": 1
+   },
+   "mean_plies": 95.3,
+   "prey_share": 0.382,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 161,
+   "hours": 3.666,
+   "games": 48,
+   "positions": 4194,
+   "buffer": 400000,
+   "selfplay_sec": 78.9,
+   "train_sec": 1.7,
+   "loss": 0.3446,
+   "endings": {
+    "last_king": 44,
+    "repetition": 4
+   },
+   "mean_plies": 87.4,
+   "prey_share": 0.401,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 162,
+   "hours": 3.684,
+   "games": 48,
+   "positions": 4849,
+   "buffer": 400000,
+   "selfplay_sec": 61.1,
+   "train_sec": 1.6,
+   "loss": 0.3431,
+   "endings": {
+    "last_king": 42,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "mean_plies": 101.0,
+   "prey_share": 0.389,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 163,
+   "hours": 3.701,
+   "games": 48,
+   "positions": 5125,
+   "buffer": 400000,
+   "selfplay_sec": 60.4,
+   "train_sec": 1.7,
+   "loss": 0.3426,
+   "endings": {
+    "last_king": 37,
+    "repetition": 10,
+    "ply_cap": 1
+   },
+   "mean_plies": 106.8,
+   "prey_share": 0.376,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 164,
+   "hours": 3.719,
+   "games": 48,
+   "positions": 5070,
+   "buffer": 400000,
+   "selfplay_sec": 62.3,
+   "train_sec": 1.7,
+   "loss": 0.3407,
+   "endings": {
+    "last_king": 41,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "mean_plies": 105.6,
+   "prey_share": 0.386,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 165,
+   "hours": 3.739,
+   "games": 48,
+   "positions": 5289,
+   "buffer": 400000,
+   "selfplay_sec": 70.0,
+   "train_sec": 1.6,
+   "loss": 0.3389,
+   "endings": {
+    "last_king": 37,
+    "repetition": 11
+   },
+   "mean_plies": 110.2,
+   "prey_share": 0.388,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 166,
+   "hours": 3.758,
+   "games": 48,
+   "positions": 4790,
+   "buffer": 400000,
+   "selfplay_sec": 69.4,
+   "train_sec": 1.7,
+   "loss": 0.3378,
+   "endings": {
+    "last_king": 41,
+    "repetition": 5,
+    "ply_cap": 2
+   },
+   "mean_plies": 99.8,
+   "prey_share": 0.403,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 167,
+   "hours": 3.786,
+   "games": 48,
+   "positions": 4763,
+   "buffer": 400000,
+   "selfplay_sec": 98.7,
+   "train_sec": 1.7,
+   "loss": 0.3344,
+   "endings": {
+    "last_king": 37,
+    "repetition": 10,
+    "ply_cap": 1
+   },
+   "mean_plies": 99.2,
+   "prey_share": 0.391,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 168,
+   "hours": 3.815,
+   "games": 48,
+   "positions": 5514,
+   "buffer": 400000,
+   "selfplay_sec": 100.5,
+   "train_sec": 1.8,
+   "loss": 0.3333,
+   "endings": {
+    "last_king": 37,
+    "ply_cap": 4,
+    "repetition": 7
+   },
+   "mean_plies": 114.9,
+   "prey_share": 0.375,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 169,
+   "hours": 3.851,
+   "games": 48,
+   "positions": 4832,
+   "buffer": 400000,
+   "selfplay_sec": 130.1,
+   "train_sec": 1.7,
+   "loss": 0.332,
+   "endings": {
+    "repetition": 5,
+    "last_king": 43
+   },
+   "mean_plies": 100.7,
+   "prey_share": 0.379,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 170,
+   "hours": 3.871,
+   "games": 48,
+   "positions": 4783,
+   "buffer": 400000,
+   "selfplay_sec": 69.9,
+   "train_sec": 1.7,
+   "loss": 0.3297,
+   "endings": {
+    "last_king": 42,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "mean_plies": 99.6,
+   "prey_share": 0.379,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 171,
+   "hours": 3.889,
+   "games": 48,
+   "positions": 4907,
+   "buffer": 400000,
+   "selfplay_sec": 61.1,
+   "train_sec": 1.7,
+   "loss": 0.3292,
+   "endings": {
+    "last_king": 35,
+    "ply_cap": 4,
+    "repetition": 9
+   },
+   "mean_plies": 102.2,
+   "prey_share": 0.381,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 172,
+   "hours": 3.906,
+   "games": 48,
+   "positions": 4618,
+   "buffer": 400000,
+   "selfplay_sec": 59.3,
+   "train_sec": 1.7,
+   "loss": 0.3277,
+   "endings": {
+    "last_king": 36,
+    "repetition": 10,
+    "ply_cap": 2
+   },
+   "mean_plies": 96.2,
+   "prey_share": 0.402,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 173,
+   "hours": 3.926,
+   "games": 48,
+   "positions": 4513,
+   "buffer": 400000,
+   "selfplay_sec": 70.8,
+   "train_sec": 1.7,
+   "loss": 0.3289,
+   "endings": {
+    "last_king": 41,
+    "repetition": 6,
+    "ply_cap": 1
+   },
+   "mean_plies": 94.0,
+   "prey_share": 0.402,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 174,
+   "hours": 3.95,
+   "games": 48,
+   "positions": 4920,
+   "buffer": 400000,
+   "selfplay_sec": 85.0,
+   "train_sec": 1.7,
+   "loss": 0.3263,
+   "endings": {
+    "last_king": 39,
+    "ply_cap": 3,
+    "repetition": 6
+   },
+   "mean_plies": 102.5,
+   "prey_share": 0.381,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 175,
+   "hours": 3.974,
+   "games": 48,
+   "positions": 4562,
+   "buffer": 400000,
+   "selfplay_sec": 85.0,
+   "train_sec": 1.7,
+   "loss": 0.3222,
+   "endings": {
+    "last_king": 41,
+    "repetition": 4,
+    "ply_cap": 3
+   },
+   "mean_plies": 95.0,
+   "prey_share": 0.391,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 176,
+   "hours": 4.005,
+   "games": 48,
+   "positions": 4660,
+   "buffer": 400000,
+   "selfplay_sec": 110.6,
+   "train_sec": 1.7,
+   "loss": 0.3242,
+   "endings": {
+    "repetition": 5,
+    "last_king": 41,
+    "ply_cap": 2
+   },
+   "mean_plies": 97.1,
+   "prey_share": 0.385,
+   "gang_rate": 0.812
+  },
+  {
+   "iteration": 177,
+   "hours": 4.023,
+   "games": 48,
+   "positions": 5014,
+   "buffer": 400000,
+   "selfplay_sec": 63.3,
+   "train_sec": 1.7,
+   "loss": 0.3233,
+   "endings": {
+    "last_king": 39,
+    "repetition": 7,
+    "ply_cap": 2
+   },
+   "mean_plies": 104.5,
+   "prey_share": 0.407,
+   "gang_rate": 0.688
+  },
+  {
+   "iteration": 178,
+   "hours": 4.041,
+   "games": 48,
+   "positions": 4069,
+   "buffer": 400000,
+   "selfplay_sec": 63.1,
+   "train_sec": 1.6,
+   "loss": 0.3215,
+   "endings": {
+    "repetition": 6,
+    "last_king": 42
+   },
+   "mean_plies": 84.8,
+   "prey_share": 0.381,
+   "gang_rate": 0.75
+  },
+  {
+   "iteration": 179,
+   "hours": 4.073,
+   "games": 48,
+   "positions": 4780,
+   "buffer": 400000,
+   "selfplay_sec": 114.4,
+   "train_sec": 1.7,
+   "loss": 0.3214,
+   "endings": {
+    "last_king": 38,
+    "ply_cap": 3,
+    "repetition": 7
+   },
+   "mean_plies": 99.6,
+   "prey_share": 0.385,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 180,
+   "hours": 4.088,
+   "games": 48,
+   "positions": 4783,
+   "buffer": 400000,
+   "selfplay_sec": 51.4,
+   "train_sec": 1.6,
+   "loss": 0.3199,
+   "endings": {
+    "last_king": 40,
+    "repetition": 6,
+    "ply_cap": 2
+   },
+   "mean_plies": 99.6,
+   "prey_share": 0.392,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 181,
+   "hours": 4.115,
+   "games": 48,
+   "positions": 4577,
+   "buffer": 400000,
+   "selfplay_sec": 97.4,
+   "train_sec": 1.6,
+   "loss": 0.3192,
+   "endings": {
+    "last_king": 42,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "mean_plies": 95.4,
+   "prey_share": 0.379,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 182,
+   "hours": 4.138,
+   "games": 48,
+   "positions": 4475,
+   "buffer": 400000,
+   "selfplay_sec": 78.9,
+   "train_sec": 1.6,
+   "loss": 0.3177,
+   "endings": {
+    "last_king": 40,
+    "repetition": 8
+   },
+   "mean_plies": 93.2,
+   "prey_share": 0.393,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 183,
+   "hours": 4.162,
+   "games": 48,
+   "positions": 4347,
+   "buffer": 400000,
+   "selfplay_sec": 84.7,
+   "train_sec": 1.7,
+   "loss": 0.3167,
+   "endings": {
+    "repetition": 4,
+    "last_king": 43,
+    "ply_cap": 1
+   },
+   "mean_plies": 90.6,
+   "prey_share": 0.402,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 184,
+   "hours": 4.217,
+   "games": 48,
+   "positions": 4548,
+   "buffer": 400000,
+   "selfplay_sec": 97.0,
+   "train_sec": 1.7,
+   "loss": 0.4141,
+   "endings": {
+    "last_king": 40,
+    "repetition": 8
+   },
+   "mean_plies": 94.8,
+   "prey_share": 0.405,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 185,
+   "hours": 4.233,
+   "games": 48,
+   "positions": 5544,
+   "buffer": 400000,
+   "selfplay_sec": 58.9,
+   "train_sec": 1.6,
+   "loss": 0.4066,
+   "endings": {
+    "last_king": 38,
+    "ply_cap": 4,
+    "repetition": 6
+   },
+   "mean_plies": 115.5,
+   "prey_share": 0.401,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 186,
+   "hours": 4.254,
+   "games": 48,
+   "positions": 5727,
+   "buffer": 400000,
+   "selfplay_sec": 72.8,
+   "train_sec": 1.6,
+   "loss": 0.4017,
+   "endings": {
+    "last_king": 37,
+    "repetition": 10,
+    "ply_cap": 1
+   },
+   "mean_plies": 119.3,
+   "prey_share": 0.378,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 187,
+   "hours": 4.266,
+   "games": 48,
+   "positions": 5093,
+   "buffer": 400000,
+   "selfplay_sec": 42.4,
+   "train_sec": 1.6,
+   "loss": 0.3977,
+   "endings": {
+    "last_king": 37,
+    "repetition": 9,
+    "ply_cap": 2
+   },
+   "mean_plies": 106.1,
+   "prey_share": 0.388,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 188,
+   "hours": 4.291,
+   "games": 48,
+   "positions": 5347,
+   "buffer": 400000,
+   "selfplay_sec": 86.4,
+   "train_sec": 1.6,
+   "loss": 0.3952,
+   "endings": {
+    "last_king": 39,
+    "ply_cap": 3,
+    "repetition": 6
+   },
+   "mean_plies": 111.4,
+   "prey_share": 0.404,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 189,
+   "hours": 4.307,
+   "games": 48,
+   "positions": 5522,
+   "buffer": 400000,
+   "selfplay_sec": 55.7,
+   "train_sec": 1.6,
+   "loss": 0.3902,
+   "endings": {
+    "last_king": 37,
+    "repetition": 9,
+    "ply_cap": 2
+   },
+   "mean_plies": 115.0,
+   "prey_share": 0.391,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 190,
+   "hours": 4.321,
+   "games": 48,
+   "positions": 4753,
+   "buffer": 400000,
+   "selfplay_sec": 49.6,
+   "train_sec": 1.5,
+   "loss": 0.388,
+   "endings": {
+    "last_king": 37,
+    "repetition": 10,
+    "ply_cap": 1
+   },
+   "mean_plies": 99.0,
+   "prey_share": 0.393,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 191,
+   "hours": 4.344,
+   "games": 48,
+   "positions": 5321,
+   "buffer": 400000,
+   "selfplay_sec": 80.7,
+   "train_sec": 1.6,
+   "loss": 0.3851,
+   "endings": {
+    "ply_cap": 2,
+    "last_king": 40,
+    "repetition": 6
+   },
+   "mean_plies": 110.9,
+   "prey_share": 0.385,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 192,
+   "hours": 4.362,
+   "games": 48,
+   "positions": 6153,
+   "buffer": 400000,
+   "selfplay_sec": 62.4,
+   "train_sec": 1.6,
+   "loss": 0.3834,
+   "endings": {
+    "last_king": 36,
+    "ply_cap": 5,
+    "repetition": 7
+   },
+   "mean_plies": 128.2,
+   "prey_share": 0.384,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 193,
+   "hours": 4.38,
+   "games": 48,
+   "positions": 5446,
+   "buffer": 400000,
+   "selfplay_sec": 64.2,
+   "train_sec": 1.7,
+   "loss": 0.3799,
+   "endings": {
+    "last_king": 38,
+    "repetition": 7,
+    "ply_cap": 3
+   },
+   "mean_plies": 113.5,
+   "prey_share": 0.365,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 194,
+   "hours": 4.394,
+   "games": 48,
+   "positions": 4626,
+   "buffer": 400000,
+   "selfplay_sec": 49.2,
+   "train_sec": 1.6,
+   "loss": 0.3782,
+   "endings": {
+    "last_king": 45,
+    "repetition": 3
+   },
+   "mean_plies": 96.4,
+   "prey_share": 0.394,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 195,
+   "hours": 4.418,
+   "games": 48,
+   "positions": 5345,
+   "buffer": 400000,
+   "selfplay_sec": 83.4,
+   "train_sec": 1.6,
+   "loss": 0.3746,
+   "endings": {
+    "last_king": 42,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "mean_plies": 111.4,
+   "prey_share": 0.396,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 196,
+   "hours": 4.457,
+   "games": 48,
+   "positions": 5863,
+   "buffer": 400000,
+   "selfplay_sec": 138.9,
+   "train_sec": 1.6,
+   "loss": 0.3746,
+   "endings": {
+    "last_king": 42,
+    "repetition": 5,
+    "ply_cap": 1
+   },
+   "mean_plies": 122.1,
+   "prey_share": 0.388,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 197,
+   "hours": 4.474,
+   "games": 48,
+   "positions": 4846,
+   "buffer": 400000,
+   "selfplay_sec": 60.1,
+   "train_sec": 1.6,
+   "loss": 0.3731,
+   "endings": {
+    "last_king": 37,
+    "repetition": 10,
+    "ply_cap": 1
+   },
+   "mean_plies": 101.0,
+   "prey_share": 0.393,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 198,
+   "hours": 4.494,
+   "games": 48,
+   "positions": 5661,
+   "buffer": 400000,
+   "selfplay_sec": 69.5,
+   "train_sec": 1.6,
+   "loss": 0.3699,
+   "endings": {
+    "last_king": 39,
+    "repetition": 6,
+    "ply_cap": 3
+   },
+   "mean_plies": 117.9,
+   "prey_share": 0.372,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 199,
+   "hours": 4.517,
+   "games": 48,
+   "positions": 5586,
+   "buffer": 400000,
+   "selfplay_sec": 81.9,
+   "train_sec": 1.6,
+   "loss": 0.3673,
+   "endings": {
+    "last_king": 31,
+    "repetition": 13,
+    "ply_cap": 4
+   },
+   "mean_plies": 116.4,
+   "prey_share": 0.376,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 200,
+   "hours": 4.538,
+   "games": 48,
+   "positions": 4551,
+   "buffer": 400000,
+   "selfplay_sec": 75.0,
+   "train_sec": 1.6,
+   "loss": 0.3661,
+   "endings": {
+    "last_king": 38,
+    "ply_cap": 1,
+    "repetition": 9
+   },
+   "mean_plies": 94.8,
+   "prey_share": 0.384,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 201,
+   "hours": 4.557,
+   "games": 48,
+   "positions": 5279,
+   "buffer": 400000,
+   "selfplay_sec": 67.8,
+   "train_sec": 1.6,
+   "loss": 0.3623,
+   "endings": {
+    "last_king": 32,
+    "ply_cap": 3,
+    "repetition": 13
+   },
+   "mean_plies": 110.0,
+   "prey_share": 0.379,
+   "gang_rate": 0.958
+  },
+  {
+   "iteration": 202,
+   "hours": 4.573,
+   "games": 48,
+   "positions": 5053,
+   "buffer": 400000,
+   "selfplay_sec": 56.2,
+   "train_sec": 1.7,
+   "loss": 0.3605,
+   "endings": {
+    "last_king": 43,
+    "ply_cap": 3,
+    "repetition": 2
+   },
+   "mean_plies": 105.3,
+   "prey_share": 0.378,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 203,
+   "hours": 4.602,
+   "games": 48,
+   "positions": 4993,
+   "buffer": 400000,
+   "selfplay_sec": 101.5,
+   "train_sec": 1.7,
+   "loss": 0.3581,
+   "endings": {
+    "repetition": 11,
+    "last_king": 37
+   },
+   "mean_plies": 104.0,
+   "prey_share": 0.375,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 204,
+   "hours": 4.622,
+   "games": 48,
+   "positions": 4710,
+   "buffer": 400000,
+   "selfplay_sec": 70.7,
+   "train_sec": 1.7,
+   "loss": 0.3575,
+   "endings": {
+    "last_king": 39,
+    "repetition": 8,
+    "ply_cap": 1
+   },
+   "mean_plies": 98.1,
+   "prey_share": 0.4,
+   "gang_rate": 0.771
+  },
+  {
+   "iteration": 205,
+   "hours": 4.654,
+   "games": 48,
+   "positions": 5198,
+   "buffer": 400000,
+   "selfplay_sec": 113.5,
+   "train_sec": 1.6,
+   "loss": 0.3554,
+   "endings": {
+    "ply_cap": 2,
+    "last_king": 36,
+    "repetition": 10
+   },
+   "mean_plies": 108.3,
+   "prey_share": 0.384,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 206,
+   "hours": 4.673,
+   "games": 48,
+   "positions": 5715,
+   "buffer": 400000,
+   "selfplay_sec": 67.6,
+   "train_sec": 1.6,
+   "loss": 0.3543,
+   "endings": {
+    "ply_cap": 4,
+    "last_king": 38,
+    "repetition": 6
+   },
+   "mean_plies": 119.1,
+   "prey_share": 0.371,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 207,
+   "hours": 4.694,
+   "games": 48,
+   "positions": 5232,
+   "buffer": 400000,
+   "selfplay_sec": 72.1,
+   "train_sec": 1.6,
+   "loss": 0.35,
+   "endings": {
+    "last_king": 38,
+    "ply_cap": 2,
+    "repetition": 8
+   },
+   "mean_plies": 109.0,
+   "prey_share": 0.369,
+   "gang_rate": 0.938
+  },
+  {
+   "iteration": 208,
+   "hours": 4.716,
+   "games": 48,
+   "positions": 4986,
+   "buffer": 400000,
+   "selfplay_sec": 79.3,
+   "train_sec": 1.6,
+   "loss": 0.3479,
+   "endings": {
+    "last_king": 44,
+    "ply_cap": 2,
+    "repetition": 2
+   },
+   "mean_plies": 103.9,
+   "prey_share": 0.397,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 209,
+   "hours": 4.747,
+   "games": 48,
+   "positions": 5595,
+   "buffer": 400000,
+   "selfplay_sec": 108.1,
+   "train_sec": 1.6,
+   "loss": 0.3442,
+   "endings": {
+    "last_king": 37,
+    "repetition": 8,
+    "ply_cap": 3
+   },
+   "mean_plies": 116.6,
+   "prey_share": 0.361,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 210,
+   "hours": 4.764,
+   "games": 48,
+   "positions": 4510,
+   "buffer": 400000,
+   "selfplay_sec": 61.7,
+   "train_sec": 1.5,
+   "loss": 0.3455,
+   "endings": {
+    "last_king": 40,
+    "repetition": 8
+   },
+   "mean_plies": 94.0,
+   "prey_share": 0.392,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 211,
+   "hours": 4.775,
+   "games": 48,
+   "positions": 4267,
+   "buffer": 400000,
+   "selfplay_sec": 36.0,
+   "train_sec": 1.5,
+   "loss": 0.3431,
+   "endings": {
+    "last_king": 40,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "mean_plies": 88.9,
+   "prey_share": 0.396,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 212,
+   "hours": 4.808,
+   "games": 48,
+   "positions": 5011,
+   "buffer": 400000,
+   "selfplay_sec": 117.9,
+   "train_sec": 1.7,
+   "loss": 0.341,
+   "endings": {
+    "last_king": 37,
+    "repetition": 10,
+    "ply_cap": 1
+   },
+   "mean_plies": 104.4,
+   "prey_share": 0.366,
+   "gang_rate": 0.958
+  },
+  {
+   "iteration": 213,
+   "hours": 4.836,
+   "games": 48,
+   "positions": 5110,
+   "buffer": 400000,
+   "selfplay_sec": 97.9,
+   "train_sec": 1.7,
+   "loss": 0.3388,
+   "endings": {
+    "last_king": 39,
+    "ply_cap": 3,
+    "repetition": 6
+   },
+   "mean_plies": 106.5,
+   "prey_share": 0.384,
+   "gang_rate": 0.958
+  },
+  {
+   "iteration": 214,
+   "hours": 4.855,
+   "games": 48,
+   "positions": 5103,
+   "buffer": 400000,
+   "selfplay_sec": 68.6,
+   "train_sec": 1.6,
+   "loss": 0.3372,
+   "endings": {
+    "last_king": 40,
+    "repetition": 7,
+    "ply_cap": 1
+   },
+   "mean_plies": 106.3,
+   "prey_share": 0.387,
+   "gang_rate": 0.854
+  },
+  {
+   "iteration": 215,
+   "hours": 4.881,
+   "games": 48,
+   "positions": 5408,
+   "buffer": 400000,
+   "selfplay_sec": 92.3,
+   "train_sec": 1.7,
+   "loss": 0.3357,
+   "endings": {
+    "repetition": 13,
+    "last_king": 35
+   },
+   "mean_plies": 112.7,
+   "prey_share": 0.375,
+   "gang_rate": 0.896
+  },
+  {
+   "iteration": 216,
+   "hours": 4.895,
+   "games": 48,
+   "positions": 5192,
+   "buffer": 400000,
+   "selfplay_sec": 48.7,
+   "train_sec": 1.6,
+   "loss": 0.3361,
+   "endings": {
+    "last_king": 41,
+    "repetition": 5,
+    "ply_cap": 2
+   },
+   "mean_plies": 108.2,
+   "prey_share": 0.41,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 217,
+   "hours": 4.911,
+   "games": 48,
+   "positions": 4407,
+   "buffer": 400000,
+   "selfplay_sec": 55.1,
+   "train_sec": 1.7,
+   "loss": 0.3328,
+   "endings": {
+    "repetition": 6,
+    "last_king": 41,
+    "ply_cap": 1
+   },
+   "mean_plies": 91.8,
+   "prey_share": 0.397,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 218,
+   "hours": 4.943,
+   "games": 48,
+   "positions": 4758,
+   "buffer": 400000,
+   "selfplay_sec": 111.8,
+   "train_sec": 1.7,
+   "loss": 0.3307,
+   "endings": {
+    "last_king": 41,
+    "repetition": 5,
+    "ply_cap": 2
+   },
+   "mean_plies": 99.1,
+   "prey_share": 0.407,
+   "gang_rate": 0.917
+  }
+ ],
+ "checks": [
+  {
+   "check": "start",
+   "iteration": 0,
+   "hours": 0.0,
+   "vs_mcts": {
+    "games": 40,
+    "pairwise": 0.817,
+    "pairwise_se": 0.05,
+    "per_seat_pairwise": {
+     "R": 0.8,
+     "B": 0.867,
+     "Y": 0.817,
+     "G": 0.783
+    },
+    "mlp": "models/opponent_pool/league_model.pt",
+    "sims": 32,
+    "maxn_seconds_per_move": 0.0667
+   },
+   "seconds": 52.5
+  },
+  {
+   "check": "h1.0",
+   "iteration": 40,
+   "hours": 1.017,
+   "vs_best": {
+    "games": 48,
+    "pairwise": 0.25,
+    "pairwise_se": 0.043,
+    "per_seat_pairwise": {
+     "R": 0.333,
+     "B": 0.278,
+     "Y": 0.111,
+     "G": 0.278
+    },
+    "against": "start"
+   },
+   "decision": "clearly worse: back to start",
+   "vs_mcts": {
+    "games": 40,
+    "pairwise": 0.796,
+    "pairwise_se": 0.049,
+    "per_seat_pairwise": {
+     "R": 0.967,
+     "B": 0.8,
+     "Y": 0.783,
+     "G": 0.633
+    },
+    "mlp": "models/opponent_pool/league_model.pt",
+    "sims": 32,
+    "maxn_seconds_per_move": 0.0671
+   },
+   "seconds": 207.4
+  },
+  {
+   "check": "h2.1",
+   "iteration": 90,
+   "hours": 2.088,
+   "vs_best": {
+    "games": 48,
+    "pairwise": 0.337,
+    "pairwise_se": 0.052,
+    "per_seat_pairwise": {
+     "R": 0.236,
+     "B": 0.319,
+     "Y": 0.333,
+     "G": 0.458
+    },
+    "against": "start"
+   },
+   "decision": "clearly worse: back to start",
+   "vs_mcts": {
+    "games": 40,
+    "pairwise": 0.9,
+    "pairwise_se": 0.038,
+    "per_seat_pairwise": {
+     "R": 0.933,
+     "B": 0.933,
+     "Y": 0.8,
+     "G": 0.933
+    },
+    "mlp": "models/opponent_pool/league_model.pt",
+    "sims": 32,
+    "maxn_seconds_per_move": 0.0634
+   },
+   "seconds": 100.9
+  },
+  {
+   "check": "h3.1",
+   "iteration": 135,
+   "hours": 3.123,
+   "vs_best": {
+    "games": 48,
+    "pairwise": 0.358,
+    "pairwise_se": 0.041,
+    "per_seat_pairwise": {
+     "R": 0.444,
+     "B": 0.278,
+     "Y": 0.347,
+     "G": 0.361
+    },
+    "against": "start"
+   },
+   "decision": "clearly worse: back to start",
+   "vs_mcts": {
+    "games": 40,
+    "pairwise": 0.783,
+    "pairwise_se": 0.05,
+    "per_seat_pairwise": {
+     "R": 0.8,
+     "B": 0.85,
+     "Y": 0.833,
+     "G": 0.65
+    },
+    "mlp": "models/opponent_pool/league_model.pt",
+    "sims": 32,
+    "maxn_seconds_per_move": 0.0706
+   },
+   "seconds": 110.4
+  },
+  {
+   "check": "h4.2",
+   "iteration": 183,
+   "hours": 4.162,
+   "vs_best": {
+    "games": 48,
+    "pairwise": 0.354,
+    "pairwise_se": 0.048,
+    "per_seat_pairwise": {
+     "R": 0.458,
+     "B": 0.278,
+     "Y": 0.292,
+     "G": 0.389
+    },
+    "against": "start"
+   },
+   "decision": "clearly worse: back to start",
+   "vs_mcts": {
+    "games": 40,
+    "pairwise": 0.842,
+    "pairwise_se": 0.046,
+    "per_seat_pairwise": {
+     "R": 0.933,
+     "B": 0.817,
+     "Y": 0.833,
+     "G": 0.783
+    },
+    "mlp": "models/opponent_pool/league_model.pt",
+    "sims": 32,
+    "maxn_seconds_per_move": 0.0604
+   },
+   "seconds": 98.5
+  },
+  {
+   "check": "final",
+   "iteration": 218,
+   "hours": 4.943,
+   "vs_best": {
+    "games": 48,
+    "pairwise": 0.514,
+    "pairwise_se": 0.05,
+    "per_seat_pairwise": {
+     "R": 0.528,
+     "B": 0.458,
+     "Y": 0.542,
+     "G": 0.528
+    },
+    "against": "start"
+   },
+   "decision": "new best",
+   "vs_mcts": {
+    "games": 40,
+    "pairwise": 0.75,
+    "pairwise_se": 0.058,
+    "per_seat_pairwise": {
+     "R": 0.85,
+     "B": 0.717,
+     "Y": 0.6,
+     "G": 0.833
+    },
+    "mlp": "models/opponent_pool/league_model.pt",
+    "sims": 32,
+    "maxn_seconds_per_move": 0.0516
+   },
+   "seconds": 123.7
+  }
+ ],
+ "status": "done",
+ "best": "final",
+ "check_sec": 123.7,
+ "iteration": 218,
+ "run_hours": 4.977
+}

@@ -4,6 +4,9 @@ A neural network evaluates positions for a 4-player Monte Carlo Tree Search, and
 from games it plays against itself. Details: [PLAN.md](PLAN.md); coordination between
 colors: [COORDINATION.md](COORDINATION.md).
 
+The newer engine (NNUE value network + max^n search, compiled core in `engine/`), with the
+whole training process and model specs: [README_NNUE.md](README_NNUE.md).
+
 Requires `numpy` and `torch` (the CPU build works). Run commands from the repository root.
 For GPU runs on the Tillicum cluster, see [../cluster/README.md](../cluster/README.md).
 

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chaturaji: play</title>
+<link rel="stylesheet" href="/static/play.css">
+</head>
+<body>
+<main>
+  <section id="setup" class="panel" hidden>
+    <h1>Chaturaji</h1>
+    <p class="muted">Choose who plays each side: a person (Human) or a bot. Several people can share one screen and take turns.</p>
+    <div id="seats"></div>
+    <label class="field">Time control
+      <select id="time-preset"></select>
+    </label>
+    <label class="field" id="time-custom-row" hidden>Custom (minutes|increment)
+      <input id="time-custom" type="text" value="1|5" autocomplete="off" spellcheck="false">
+    </label>
+    <label class="check"><input type="checkbox" id="human-clock" checked> Clock for people</label>
+    <div class="row"><button id="start" class="primary">Start game</button></div>
+    <div id="setup-err" class="err" role="alert"></div>
+  </section>
+
+  <section id="game" class="game" hidden>
+    <div class="board-col">
+      <div id="clocks" class="clocks"></div>
+      <div id="board" class="board" role="grid" aria-label="Board"></div>
+      <div id="status" class="status" aria-live="polite"></div>
+      <div class="controls" role="group" aria-label="Review">
+        <button id="first" title="First move">|&lt;</button>
+        <button id="prev" title="Previous move (Left arrow)">&lt;</button>
+        <button id="next" title="Next move (Right arrow)">&gt;</button>
+        <button id="last" title="Last move (End)">&gt;|</button>
+        <button id="live" class="primary" title="Back to the live game (End)" disabled>Live</button>
+      </div>
+    </div>
+    <aside class="side">
+      <div class="box">
+        <div id="tc" class="muted"></div>
+        <label class="check"><input type="checkbox" id="flip"> Board follows the side to move</label>
+        <div class="muted small">Click a piece, then a highlighted square. Arrow keys step through the moves.</div>
+      </div>
+      <div class="box row">
+        <button id="pause">Pause</button>
+        <button id="resign">Resign</button>
+        <button id="new">New game</button>
+      </div>
+      <div class="box"><b>Players</b><div id="players" class="players"></div></div>
+      <div class="box"><b>Moves</b><div id="moves" class="moves" role="list"></div></div>
+      <div class="box"><b>Bots</b><div id="bots" class="muted small"></div></div>
+    </aside>
+  </section>
+</main>
+<script src="/static/play.js"></script>
+</body>
+</html>

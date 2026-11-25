@@ -8,6 +8,7 @@ that maximises its own entry.
 from __future__ import annotations
 
 import math
+import time
 
 import numpy as np
 import torch
@@ -134,7 +135,17 @@ class MCTS:
         u = self.c_puct * node.priors * math.sqrt(n_total + 1) / (1 + node.child_n)
         return int(np.argmax(q + u))
 
-    def search(self, root: Node, add_noise: bool = False) -> Node:
+    def search(self, root: Node, add_noise: bool = False, time_limit: float | None = None,
+               stop=None, early_stop: bool = True) -> Node:
+        """Run simulations from `root`.
+
+        Without `time_limit`, runs exactly `num_simulations`. With `time_limit` (seconds),
+        searches until the time is used up, or until the most-visited move can no longer be
+        overtaken at the current speed (early stop, bot/PLAN.md section 5.7);
+        `num_simulations` is then a cap (None = no cap). `stop` is an optional callable
+        (e.g. an Event's `is_set`) checked between simulations to abort early. The root
+        always gets at least one simulation so `choose` has a move.
+        """
         if not root.expanded and not root.terminal:
             self._evaluate(root)
         if root.terminal:
@@ -142,7 +153,26 @@ class MCTS:
         if add_noise:
             noise = self.rng.dirichlet([self.dirichlet_alpha] * len(root.priors))
             root.priors = (1 - self.noise_eps) * root.priors + self.noise_eps * noise
-        for _ in range(self.num_simulations):
+        deadline = None if time_limit is None else time.monotonic() + time_limit
+        cap = self.num_simulations
+        if cap is None and deadline is None and stop is None:
+            raise ValueError("num_simulations=None needs a time_limit or a stop callback")
+        done, t0 = 0, time.monotonic()
+        while cap is None or done < cap:
+            if done and stop is not None and stop():
+                break
+            if done and deadline is not None:
+                now = time.monotonic()
+                if now >= deadline:
+                    break
+                if early_stop and done % 32 == 0 and len(root.child_n) > 1:
+                    left = (deadline - now) * done / max(now - t0, 1e-9)
+                    if cap is not None:
+                        left = min(left, cap - done)
+                    top2 = np.partition(root.child_n, -2)[-2:]
+                    if top2[1] - top2[0] > left:
+                        break
+            done += 1
             node, path = root, []
             while node.expanded and not node.terminal:
                 i = self._select(node)
@@ -156,7 +186,18 @@ class MCTS:
             for n, i in path:
                 n.child_n[i] += 1
                 n.child_w[i] += value
+        self.last_simulations = done
         return root
+
+    @staticmethod
+    def advance(root: Node | None, move: Move) -> Node | None:
+        """Tree reuse: the already-searched child of `root` reached by `move`, or None."""
+        if root is None or not root.expanded:
+            return None
+        for i, m in enumerate(root.moves):
+            if m == move:
+                return root.children[i]
+        return None
 
     @staticmethod
     def visit_policy(root: Node) -> np.ndarray:

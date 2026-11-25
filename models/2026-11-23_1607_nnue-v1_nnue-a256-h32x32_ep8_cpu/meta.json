@@ -1,0 +1,143 @@
+{
+ "label": "2026-11-23_1607_nnue-v1_nnue-a256-h32x32_ep8_cpu",
+ "kind": "nnue",
+ "config": {
+  "acc": 256,
+  "hidden": [
+   32,
+   32
+  ]
+ },
+ "params": 444422,
+ "args": {
+  "records": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\scraper\\data\\records",
+  "no_scraped": false,
+  "selfplay": [
+   "logs/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu/games.jsonl"
+  ],
+  "stride": 2,
+  "max_games": null,
+  "val_fraction": 0.05,
+  "epochs": 8,
+  "batch": 1024,
+  "lr": 0.001,
+  "acc": null,
+  "tag": "nnue-v1",
+  "seed": 0,
+  "device": "cpu"
+ },
+ "environment": {
+  "host": "arnavjyoga7",
+  "python": "3.14.0",
+  "torch": "2.9.1+cpu",
+  "device": "cpu",
+  "git_commit": "8616154-dirty",
+  "cuda_available": false
+ },
+ "data": {
+  "games": {
+   "scraped": 2880,
+   "2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu": 7272
+  },
+  "train_positions": 722878,
+  "val_positions": 39912
+ },
+ "history": [
+  {
+   "epoch": 0,
+   "train_loss": 0.5305,
+   "val": {
+    "loss": 0.478,
+    "pair_acc": 0.7487,
+    "baseline_score_lead_acc": 0.6838,
+    "positions": 39912
+   },
+   "minutes": 6.3
+  },
+  {
+   "epoch": 1,
+   "train_loss": 0.3838,
+   "val": {
+    "loss": 0.5145,
+    "pair_acc": 0.7382,
+    "baseline_score_lead_acc": 0.6838,
+    "positions": 39912
+   },
+   "minutes": 6.8
+  },
+  {
+   "epoch": 2,
+   "train_loss": 0.3352,
+   "val": {
+    "loss": 0.555,
+    "pair_acc": 0.7328,
+    "baseline_score_lead_acc": 0.6838,
+    "positions": 39912
+   },
+   "minutes": 7.2
+  },
+  {
+   "epoch": 3,
+   "train_loss": 0.3081,
+   "val": {
+    "loss": 0.5905,
+    "pair_acc": 0.7299,
+    "baseline_score_lead_acc": 0.6838,
+    "positions": 39912
+   },
+   "minutes": 7.7
+  },
+  {
+   "epoch": 4,
+   "train_loss": 0.2904,
+   "val": {
+    "loss": 0.622,
+    "pair_acc": 0.7278,
+    "baseline_score_lead_acc": 0.6838,
+    "positions": 39912
+   },
+   "minutes": 8.2
+  },
+  {
+   "epoch": 5,
+   "train_loss": 0.2782,
+   "val": {
+    "loss": 0.6434,
+    "pair_acc": 0.7281,
+    "baseline_score_lead_acc": 0.6838,
+    "positions": 39912
+   },
+   "minutes": 8.7
+  },
+  {
+   "epoch": 6,
+   "train_loss": 0.2706,
+   "val": {
+    "loss": 0.6539,
+    "pair_acc": 0.728,
+    "baseline_score_lead_acc": 0.6838,
+    "positions": 39912
+   },
+   "minutes": 9.2
+  },
+  {
+   "epoch": 7,
+   "train_loss": 0.267,
+   "val": {
+    "loss": 0.6555,
+    "pair_acc": 0.7286,
+    "baseline_score_lead_acc": 0.6838,
+    "positions": 39912
+   },
+   "minutes": 9.6
+  }
+ ],
+ "status": "done",
+ "best_epoch": 0,
+ "val": {
+  "loss": 0.478,
+  "pair_acc": 0.7487,
+  "baseline_score_lead_acc": 0.6838,
+  "positions": 39912
+ }
+}

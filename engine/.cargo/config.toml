@@ -1,0 +1,7 @@
+# AVX2 + FMA (x86-64-v3): every recent Intel/AMD CPU, including Tillicum's nodes.
+# The matrix-vector loops in src/nnue.rs are written so the compiler vectorizes them.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-cpu=x86-64-v3"]
+
+[target.x86_64-unknown-linux-gnu]
+rustflags = ["-C", "target-cpu=x86-64-v3"]

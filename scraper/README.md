@@ -45,7 +45,9 @@ python -m scraper.game_scraping player arnav2007 --time-control "1 | 5" --time-c
 python -m scraper.game_scraping player arnav2007
 ```
 (no `--time-control` means every time control). `--days "0-30"` limits the search to the
-last 30 days. Add `--selenium` to any of these to use the browser instead.
+last 30 days. `--min-seek 2000` keeps only games whose seek had a minimum rating of
+at least 2000 (games with no minimum are skipped); the seek's bounds are saved as
+`seek_min` / `seek_max` and `seek_min` is in the player index. Add `--selenium` to any of these to use the browser instead.
 
 Scrape specific games, optionally adding them to a player's index:
 ```powershell

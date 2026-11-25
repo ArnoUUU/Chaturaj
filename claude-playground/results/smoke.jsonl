@@ -1,0 +1,4 @@
+{"game":0,"opening":0,"seat":0,"scores":[9,1,13,10],"turns":68,"score":0.3333,"test_nodes":3343.6,"base_nodes":2023.5,"test_depth":2.000,"base_depth":1.976,"secs":7.208}
+{"game":1,"opening":0,"seat":1,"scores":[9,1,13,10],"turns":68,"score":0.0000,"test_nodes":2611.4,"base_nodes":2211.8,"test_depth":2.000,"base_depth":1.976,"secs":11.981}
+{"game":2,"opening":0,"seat":2,"scores":[9,1,13,10],"turns":68,"score":1.0000,"test_nodes":1394.3,"base_nodes":2688.3,"test_depth":1.938,"base_depth":2.000,"secs":7.563}
+{"game":3,"opening":0,"seat":3,"scores":[9,1,13,10],"turns":68,"score":0.6667,"test_nodes":2322.0,"base_nodes":2264.2,"test_depth":2.000,"base_depth":1.971,"secs":9.296}

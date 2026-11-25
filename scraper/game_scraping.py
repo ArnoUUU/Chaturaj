@@ -434,6 +434,10 @@ def add_to_player_index(name: str, data: dict, row: dict | None = None,
         "opponents": [s["name"] for c, s in data["seats"].items() if c != seat],
         "termination": data.get("termination"),
         "anonymity": data.get("anonymity"),
+        "seek_min": (row or {}).get("seek_min", data.get("seek_min")),
+        "tc_type": (row or {}).get("tc_type", data.get("time_control_type")),
+        "min_opponent_rating": min((s["rating"] for c, s in data["seats"].items()
+                                    if c != seat and s.get("rating")), default=None),
         "plies": len(data.get("moves", [])),
         "chat_messages": sum(1 for c in data.get("chat", []) if not c["system"]),
         "record": record_ok,
@@ -693,6 +697,12 @@ def main(argv=None) -> None:
                         help="drive a browser instead of using the variants WebSocket")
         sp.add_argument("--headless", action="store_true", help="(--selenium only)")
     p.add_argument("--days", default="0-9999", help='archive range in days back, e.g. "0-30" (WebSocket only)')
+    p.add_argument("--tc-type", action="append", dest="tc_types",
+                   help='chess.com time-control type: rapid, blitz, bullet, hyper (repeatable; WebSocket only)')
+    p.add_argument("--min-opponent-rating", type=int, default=None,
+                   help="only games where all three opponents were rated at least this (WebSocket only)")
+    p.add_argument("--min-seek", type=int, default=None,
+                   help="only games whose seek had a minimum rating of at least this, e.g. 2000 (WebSocket only)")
     ap.add_argument("--browser", choices=("firefox", "chrome"), default="firefox",
                     help="browser for login / --selenium (each keeps its own saved login)")
 
@@ -732,14 +742,16 @@ def _main_ws(args) -> None:
     """player / games / archive over the variants WebSocket (no browser)."""
     from . import ws
     delay = 1.0 if args.delay is None else args.delay
+    sock = ws.VariantsSocket()
     try:
-        sock = ws.VariantsSocket().connect()
+        sock._retry(lambda: None)   # connect, waiting out a network outage
     except ws.NotLoggedIn as e:
         raise SystemExit(str(e))
     try:
         if args.cmd == "player":
             print(ws.scrape_player(sock, args.name, args.time_controls, args.max_per_tc,
-                                   args.days, delay, args.refetch))
+                                   args.days, delay, args.refetch, min_seek=args.min_seek,
+                                   tc_types=args.tc_types, min_opp_rating=args.min_opponent_rating))
         elif args.cmd == "games":
             ids = [m.group(1) for m in map(GAME_ID_RE.search, args.games) if m]
             ws.scrape_games(sock, ids, delay, args.refetch, args.player)

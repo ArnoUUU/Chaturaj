@@ -34,9 +34,17 @@ def sparse_features(state: ChaturajiState) -> tuple[np.ndarray, np.ndarray]:
             if p is not None:
                 cr, cc = rotate_square(r, c, k)
                 idx.append((relative_owner(p[0], k) * 5 + _TYPE_IDX[p[1]]) * 64 + cr * 8 + cc)
+    g = global_features(state, k)
+    return np.array(idx, dtype=np.int64), g
+
+
+def global_features(state: ChaturajiState, k: int | None = None) -> np.ndarray:
+    """The 16 dense global features, seats ordered from seat k's view (default: the mover)."""
+    if k is None:
+        k = mover_index(state)
     seats = [TURN_ORDER[(k + i) % 4] for i in range(4)]
     scores = np.array([state.scores[s] for s in seats], dtype=np.float32)
-    g = np.concatenate([
+    return np.concatenate([
         [0.0 if s in state.eliminated else 1.0 for s in seats],      # alive
         scores / 30.0,                                                # scores
         (scores - scores.mean()) / 20.0,                              # score vs mean
@@ -45,7 +53,6 @@ def sparse_features(state: ChaturajiState) -> tuple[np.ndarray, np.ndarray]:
          sum(row.count(DEAD + "K") for row in state.board) / 3.0,     # dead kings
          len(state.active_players()) / 4.0],                          # players alive
     ]).astype(np.float32)
-    return np.array(idx, dtype=np.int64), g
 
 
 class ChaturajiMLP(nn.Module):
