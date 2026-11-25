@@ -101,10 +101,13 @@ def make_batch(parts_list):
 
 
 def game_stats(rec: dict) -> dict:
-    """Predator / prey numbers for one game from its captures of active pieces."""
+    """Predator / prey numbers for one game from its captures of active pieces, and the ply
+    of its first elimination."""
+    el = rec.get("eliminations") or []
+    first = min(p for p, _, _ in el) if el else None
     caps = rec["captures"]
     if not caps:
-        return {"prey_share": None, "ganged": False}
+        return {"prey_share": None, "ganged": False, "first_elim": first}
     victims = Counter(v for _, _, v, _ in caps)
     share = victims.most_common(1)[0][1] / len(caps)
     ganged = False
@@ -115,7 +118,7 @@ def game_stats(rec: dict) -> dict:
         for i, (p1, a1) in enumerate(hits):
             if any(a2 != a1 and abs(p2 - p1) <= 12 for p2, a2 in hits[i + 1:]):
                 ganged = True
-    return {"prey_share": share, "ganged": ganged}
+    return {"prey_share": share, "ganged": ganged, "first_elim": first}
 
 
 def pairwise_summary(pw: list[float], seats: list[str]) -> dict:
@@ -233,7 +236,8 @@ def run(args) -> str:
     ctx = mp.get_context("spawn")
     pool = ctx.Pool(args.workers)
     common = {"depth": args.depth, "qdepth": args.qdepth, "check_ext": args.check_ext, "width": args.width,
-              "full_plies": args.full_plies, "max_turn": 400}
+              "full_plies": args.full_plies, "discount": args.discount, "elim_bonus": args.elim_bonus,
+              "elim_horizon": args.elim_horizon, "max_turn": 400}
     total_steps = 0
 
     def check(tag: str, it: int, final: bool = False) -> None:
@@ -304,7 +308,7 @@ def run(args) -> str:
                   "explore": args.explore, "explore_plies": 30, "stride": 1} for g in range(args.games)]
         results = pool.map(W.selfplay_game, tasks)
         tg = time.time() - ti
-        endings, plies, prey, gang, n_pos = Counter(), [], [], [], 0
+        endings, plies, prey, gang, first_el, n_pos = Counter(), [], [], [], [], 0
         for gi, r in enumerate(results):
             scores = np.array(r["scores"], dtype=np.float32)
             held_out = bool(args.val_selfplay_every) and gi % args.val_selfplay_every == 0
@@ -319,9 +323,12 @@ def run(args) -> str:
             if st["prey_share"] is not None:
                 prey.append(st["prey_share"])
             gang.append(st["ganged"])
+            if st["first_elim"] is not None:
+                first_el.append(st["first_elim"])
             games_log.write(json.dumps({"type": "selfplay", "iteration": it, "seed": r["seed"], "opening": r["opening"],
                                         "scores": r["scores"], "reason": r["reason"], "plies": r["plies"],
-                                        "moves": r["moves"], "captures": r["captures"], "checks": r["checks"]}) + "\n")
+                                        "moves": r["moves"], "captures": r["captures"], "checks": r["checks"],
+                                        "eliminations": r.get("eliminations", [])}) + "\n")
         games_log.flush()
         losses, gnorms = [], []
         if len(replay) >= args.min_buffer:
@@ -355,14 +362,15 @@ def run(args) -> str:
                  "grad_norm": round(float(np.mean(gnorms)), 4) if gnorms else None, "endings": dict(endings),
                  "mean_plies": round(float(np.mean(plies)), 1),
                  "prey_share": round(float(np.mean(prey)), 3) if prey else None,
-                 "gang_rate": round(float(np.mean(gang)), 3)}
+                 "gang_rate": round(float(np.mean(gang)), 3),
+                 "first_elim_ply": round(float(np.mean(first_el)), 1) if first_el else None}
         meta["history"].append(entry)
         meta["iteration"] = it
         log.log("iteration", **entry)
         registry.save_model(model, kind, config, label, meta, opt)
         print(f"it {it} | {entry['hours']:.2f}h | games {len(results)} ({tg:.0f} s) | buffer {len(replay):,} | "
               f"loss {entry['loss']} | val {entry['val_base_loss']} / {entry['val_selfplay_loss']} | plies {entry['mean_plies']} | prey {entry['prey_share']} | "
-              f"gang {entry['gang_rate']}", flush=True)
+              f"gang {entry['gang_rate']} | first elim {entry['first_elim_ply']}", flush=True)
         if time.time() - last_check >= args.check_min * 60 and time.time() - t0 + reserve() * 2 < budget:
             check(f"h{hours():.1f}", it)
             last_check = time.time()
@@ -399,6 +407,12 @@ def parse_args(argv=None):
     ap.add_argument("--width", type=int, default=0,
                     help="selective depth: children searched per node from ply --full-plies on (0 = all)")
     ap.add_argument("--full-plies", type=int, default=2, help="plies from the root searched at full width")
+    ap.add_argument("--discount", type=float, default=0.9985,
+                    help="search preference for shorter games: values pulled towards 0.5 by this per move (1 = off)")
+    ap.add_argument("--elim-bonus", type=float, default=0.008,
+                    help="search preference for early eliminations: utility added to the eliminator (0 = off); "
+                         "keep below a pawn (about 0.01 for nnue-v1)")
+    ap.add_argument("--elim-horizon", type=int, default=200, help="turn at which the elimination bonus reaches 0")
     ap.add_argument("--explore", type=float, default=0.05)
     ap.add_argument("--steps", type=int, default=120)
     ap.add_argument("--batch", type=int, default=1024)

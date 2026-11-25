@@ -79,13 +79,18 @@ def _positions(seed, n=80, every=8):
     return out
 
 
-@pytest.mark.parametrize("depth,qdepth,width,full", [(1, 2, 0, 2), (2, 1, 0, 2), (2, 2, 0, 2),
-                                                     (3, 1, 3, 1), (4, 1, 2, 1)])
-def test_compiled_search_matches_python(depth, qdepth, width, full):
-    """Same move and root value; the last two cases use selective depth (width)."""
+@pytest.mark.parametrize("depth,qdepth,width,full,prefs", [(1, 2, 0, 2, False), (2, 1, 0, 2, False),
+                                                           (2, 2, 0, 2, False), (3, 1, 3, 1, False),
+                                                           (4, 1, 2, 1, False), (2, 2, 0, 2, True),
+                                                           (3, 1, 3, 1, True)])
+def test_compiled_search_matches_python(depth, qdepth, width, full, prefs):
+    """Same move and root value; selective depth (width) and the game-length / elimination
+    preferences (exaggerated here so they matter) in the later cases."""
     torch.manual_seed(5)
     net = NumpyNNUE.from_model(NNUE().eval())
     kw = dict(time_ms=None, depth=depth, qdepth=qdepth, width=width, full_plies=full)
+    if prefs:
+        kw.update(discount=0.97, elim_bonus=0.2, elim_horizon=150)
     py = MaxN(net, backend="python", **kw)
     rs = MaxN(net, backend="rust", **kw)
     exact = n = 0
@@ -134,3 +139,37 @@ def test_gives_check_matches_python():
             assert pos.gives_check(move_code(m)) == want
             n += want
     assert n > 0
+
+
+def test_preferences_shape_values():
+    """discount pulls every value towards 0.5; the elimination bonus goes to the mover only,
+    shrinking with the turn and gone after the horizon."""
+    net = NumpyNNUE.from_model(NNUE().eval())
+    p = MaxN(net, time_ms=None, depth=1, discount=0.9, elim_bonus=0.01, elim_horizon=200, backend="python")
+    v = np.array([1.0, 0.0, 0.5, 0.5])
+    assert np.allclose(p._shape(v, 0, 0, False), [0.95, 0.05, 0.5, 0.5])
+    assert np.allclose(p._shape(v, 1, 50, True), [0.95, 0.05 + 0.0075, 0.5, 0.5])
+    assert np.allclose(p._shape(v, 1, 300, True), [0.95, 0.05, 0.5, 0.5])
+    with pytest.raises(ValueError):
+        MaxN(net, time_ms=None, depth=1, discount=0.0)
+
+
+def test_elimination_bonus_finds_a_king_capture():
+    """With a large bonus the search takes an available king capture (an elimination)."""
+    torch.manual_seed(2)
+    net = NumpyNNUE.from_model(NNUE().eval())
+    found = 0
+    for seed in range(40):
+        for s in _positions(seed):
+            kids = MaxN._expand(s, legal_moves(s))
+            if any(e[3] for e in kids) and not all(e[3] for e in kids):
+                for backend in ("python", "rust"):
+                    p = MaxN(net, time_ms=None, depth=1, qdepth=0, elim_bonus=5.0, elim_horizon=10_000,
+                             backend=backend)
+                    m = p.best_move(s)
+                    assert dict((e[0], e[3]) for e in kids)[m], backend
+                found += 1
+                break
+        if found >= 3:
+            break
+    assert found >= 1

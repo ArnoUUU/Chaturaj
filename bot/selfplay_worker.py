@@ -36,13 +36,21 @@ def load_core_net(path: str):
     return _NETS[path]
 
 
+PREFS = ("discount", "elim_bonus", "elim_horizon")
+
+
+def prefs(task: dict) -> dict:
+    """The search preferences in a task (defaults: off)."""
+    return {k: task[k] for k in PREFS if k in task}
+
+
 def searcher(path: str, depth: int, qdepth: int, check_ext: int, slot: int = 0, width: int = 0,
-             full_plies: int = 2):
-    key = (path, depth, qdepth, check_ext, width, full_plies, slot)
+             full_plies: int = 2, **pref):
+    key = (path, depth, qdepth, check_ext, width, full_plies, tuple(sorted(pref.items())), slot)
     if key not in _SEARCHERS:
         net = _NETS.get(path) or load_core_net(path)
         _SEARCHERS[key] = E.MaxN(net, depth=depth, qdepth=qdepth, check_ext=check_ext, width=width,
-                                 full_plies=full_plies, tt_size=1_000_000)
+                                 full_plies=full_plies, tt_size=1_000_000, **pref)
     return _SEARCHERS[key]
 
 
@@ -61,11 +69,11 @@ def selfplay_game(task: dict) -> dict:
     """
     rng = np.random.default_rng(task["seed"])
     s = searcher(task["weights"], task["depth"], task["qdepth"], task["check_ext"], 0,
-                 task.get("width", 0), task.get("full_plies", 2))
+                 task.get("width", 0), task.get("full_plies", 2), **prefs(task))
     s.clear()
     pos = E.Position.initial()
     n_open = int(rng.integers(task["open_lo"], task["open_hi"] + 1))
-    boards, ks, gl, moves, captures, checks = [], [], [], [], [], []
+    boards, ks, gl, moves, captures, checks, elims = [], [], [], [], [], [], []
     ply = 0
     while pos.game_over is None and pos.turn < task["max_turn"]:
         ms = pos.legal_moves()
@@ -85,11 +93,13 @@ def selfplay_game(task: dict) -> dict:
         moves.append(int(m))
         if cap and (cap - 1) // 5 < 4:             # an active piece: (ply, attacker, victim, points)
             captures.append((ply, mover, (cap - 1) // 5, points))
+        if elim is not None:                       # (ply, eliminator, eliminated)
+            elims.append((ply, mover, int(elim)))
         ply += 1
     return {"seed": task["seed"], "boards": np.stack(boards).astype(np.uint8), "ks": np.array(ks, dtype=np.int8),
             "globals": np.stack(gl).astype(np.float32), "scores": list(pos.scores),
             "reason": pos.game_over or "ply_cap", "plies": ply, "opening": n_open, "moves": moves,
-            "captures": captures, "checks": checks}
+            "captures": captures, "checks": checks, "eliminations": elims}
 
 
 def match_game(task: dict) -> dict:
@@ -97,8 +107,8 @@ def match_game(task: dict) -> dict:
     search), after a seeded random opening; no exploration."""
     seat = task["seat"]
     w, fp = task.get("width", 0), task.get("full_plies", 2)
-    cand = searcher(task["cand"], task["depth"], task["qdepth"], task["check_ext"], 9, w, fp)
-    opps = {c: searcher(task["opp"], task["depth"], task["qdepth"], task["check_ext"], c, w, fp)
+    cand = searcher(task["cand"], task["depth"], task["qdepth"], task["check_ext"], 9, w, fp, **prefs(task))
+    opps = {c: searcher(task["opp"], task["depth"], task["qdepth"], task["check_ext"], c, w, fp, **prefs(task))
             for c in range(4) if c != seat}
     for x in (cand, *opps.values()):
         x.clear()
@@ -127,7 +137,7 @@ def yardstick_block(task: dict) -> dict:
     from .nnue import NumpyNNUE
     player = MaxN(NumpyNNUE.load(task["weights"]), time_ms=None, depth=task["depth"], qdepth=task["qdepth"],
                   check_ext=task["check_ext"], width=task.get("width", 0),
-                  full_plies=task.get("full_plies", 2))
+                  full_plies=task.get("full_plies", 2), **prefs(task))
     times = []
 
     def play(state):

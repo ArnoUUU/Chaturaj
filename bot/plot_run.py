@@ -16,7 +16,7 @@ Panels, all against hours of training (iterations from meta.json "history", chec
 3. Gradient norm (mean per iteration, before clipping at 1.0).
 4. Checks: pairwise score ±2 SE vs the best weights and vs MCTS + MLP; 0.5 = even.
 5. Predator and prey: prey share and gang rate.
-6. Mean game length (plies).
+6. Mean game length and mean ply of the first elimination.
 
 Older runs (before validation and learning-rate logging) simply leave those panels empty.
 """
@@ -50,6 +50,8 @@ def _config_line(meta) -> str:
     bits = [f"depth {a.get('depth')}", f"q {a.get('qdepth')}", f"check ext {a.get('check_ext')}"]
     if a.get("width"):
         bits.append(f"width {a['width']} after {a.get('full_plies', 2)} plies")
+    if a.get("discount", 1) < 1 or a.get("elim_bonus"):
+        bits.append(f"discount {a.get('discount')}, elim bonus {a.get('elim_bonus')} to turn {a.get('elim_horizon')}")
     bits += [f"lr {a.get('lr')}", f"{a.get('games')} games x {a.get('steps')} steps x {a.get('batch')}",
              f"checks every {a.get('check_min')} min", f"{a.get('workers')} workers"]
     return " | ".join(str(b) for b in bits)
@@ -71,7 +73,8 @@ def plot_meta(meta: dict, out: str | Path) -> Path:
         for i, r in enumerate(reverts):
             ax.axvline(r, color=RED, lw=1, ls="--", label="back to best weights" if i == 0 else None)
         ax.set_title("Loss (pairwise cross-entropy)", loc="left", fontsize=10)
-        ax.legend(fontsize=7.5, loc="best")
+        if ax.get_legend_handles_labels()[0]:
+            ax.legend(fontsize=7.5, loc="best")
 
         ax = axes[0, 1]
         x, y = _series(hist, "lr")
@@ -108,7 +111,8 @@ def plot_meta(meta: dict, out: str | Path) -> Path:
                             xytext=(0, -16), ha="center", fontsize=7, color=INK2)
         ax.set_ylim(0, 1)
         ax.set_title("Checks: pairwise score ±2 SE", loc="left", fontsize=10)
-        ax.legend(fontsize=7.5, loc="lower right")
+        if ax.get_legend_handles_labels()[0]:
+            ax.legend(fontsize=7.5, loc="lower right")
 
         ax = axes[1, 1]
         for key, col, name in (("prey_share", BLUE, "prey share"), ("gang_rate", ORANGE, "gang rate")):
@@ -120,13 +124,17 @@ def plot_meta(meta: dict, out: str | Path) -> Path:
                 color=INK2, va="bottom")
         ax.set_ylim(0, 1)
         ax.set_title("Predator and prey", loc="left", fontsize=10)
-        ax.legend(fontsize=7.5, loc="lower right")
+        if ax.get_legend_handles_labels()[0]:
+            ax.legend(fontsize=7.5, loc="lower right")
 
         ax = axes[1, 2]
-        x, y = _series(hist, "mean_plies")
-        if x:
-            ax.plot(x, y, color=BLUE, lw=1.2)
-        ax.set_title("Mean game length (plies)", loc="left", fontsize=10)
+        for key, col, name in (("mean_plies", BLUE, "game length"), ("first_elim_ply", ORANGE, "first elimination")):
+            x, y = _series(hist, key)
+            if x:
+                ax.plot(x, y, color=col, lw=1.2, label=name)
+        ax.set_title("Game length and first elimination (plies, mean)", loc="left", fontsize=10)
+        if ax.get_legend_handles_labels()[0]:
+            ax.legend(fontsize=7.5, loc="best")
 
         for a in axes.flat:
             a.set_xlabel("hours", fontsize=8)

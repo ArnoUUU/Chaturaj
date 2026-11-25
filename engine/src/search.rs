@@ -16,6 +16,13 @@
 //! - selective depth (`width`): from ply `full_plies` on, a node searches only the `width`
 //!   children with the best static evaluation for the mover (plus the table's move), so deep
 //!   searches (depth 5) fit in a self-play budget; 0 = search every move
+//! - preferences (both off by default), applied to a child's value as it is backed up:
+//!   - `discount` (< 1): every move pulls the values towards the mean 0.5, so a player who is
+//!     doing well prefers the shorter line (and one doing badly the longer one)
+//!   - `elim_bonus`: a move that eliminates a player adds `elim_bonus * (1 - turn / elim_horizon)`
+//!     (not below 0) to the mover's value, so eliminating early is preferred
+//!   Both are kept smaller than what the network gives a pawn, so they break near-ties and
+//!   never outweigh keeping one's own pieces (logs/nnue_selfplay_plan.md)
 //! - immediate pruning: a utility of 1 (above all three) can't be beaten
 //! - all sibling leaves are evaluated together in one batched network pass
 //! - if the time runs out before depth 1 finishes, the best child by one batched evaluation
@@ -93,6 +100,9 @@ pub struct Searcher {
     pub check_ext: u32,
     pub width: usize,
     pub full_plies: u32,
+    pub discount: f64,
+    pub elim_bonus: f64,
+    pub elim_horizon: u32,
     tt: HashMap<u64, Entry>,
     nodes: u64,
     deadline: Option<Instant>,
@@ -100,11 +110,16 @@ pub struct Searcher {
 
 impl Searcher {
     pub fn new(net: Arc<Net>, time_ms: Option<f64>, depth: Option<u32>, max_depth: u32, qdepth: u32,
-               tt_size: usize, check_ext: u32, width: usize, full_plies: u32) -> Result<Self, String> {
+               tt_size: usize, check_ext: u32, width: usize, full_plies: u32, discount: f64, elim_bonus: f64,
+               elim_horizon: u32) -> Result<Self, String> {
+        if !(0.0..=1.0).contains(&discount) || discount == 0.0 {
+            return Err("discount must be in (0, 1]".into());
+        }
         if time_ms.is_none() && depth.is_none() {
             return Err("give a time budget or a fixed depth".into());
         }
-        Ok(Searcher { net, time_ms, depth, max_depth, qdepth, tt_size, check_ext, width, full_plies, tt: HashMap::new(), nodes: 0,
+        Ok(Searcher { net, time_ms, depth, max_depth, qdepth, tt_size, check_ext, width, full_plies, discount, elim_bonus,
+                      elim_horizon: elim_horizon.max(1), tt: HashMap::new(), nodes: 0,
                       deadline: None })
     }
 
@@ -170,24 +185,39 @@ impl Searcher {
         pos.hash ^ h
     }
 
-    /// Whether each move gives check (make + unmake).
-    fn checks(pos: &mut Position, moves: &[Move]) -> Vec<bool> {
+    /// For each move: (gives check, eliminates a player) (make + unmake).
+    fn flags(pos: &mut Position, moves: &[Move]) -> Vec<(bool, bool)> {
         moves.iter().map(|&m| {
-            let c = pos.push(m).expect("legal move").gives_check;
+            let info = pos.push(m).expect("legal move");
             pos.pop().expect("pop");
-            c
+            (info.gives_check, info.eliminated.is_some())
         }).collect()
     }
 
-    /// Moves in search order with their gives-check flags: the table's move, then captures by
-    /// points, then checks (stable, like Python's sort).
-    fn ordered(pos: &mut Position, tt_move: Option<Move>) -> Vec<(Move, bool)> {
+    /// A child's value as seen from its parent: the game-length discount, then the
+    /// elimination bonus for the mover (`turn`: the parent's turn).
+    fn shape(&self, v: Utilities, mover: usize, turn: u32, eliminates: bool) -> Utilities {
+        let mut v = v;
+        if self.discount < 1.0 {
+            for x in v.iter_mut() {
+                *x = 0.5 + self.discount * (*x - 0.5);
+            }
+        }
+        if eliminates && self.elim_bonus > 0.0 {
+            v[mover] += self.elim_bonus * (1.0 - turn as f64 / self.elim_horizon as f64).max(0.0);
+        }
+        v
+    }
+
+    /// Moves in search order with their (gives check, eliminates) flags: the table's move,
+    /// then captures by points, then checks (stable, like Python's sort).
+    fn ordered(pos: &mut Position, tt_move: Option<Move>) -> Vec<(Move, bool, bool)> {
         let moves = pos.legal_moves();
-        let chk = Self::checks(pos, &moves);
-        let mut kids: Vec<(Move, bool)> = moves.into_iter().zip(chk).collect();
-        kids.sort_by_key(|&(m, c)| (-pos.capture_points(m), -(c as i32)));
+        let fl = Self::flags(pos, &moves);
+        let mut kids: Vec<(Move, bool, bool)> = moves.into_iter().zip(fl).map(|(m, (c, e))| (m, c, e)).collect();
+        kids.sort_by_key(|&(m, c, _)| (-pos.capture_points(m), -(c as i32)));
         if let Some(t) = tt_move {
-            if let Some(i) = kids.iter().position(|&(m, _)| m == t) {
+            if let Some(i) = kids.iter().position(|&(m, _, _)| m == t) {
                 let e = kids.remove(i);
                 kids.insert(0, e);
             }
@@ -271,7 +301,7 @@ impl Searcher {
         // selective depth: keep the `width` best children by static evaluation (and the
         // table's move, which `ordered` put first), in search order
         if self.width > 0 && ply >= self.full_plies && kids.len() > self.width {
-            let ms: Vec<Move> = kids.iter().map(|&(m, _)| m).collect();
+            let ms: Vec<Move> = kids.iter().map(|&(m, _, _)| m).collect();
             let evals = self.children(pos, acc, &ms);
             let mut idx: Vec<usize> = (0..kids.len()).collect();
             idx.sort_by(|&a, &b| evals[b].1[me].partial_cmp(&evals[a].1[me]).unwrap().then(a.cmp(&b)));
@@ -299,8 +329,9 @@ impl Searcher {
                 leaves[idx[j]] = Some(r);
             }
         }
+        let turn = pos.turn;
         let (mut best_v, mut best_m): (Option<Utilities>, Option<Move>) = (None, None);
-        for (i, &(m, chk)) in kids.iter().enumerate() {
+        for (i, &(m, chk, elim)) in kids.iter().enumerate() {
             let extend = chk && ext > 0;
             if depth == 1 && self.tick() {
                 return None;
@@ -326,11 +357,12 @@ impl Searcher {
                 Self::pop(pos, acc);
                 r?.0
             };
-            if best_v.is_none_or(|b| v[me] > b[me]) {
-                best_v = Some(v);
+            let sv = self.shape(v, me, turn, elim);
+            if best_v.is_none_or(|b| sv[me] > b[me]) {
+                best_v = Some(sv);
                 best_m = Some(m);
                 if v[me] >= WIN {
-                    break;
+                    break;          // finishes above everyone (judged before the preferences)
                 }
             }
         }
@@ -351,14 +383,15 @@ impl Searcher {
         if !first {
             moves.retain(|&m| pos.capture_points(m) > 0);
         }
-        let chk = Self::checks(pos, &moves);
-        let mut kids: Vec<(Move, bool)> = moves.into_iter().zip(chk)
-            .filter(|&(m, c)| pos.capture_points(m) > 0 || (first && c)).collect();
+        let fl = Self::flags(pos, &moves);
+        let mut kids: Vec<(Move, bool, bool)> = moves.into_iter().zip(fl).map(|(m, (c, e))| (m, c, e))
+            .filter(|&(m, c, _)| pos.capture_points(m) > 0 || (first && c)).collect();
         if kids.is_empty() {
             return Some(stand);
         }
-        kids.sort_by_key(|&(m, c)| (-pos.capture_points(m), -(c as i32)));
-        let ms: Vec<Move> = kids.iter().map(|&(m, _)| m).collect();
+        kids.sort_by_key(|&(m, c, _)| (-pos.capture_points(m), -(c as i32)));
+        let ms: Vec<Move> = kids.iter().map(|&(m, _, _)| m).collect();
+        let turn = pos.turn;
         let evals = self.children(pos, acc, &ms);
         let mut best = stand;
         for (i, &m) in ms.iter().enumerate() {
@@ -374,8 +407,9 @@ impl Searcher {
                 Self::pop(pos, acc);
                 r?
             };
-            if v[me] > best[me] {
-                best = v;
+            let sv = self.shape(v, me, turn, kids[i].2);
+            if sv[me] > best[me] {
+                best = sv;
             }
         }
         Some(best)
@@ -407,7 +441,7 @@ mod tests {
             pos.push(m).unwrap();
         }
         let before = (pos.board, pos.turn, pos.scores, pos.depth());
-        let mut s = Searcher::new(tiny_net(), None, Some(3), 12, 2, 100_000, 3, 0, 2).unwrap();
+        let mut s = Searcher::new(tiny_net(), None, Some(3), 12, 2, 100_000, 3, 0, 2, 1.0, 0.0, 200).unwrap();
         let r = s.best_move(&mut pos).unwrap();
         assert_eq!((pos.board, pos.turn, pos.scores, pos.depth()), before);
         assert!(pos.legal_moves().contains(&r.best));
@@ -419,7 +453,7 @@ mod tests {
     #[test]
     fn time_budget_is_respected() {
         let mut pos = Position::initial();
-        let mut s = Searcher::new(tiny_net(), Some(50.0), None, 30, 2, 100_000, 3, 0, 2).unwrap();
+        let mut s = Searcher::new(tiny_net(), Some(50.0), None, 30, 2, 100_000, 3, 0, 2, 1.0, 0.0, 200).unwrap();
         let r = s.best_move(&mut pos).unwrap();
         assert!(r.seconds < 0.2, "{}", r.seconds);
         assert!(r.depth >= 1);

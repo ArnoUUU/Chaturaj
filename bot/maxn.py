@@ -73,17 +73,27 @@ def capture_points(board, move: Move) -> int:
 class MaxN:
     def __init__(self, net: NumpyNNUE, time_ms: float | None = 250, depth: int | None = None,
                  max_depth: int = 12, qdepth: int = 2, tt_size: int = 200_000, backend: str = "auto",
-                 check_ext: int = 3, width: int = 0, full_plies: int = 2):
+                 check_ext: int = 3, width: int = 0, full_plies: int = 2, discount: float = 1.0,
+                 elim_bonus: float = 0.0, elim_horizon: int = 200):
         """backend: "auto" (compiled when available), "rust" (require it) or "python".
 
         width: selective depth. From ply `full_plies` on, a node searches only the `width`
         children with the best static evaluation for the mover (plus the table's move);
-        0 searches every move."""
+        0 searches every move.
+
+        Preferences (off by default), applied to a child's value as it is backed up:
+        discount (< 1) pulls values towards the mean 0.5 at every move, so a player doing well
+        prefers shorter lines; elim_bonus adds elim_bonus * max(0, 1 - turn / elim_horizon) to
+        the value of a player who eliminates someone, so eliminating early is preferred. Both
+        are kept below what the network gives a pawn (they only break near-ties)."""
+        if not 0.0 < discount <= 1.0:
+            raise ValueError("discount must be in (0, 1]")
         if time_ms is None and depth is None:
             raise ValueError("give a time budget or a fixed depth")
         self.net, self.time_ms, self.depth = net, time_ms, depth
         self.max_depth, self.qdepth, self.tt_size = max_depth, qdepth, tt_size
         self.check_ext, self.width, self.full_plies = check_ext, width, full_plies
+        self.discount, self.elim_bonus, self.elim_horizon = discount, elim_bonus, max(1, elim_horizon)
         self.tt: dict = {}
         self.stats: dict = {}
         self.fast = None
@@ -93,7 +103,8 @@ class MaxN:
             import chaturaji_engine
             self.fast = chaturaji_engine.MaxN(net.core, time_ms=time_ms, depth=depth, max_depth=max_depth,
                                               qdepth=qdepth, tt_size=tt_size, check_ext=check_ext,
-                                              width=width, full_plies=full_plies)
+                                              width=width, full_plies=full_plies, discount=discount,
+                                              elim_bonus=elim_bonus, elim_horizon=elim_horizon)
         elif backend == "rust":
             raise RuntimeError("backend='rust' needs the compiled core (engine/README.md)")
         self.backend = "rust" if self.fast is not None else "python"
@@ -157,15 +168,25 @@ class MaxN:
                 tuple(sorted(state.eliminated)))
 
     @staticmethod
-    def _expand(state: ChaturajiState, moves: list[Move]) -> list[tuple[Move, ChaturajiState, bool]]:
-        """(move, child, gives check) for each move. A move gives check when, after it, the
-        mover attacks an active king it did not attack before."""
+    def _expand(state: ChaturajiState, moves: list[Move]) -> list[tuple[Move, ChaturajiState, bool, bool]]:
+        """(move, child, gives check, eliminates) for each move. A move gives check when,
+        after it, the mover attacks an active king it did not attack before."""
         before = kings_attacked_by(state.board, state.current_player(), state.active_players())
         out = []
         for m in moves:
             child, info = apply_move(state, m)
-            out.append((m, child, bool(info.checked - before)))
+            out.append((m, child, bool(info.checked - before), info.eliminated is not None))
         return out
+
+    def _shape(self, v: np.ndarray, mover: int, turn: int, eliminates: bool) -> np.ndarray:
+        """A child's value as seen from its parent: the game-length discount, then the
+        elimination bonus for the mover (`turn`: the parent's turn)."""
+        if self.discount < 1.0:
+            v = 0.5 + self.discount * (np.asarray(v, dtype=np.float64) - 0.5)
+        if eliminates and self.elim_bonus > 0.0:
+            v = np.array(v, dtype=np.float64)
+            v[mover] += self.elim_bonus * max(0.0, 1.0 - turn / self.elim_horizon)
+        return v
 
     def _ordered(self, state: ChaturajiState, tt_move: Move | None):
         """Children in search order: the table's move, then captures by points, then checks."""
@@ -198,7 +219,7 @@ class MaxN:
         stands = {}
         if self.width and ply >= self.full_plies and len(kids) > self.width:
             # selective depth: the `width` best children by static evaluation, plus the table's move
-            vals = [exact_utilities(c) if is_game_over(c) else None for _, c, _ in kids]
+            vals = [exact_utilities(c) if is_game_over(c) else None for _, c, _, _ in kids]
             live = [i for i, v in enumerate(vals) if v is None]
             self.nodes += len(live)
             for i, v in zip(live, acc.evaluate_children([kids[i][1] for i in live])):
@@ -210,11 +231,12 @@ class MaxN:
             if depth == 1:
                 stands = {j: vals[i] for j, i in enumerate(sel)}
         elif depth == 1:      # leaves (no extension): one batched evaluation
-            live = [i for i, (_, c, chk) in enumerate(kids) if not is_game_over(c) and not (chk and ext > 0)]
+            live = [i for i, (_, c, chk, _) in enumerate(kids) if not is_game_over(c) and not (chk and ext > 0)]
             self.nodes += len(live)
             for i, v in zip(live, acc.evaluate_children([kids[i][1] for i in live])):
                 stands[i] = v
-        for i, (m, child, chk) in enumerate(kids):
+        turn = state.turn
+        for i, (m, child, chk, elim) in enumerate(kids):
             extend = chk and ext > 0
             if depth == 1:
                 self._tick()
@@ -232,10 +254,11 @@ class MaxN:
                     v, _ = self._search(child, depth if extend else depth - 1, acc, ext - 1 if extend else ext, ply + 1)
                 finally:
                     acc.pop()
-            if best_v is None or v[me] > best_v[me]:
-                best_v, best_m = v, m
+            sv = self._shape(v, me, turn, elim)
+            if best_v is None or sv[me] > best_v[me]:
+                best_v, best_m = sv, m
                 if v[me] >= 1.0 - 1e-9:
-                    break                               # immediate pruning
+                    break                               # immediate pruning (before the preferences)
         self.tt[key] = (depth, best_v, best_m)
         return best_v, best_m
 
@@ -261,7 +284,8 @@ class MaxN:
         live = [i for i, e in enumerate(kids) if not is_game_over(e[1])]
         evals = dict(zip(live, acc.evaluate_children([kids[i][1] for i in live])))
         self.nodes += len(live)
-        for i, (m, child, _) in enumerate(kids):
+        turn = state.turn
+        for i, (m, child, _, elim) in enumerate(kids):
             self._tick()
             if is_game_over(child):
                 v = exact_utilities(child)
@@ -273,8 +297,9 @@ class MaxN:
                     v = self._quiesce(child, q - 1, acc, evals[i])
                 finally:
                     acc.pop()
-            if v[me] > best[me]:
-                best = v
+            sv = self._shape(v, me, turn, elim)
+            if sv[me] > best[me]:
+                best = sv
         return best
 
 

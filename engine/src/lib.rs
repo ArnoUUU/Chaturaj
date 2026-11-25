@@ -367,10 +367,11 @@ mod python {
     #[pymethods]
     impl PyMaxN {
         #[new]
-        #[pyo3(signature = (net, time_ms=None, depth=None, max_depth=12, qdepth=2, tt_size=200_000, check_ext=3, width=0, full_plies=2))]
+        #[pyo3(signature = (net, time_ms=None, depth=None, max_depth=12, qdepth=2, tt_size=200_000, check_ext=3, width=0, full_plies=2, discount=1.0, elim_bonus=0.0, elim_horizon=200))]
         fn new(net: &PyNnue, time_ms: Option<f64>, depth: Option<u32>, max_depth: u32, qdepth: u32, tt_size: usize,
-               check_ext: u32, width: usize, full_plies: u32) -> PyResult<Self> {
-            Ok(PyMaxN { s: Searcher::new(net.net.clone(), time_ms, depth, max_depth, qdepth, tt_size, check_ext, width, full_plies).map_err(err)? })
+               check_ext: u32, width: usize, full_plies: u32, discount: f64, elim_bonus: f64,
+               elim_horizon: u32) -> PyResult<Self> {
+            Ok(PyMaxN { s: Searcher::new(net.net.clone(), time_ms, depth, max_depth, qdepth, tt_size, check_ext, width, full_plies, discount, elim_bonus, elim_horizon).map_err(err)? })
         }
 
         /// Search a position: returns (move, depth reached, nodes, root utilities R B Y G or
