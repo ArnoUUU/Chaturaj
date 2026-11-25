@@ -1,0 +1,684 @@
+{
+ "label": "2026-11-24_1127_nnue-selfplay-d5_nnue-a256-h32x32_maxn-s5_timed_cpu",
+ "kind": "nnue",
+ "config": {
+  "acc": 256,
+  "hidden": [
+   32,
+   32
+  ]
+ },
+ "params": 444422,
+ "args": {
+  "init": "models/2026-11-23_1607_nnue-v1_nnue-a256-h32x32_ep8_cpu",
+  "tag": "nnue-selfplay-d5",
+  "hours": 8.0,
+  "until": null,
+  "workers": 12,
+  "games": 24,
+  "depth": 5,
+  "qdepth": 2,
+  "check_ext": 3,
+  "width": 4,
+  "full_plies": 1,
+  "explore": 0.05,
+  "steps": 40,
+  "batch": 1024,
+  "base_frac": 0.5,
+  "buffer": 400000,
+  "min_buffer": 20000,
+  "lr": 0.00025,
+  "weight_decay": 1e-05,
+  "check_min": 18.0,
+  "val_every": 20,
+  "val_base": 20000,
+  "val_selfplay_every": 10,
+  "val_buffer": 40000,
+  "check_games": 24,
+  "yard_games": 20,
+  "yard_workers": 3,
+  "yard_sims": 32,
+  "mlp": "models/opponent_pool/league_model.pt",
+  "records": "C:\\Users\\Arnav\\Downloads\\Chaturaj\\scraper\\data\\records",
+  "base_selfplay": [
+   "logs/2026-11-23_0144_league-5h_mlp-e512-w1024x512x256_puct-s32_timed_cpu/games.jsonl"
+  ],
+  "cache": "logs/nnue_cache.npz",
+  "seed": 0
+ },
+ "environment": {
+  "host": "arnavjyoga7",
+  "python": "3.14.0",
+  "torch": "2.9.1+cpu",
+  "device": "cpu",
+  "git_commit": "d864e82-dirty",
+  "cuda_available": false
+ },
+ "init": "models/2026-11-23_1607_nnue-v1_nnue-a256-h32x32_ep8_cpu",
+ "history": [
+  {
+   "iteration": 0,
+   "hours": 0.0,
+   "steps": 0,
+   "lr": 0.00025,
+   "val_base_loss": 0.41965
+  },
+  {
+   "iteration": 1,
+   "hours": 0.167,
+   "games": 24,
+   "positions": 3114,
+   "buffer": 2751,
+   "selfplay_sec": 463.2,
+   "train_sec": 0.2,
+   "loss": null,
+   "val_base_loss": 0.41965,
+   "val_selfplay_loss": 0.59705,
+   "val_selfplay_positions": 363,
+   "lr": 0.00025,
+   "steps": 0,
+   "grad_norm": null,
+   "endings": {
+    "last_king": 22,
+    "repetition": 1,
+    "ply_cap": 1
+   },
+   "mean_plies": 129.8,
+   "prey_share": 0.35,
+   "gang_rate": 0.958
+  },
+  {
+   "iteration": 2,
+   "hours": 0.274,
+   "games": 24,
+   "positions": 2713,
+   "buffer": 5099,
+   "selfplay_sec": 383.4,
+   "train_sec": 0.2,
+   "loss": null,
+   "val_base_loss": 0.41965,
+   "val_selfplay_loss": 0.53218,
+   "val_selfplay_positions": 728,
+   "lr": 0.00025,
+   "steps": 0,
+   "grad_norm": null,
+   "endings": {
+    "last_king": 20,
+    "ply_cap": 2,
+    "repetition": 2
+   },
+   "mean_plies": 113.0,
+   "prey_share": 0.377,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 3,
+   "hours": 0.353,
+   "games": 24,
+   "positions": 2459,
+   "buffer": 7330,
+   "selfplay_sec": 284.3,
+   "train_sec": 0.2,
+   "loss": null,
+   "val_base_loss": 0.41965,
+   "val_selfplay_loss": 0.50105,
+   "val_selfplay_positions": 956,
+   "lr": 0.00025,
+   "steps": 0,
+   "grad_norm": null,
+   "endings": {
+    "last_king": 23,
+    "ply_cap": 1
+   },
+   "mean_plies": 102.5,
+   "prey_share": 0.387,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 4,
+   "hours": 0.611,
+   "games": 24,
+   "positions": 3311,
+   "buffer": 10346,
+   "selfplay_sec": 495.1,
+   "train_sec": 0.2,
+   "loss": null,
+   "val_base_loss": 0.41965,
+   "val_selfplay_loss": 0.55736,
+   "val_selfplay_positions": 1251,
+   "lr": 0.00025,
+   "steps": 0,
+   "grad_norm": null,
+   "endings": {
+    "last_king": 20,
+    "ply_cap": 3,
+    "repetition": 1
+   },
+   "mean_plies": 138.0,
+   "prey_share": 0.38,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 5,
+   "hours": 0.719,
+   "games": 24,
+   "positions": 2648,
+   "buffer": 12717,
+   "selfplay_sec": 387.6,
+   "train_sec": 0.2,
+   "loss": null,
+   "val_base_loss": 0.41965,
+   "val_selfplay_loss": 0.53105,
+   "val_selfplay_positions": 1528,
+   "lr": 0.00025,
+   "steps": 0,
+   "grad_norm": null,
+   "endings": {
+    "last_king": 20,
+    "repetition": 1,
+    "ply_cap": 3
+   },
+   "mean_plies": 110.3,
+   "prey_share": 0.393,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 6,
+   "hours": 0.867,
+   "games": 24,
+   "positions": 2995,
+   "buffer": 15262,
+   "selfplay_sec": 534.0,
+   "train_sec": 0.2,
+   "loss": null,
+   "val_base_loss": 0.41965,
+   "val_selfplay_loss": 0.50792,
+   "val_selfplay_positions": 1978,
+   "lr": 0.00025,
+   "steps": 0,
+   "grad_norm": null,
+   "endings": {
+    "ply_cap": 1,
+    "last_king": 22,
+    "repetition": 1
+   },
+   "mean_plies": 124.8,
+   "prey_share": 0.372,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 7,
+   "hours": 1.163,
+   "games": 24,
+   "positions": 2467,
+   "buffer": 17266,
+   "selfplay_sec": 356.8,
+   "train_sec": 0.2,
+   "loss": null,
+   "val_base_loss": 0.41965,
+   "val_selfplay_loss": 0.50638,
+   "val_selfplay_positions": 2441,
+   "lr": 0.00025,
+   "steps": 0,
+   "grad_norm": null,
+   "endings": {
+    "last_king": 21,
+    "repetition": 2,
+    "ply_cap": 1
+   },
+   "mean_plies": 102.8,
+   "prey_share": 0.415,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 8,
+   "hours": 1.268,
+   "games": 24,
+   "positions": 2649,
+   "buffer": 19553,
+   "selfplay_sec": 374.8,
+   "train_sec": 0.2,
+   "loss": null,
+   "val_base_loss": 0.41965,
+   "val_selfplay_loss": 0.48924,
+   "val_selfplay_positions": 2803,
+   "lr": 0.00025,
+   "steps": 0,
+   "grad_norm": null,
+   "endings": {
+    "last_king": 22,
+    "ply_cap": 2
+   },
+   "mean_plies": 110.4,
+   "prey_share": 0.421,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 9,
+   "hours": 1.361,
+   "games": 24,
+   "positions": 2771,
+   "buffer": 22064,
+   "selfplay_sec": 336.3,
+   "train_sec": 1.1,
+   "loss": 0.4171,
+   "val_base_loss": 0.4209,
+   "val_selfplay_loss": 0.48435,
+   "val_selfplay_positions": 3063,
+   "lr": 0.00025,
+   "steps": 40,
+   "grad_norm": 0.1133,
+   "endings": {
+    "last_king": 22,
+    "ply_cap": 2
+   },
+   "mean_plies": 115.5,
+   "prey_share": 0.407,
+   "gang_rate": 0.875
+  },
+  {
+   "iteration": 10,
+   "hours": 1.436,
+   "games": 24,
+   "positions": 2448,
+   "buffer": 24188,
+   "selfplay_sec": 267.4,
+   "train_sec": 1.0,
+   "loss": 0.3989,
+   "val_base_loss": 0.42132,
+   "val_selfplay_loss": 0.48124,
+   "val_selfplay_positions": 3387,
+   "lr": 0.00025,
+   "steps": 80,
+   "grad_norm": 0.1102,
+   "endings": {
+    "last_king": 23,
+    "repetition": 1
+   },
+   "mean_plies": 102.0,
+   "prey_share": 0.398,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 11,
+   "hours": 1.713,
+   "games": 24,
+   "positions": 2773,
+   "buffer": 26785,
+   "selfplay_sec": 369.0,
+   "train_sec": 1.1,
+   "loss": 0.3856,
+   "val_base_loss": 0.42,
+   "val_selfplay_loss": 0.49347,
+   "val_selfplay_positions": 3563,
+   "lr": 0.00025,
+   "steps": 120,
+   "grad_norm": 0.1087,
+   "endings": {
+    "last_king": 21,
+    "repetition": 2,
+    "ply_cap": 1
+   },
+   "mean_plies": 115.5,
+   "prey_share": 0.387,
+   "gang_rate": 0.792
+  },
+  {
+   "iteration": 12,
+   "hours": 1.813,
+   "games": 24,
+   "positions": 2633,
+   "buffer": 28963,
+   "selfplay_sec": 358.8,
+   "train_sec": 1.1,
+   "loss": 0.3789,
+   "val_base_loss": 0.41844,
+   "val_selfplay_loss": 0.49251,
+   "val_selfplay_positions": 4018,
+   "lr": 0.00025,
+   "steps": 160,
+   "grad_norm": 0.1145,
+   "endings": {
+    "last_king": 20,
+    "repetition": 2,
+    "ply_cap": 2
+   },
+   "mean_plies": 109.7,
+   "prey_share": 0.388,
+   "gang_rate": 0.75
+  },
+  {
+   "iteration": 13,
+   "hours": 1.901,
+   "games": 24,
+   "positions": 2741,
+   "buffer": 31469,
+   "selfplay_sec": 317.6,
+   "train_sec": 1.0,
+   "loss": 0.3722,
+   "val_base_loss": 0.4183,
+   "val_selfplay_loss": 0.49382,
+   "val_selfplay_positions": 4253,
+   "lr": 0.00025,
+   "steps": 200,
+   "grad_norm": 0.1162,
+   "endings": {
+    "last_king": 22,
+    "ply_cap": 2
+   },
+   "mean_plies": 114.2,
+   "prey_share": 0.396,
+   "gang_rate": 0.958
+  },
+  {
+   "iteration": 14,
+   "hours": 2.059,
+   "games": 24,
+   "positions": 2603,
+   "buffer": 33627,
+   "selfplay_sec": 566.7,
+   "train_sec": 1.2,
+   "loss": 0.369,
+   "val_base_loss": 0.41784,
+   "val_selfplay_loss": 0.50713,
+   "val_selfplay_positions": 4698,
+   "lr": 0.00025,
+   "steps": 240,
+   "grad_norm": 0.1196,
+   "endings": {
+    "last_king": 24
+   },
+   "mean_plies": 108.5,
+   "prey_share": 0.388,
+   "gang_rate": 1.0
+  },
+  {
+   "iteration": 15,
+   "hours": 2.385,
+   "games": 24,
+   "positions": 2806,
+   "buffer": 36023,
+   "selfplay_sec": 514.3,
+   "train_sec": 1.1,
+   "loss": 0.416,
+   "val_base_loss": 0.41905,
+   "val_selfplay_loss": 0.50036,
+   "val_selfplay_positions": 5108,
+   "lr": 0.00025,
+   "steps": 280,
+   "grad_norm": 0.1132,
+   "endings": {
+    "repetition": 2,
+    "last_king": 22
+   },
+   "mean_plies": 116.9,
+   "prey_share": 0.401,
+   "gang_rate": 0.833
+  },
+  {
+   "iteration": 16,
+   "hours": 2.506,
+   "games": 24,
+   "positions": 2672,
+   "buffer": 38224,
+   "selfplay_sec": 432.1,
+   "train_sec": 1.1,
+   "loss": 0.4004,
+   "val_base_loss": 0.41838,
+   "val_selfplay_loss": 0.53952,
+   "val_selfplay_positions": 5579,
+   "lr": 0.00025,
+   "steps": 320,
+   "grad_norm": 0.1069,
+   "endings": {
+    "last_king": 24
+   },
+   "mean_plies": 111.3,
+   "prey_share": 0.397,
+   "gang_rate": 0.917
+  },
+  {
+   "iteration": 17,
+   "hours": 2.651,
+   "games": 24,
+   "positions": 3518,
+   "buffer": 41231,
+   "selfplay_sec": 522.5,
+   "train_sec": 1.1,
+   "loss": 0.3952,
+   "val_base_loss": 0.41796,
+   "val_selfplay_loss": 0.52712,
+   "val_selfplay_positions": 6090,
+   "lr": 0.00025,
+   "steps": 360,
+   "grad_norm": 0.1083,
+   "endings": {
+    "last_king": 20,
+    "ply_cap": 4
+   },
+   "mean_plies": 146.6,
+   "prey_share": 0.354,
+   "gang_rate": 1.0
+  },
+  {
+   "iteration": 18,
+   "hours": 2.944,
+   "games": 24,
+   "positions": 2498,
+   "buffer": 43328,
+   "selfplay_sec": 351.1,
+   "train_sec": 1.3,
+   "loss": 0.3879,
+   "val_base_loss": 0.41738,
+   "val_selfplay_loss": 0.51672,
+   "val_selfplay_positions": 6491,
+   "lr": 0.00025,
+   "steps": 400,
+   "grad_norm": 0.1072,
+   "endings": {
+    "last_king": 23,
+    "ply_cap": 1
+   },
+   "mean_plies": 104.1,
+   "prey_share": 0.419,
+   "gang_rate": 0.792
+  }
+ ],
+ "checks": [
+  {
+   "check": "start",
+   "iteration": 0,
+   "hours": 0.001,
+   "vs_mcts": {
+    "games": 20,
+    "pairwise": 0.875,
+    "pairwise_se": 0.065,
+    "per_seat_pairwise": {
+     "R": 0.667,
+     "B": 0.967,
+     "Y": 0.867,
+     "G": 1.0
+    },
+    "mlp": "models/opponent_pool/league_model.pt",
+    "sims": 32,
+    "maxn_seconds_per_move": 0.6966
+   },
+   "seconds": 135.3
+  },
+  {
+   "check": "h0.4",
+   "iteration": 3,
+   "hours": 0.353,
+   "vs_best": {
+    "games": 24,
+    "pairwise": 0.5,
+    "pairwise_se": 0.076,
+    "per_seat_pairwise": {
+     "R": 0.5,
+     "B": 0.583,
+     "Y": 0.611,
+     "G": 0.306
+    },
+    "against": "start"
+   },
+   "decision": "new best",
+   "vs_mcts": {
+    "games": 20,
+    "pairwise": 0.875,
+    "pairwise_se": 0.065,
+    "per_seat_pairwise": {
+     "R": 0.667,
+     "B": 0.967,
+     "Y": 0.867,
+     "G": 1.0
+    },
+    "mlp": "models/opponent_pool/league_model.pt",
+    "sims": 32,
+    "maxn_seconds_per_move": 0.6855
+   },
+   "seconds": 435.3
+  },
+  {
+   "check": "h0.9",
+   "iteration": 6,
+   "hours": 0.867,
+   "vs_best": {
+    "games": 24,
+    "pairwise": 0.5,
+    "pairwise_se": 0.077,
+    "per_seat_pairwise": {
+     "R": 0.583,
+     "B": 0.639,
+     "Y": 0.5,
+     "G": 0.278
+    },
+    "against": "h0.4"
+   },
+   "decision": "new best",
+   "vs_mcts": {
+    "games": 20,
+    "pairwise": 0.875,
+    "pairwise_se": 0.065,
+    "per_seat_pairwise": {
+     "R": 0.667,
+     "B": 0.967,
+     "Y": 0.867,
+     "G": 1.0
+    },
+    "mlp": "models/opponent_pool/league_model.pt",
+    "sims": 32,
+    "maxn_seconds_per_move": 0.6605
+   },
+   "seconds": 708.2
+  },
+  {
+   "check": "h1.4",
+   "iteration": 10,
+   "hours": 1.436,
+   "vs_best": {
+    "games": 24,
+    "pairwise": 0.479,
+    "pairwise_se": 0.076,
+    "per_seat_pairwise": {
+     "R": 0.556,
+     "B": 0.722,
+     "Y": 0.222,
+     "G": 0.417
+    },
+    "against": "h0.9"
+   },
+   "decision": "not better than h0.9; kept training",
+   "vs_mcts": {
+    "games": 20,
+    "pairwise": 0.933,
+    "pairwise_se": 0.037,
+    "per_seat_pairwise": {
+     "R": 0.833,
+     "B": 0.967,
+     "Y": 0.933,
+     "G": 1.0
+    },
+    "mlp": "models/opponent_pool/league_model.pt",
+    "sims": 32,
+    "maxn_seconds_per_move": 0.3631
+   },
+   "seconds": 626.7
+  },
+  {
+   "check": "h2.1",
+   "iteration": 14,
+   "hours": 2.059,
+   "vs_best": {
+    "games": 24,
+    "pairwise": 0.292,
+    "pairwise_se": 0.064,
+    "per_seat_pairwise": {
+     "R": 0.389,
+     "B": 0.444,
+     "Y": 0.167,
+     "G": 0.167
+    },
+    "against": "h0.9"
+   },
+   "decision": "clearly worse: back to h0.9",
+   "vs_mcts": {
+    "games": 20,
+    "pairwise": 0.792,
+    "pairwise_se": 0.077,
+    "per_seat_pairwise": {
+     "R": 0.8,
+     "B": 0.867,
+     "Y": 0.867,
+     "G": 0.633
+    },
+    "mlp": "models/opponent_pool/league_model.pt",
+    "sims": 32,
+    "maxn_seconds_per_move": 0.5695
+   },
+   "seconds": 658.1
+  },
+  {
+   "check": "h2.7",
+   "iteration": 17,
+   "hours": 2.651,
+   "vs_best": {
+    "games": 24,
+    "pairwise": 0.41,
+    "pairwise_se": 0.081,
+    "per_seat_pairwise": {
+     "R": 0.417,
+     "B": 0.5,
+     "Y": 0.333,
+     "G": 0.389
+    },
+    "against": "h0.9"
+   },
+   "decision": "not better than h0.9; kept training",
+   "vs_mcts": {
+    "games": 20,
+    "pairwise": 0.833,
+    "pairwise_se": 0.05,
+    "per_seat_pairwise": {
+     "R": 0.733,
+     "B": 0.9,
+     "Y": 0.9,
+     "G": 0.8
+    },
+    "mlp": "models/opponent_pool/league_model.pt",
+    "sims": 32,
+    "maxn_seconds_per_move": 0.7973
+   },
+   "seconds": 699.3
+  }
+ ],
+ "status": "running",
+ "validation": {
+  "base_positions": 20000,
+  "base_every": 20,
+  "selfplay_every": 10,
+  "selfplay_buffer": 40000
+ },
+ "best": "h0.9",
+ "check_sec": 699.3,
+ "iteration": 18
+}
