@@ -381,7 +381,8 @@ def parse_args(argv=None):
     ap.add_argument("--games", type=int, default=48, help="self-play games per iteration")
     ap.add_argument("--depth", type=int, default=2)
     ap.add_argument("--qdepth", type=int, default=2)
-    ap.add_argument("--check-ext", type=int, default=3)
+    ap.add_argument("--check-ext", type=int, default=0,
+                    help="check extensions per line (off by default: no gain in a 48-game arena test)")
     ap.add_argument("--width", type=int, default=0,
                     help="selective depth: children searched per node from ply --full-plies on (0 = all)")
     ap.add_argument("--full-plies", type=int, default=2, help="plies from the root searched at full width")

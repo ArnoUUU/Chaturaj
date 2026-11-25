@@ -93,7 +93,8 @@ def test_compiled_search_matches_python(depth, qdepth, width, full, prefs):
     preferences (exaggerated here so they matter) in the later cases."""
     torch.manual_seed(5)
     net = NumpyNNUE.from_model(NNUE().eval())
-    kw = dict(time_ms=None, depth=depth, qdepth=qdepth, width=width, full_plies=full)
+    kw = dict(time_ms=None, depth=depth, qdepth=qdepth, width=width, full_plies=full,
+              check_ext=3)          # off by default, still covered here
     if prefs:
         kw.update(discount=0.97, elim_bonus=0.2, elim_horizon=150)
     py = MaxN(net, backend="python", **kw)

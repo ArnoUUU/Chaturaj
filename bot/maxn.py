@@ -74,7 +74,7 @@ def capture_points(board, move: Move) -> int:
 class MaxN:
     def __init__(self, net: NumpyNNUE, time_ms: float | None = 250, depth: int | None = None,
                  max_depth: int = 12, qdepth: int = 2, tt_size: int = 200_000, backend: str = "auto",
-                 check_ext: int = 3, width: int = 0, full_plies: int = 2, discount: float = 1.0,
+                 check_ext: int = 0, width: int = 0, full_plies: int = 2, discount: float = 1.0,
                  elim_bonus: float = 0.0, elim_horizon: int = 200, resign: bool = True):
         """backend: "auto" (compiled when available), "rust" (require it) or "python".
 

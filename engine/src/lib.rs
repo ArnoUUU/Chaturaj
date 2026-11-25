@@ -367,7 +367,7 @@ mod python {
     #[pymethods]
     impl PyMaxN {
         #[new]
-        #[pyo3(signature = (net, time_ms=None, depth=None, max_depth=12, qdepth=2, tt_size=200_000, check_ext=3, width=0, full_plies=2, discount=1.0, elim_bonus=0.0, elim_horizon=200, resign=true))]
+        #[pyo3(signature = (net, time_ms=None, depth=None, max_depth=12, qdepth=2, tt_size=200_000, check_ext=0, width=0, full_plies=2, discount=1.0, elim_bonus=0.0, elim_horizon=200, resign=true))]
         fn new(net: &PyNnue, time_ms: Option<f64>, depth: Option<u32>, max_depth: u32, qdepth: u32, tt_size: usize,
                check_ext: u32, width: usize, full_plies: u32, discount: f64, elim_bonus: f64,
                elim_horizon: u32, resign: bool) -> PyResult<Self> {
