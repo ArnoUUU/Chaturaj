@@ -60,12 +60,38 @@ def _pairwise(scores, seat):
     return sum(res) / 3, res
 
 
+MOVE_FIELDS = ("movers", "kinds", "values", "depths", "nodes", "secs")
+
+
+class MoveLog:
+    """Per-ply lists for a game record (one entry per ply, in ply order).
+
+    kinds: "opening" (random opening ply), "explore" (random exploration move), "search"
+    (max^n move), "forced" (the search's forced flag: only one legal move), "resign".
+    values / depths / nodes / secs come from the search's result and are null for the plies
+    that were not searched (opening, explore, forced)."""
+
+    def __init__(self):
+        self.d = {k: [] for k in MOVE_FIELDS}
+
+    def add(self, mover: int, kind: str, res) -> None:
+        searched = res is not None and not res[4]
+        value = res[3] if searched else None
+        self.d["movers"].append(int(mover))
+        self.d["kinds"].append(kind)
+        self.d["values"].append([round(float(x), 4) for x in value] if value is not None else None)
+        self.d["depths"].append(int(res[1]) if searched else None)
+        self.d["nodes"].append(int(res[2]) if searched else None)
+        self.d["secs"].append(round(float(res[5]), 4) if searched else None)
+
+
 def selfplay_game(task: dict) -> dict:
     """One self-play game: every seat is max^n with the same network.
 
     Exploration: a random opening of `open_lo`..`open_hi` plies, then a random move with
     probability `explore` during the first `explore_plies` plies. Every `stride`-th position
-    is returned (board codes, mover, the 16 globals), with the final scores.
+    is returned (board codes, mover, the 16 globals), with the final scores. Each ply's mover,
+    kind, search values and resignations are returned too (see MoveLog and "resigns").
     """
     rng = np.random.default_rng(task["seed"])
     s = searcher(task["weights"], task["depth"], task["qdepth"], task["check_ext"], 0,
@@ -75,6 +101,7 @@ def selfplay_game(task: dict) -> dict:
     pos = E.Position.initial()
     n_open = int(rng.integers(task["open_lo"], task["open_hi"] + 1))
     boards, ks, gl, moves, captures, checks, elims = [], [], [], [], [], [], []
+    log, resigns = MoveLog(), []
     ply = 0
     while pos.game_over is None and pos.turn < task["max_turn"]:
         ms = pos.legal_moves()
@@ -83,16 +110,23 @@ def selfplay_game(task: dict) -> dict:
             boards.append(np.asarray(pos.board))
             ks.append(k)
             gl.append(np.asarray(pos.globals(k)))
-        if ply < n_open or (ply < task["explore_plies"] and rng.random() < task["explore"]):
-            m = ms[int(rng.integers(len(ms)))]
+        mover = pos.current_player
+        if ply < n_open:
+            kind, res, m = "opening", None, ms[int(rng.integers(len(ms)))]
+        elif ply < task["explore_plies"] and rng.random() < task["explore"]:
+            kind, res, m = "explore", None, ms[int(rng.integers(len(ms)))]
         else:
-            m = s.best_move(pos)[0]
+            res = s.best_move(pos)
+            m = res[0]
+            kind = "resign" if m == E.RESIGN else ("forced" if res[4] else "search")
+        log.add(mover, kind, res)
         if m == E.RESIGN:                          # the mover resigns: no move, no checks or captures
+            resigns.append({"ply": ply, "seat": mover, "active": 4 - len(pos.eliminated),
+                            "scores": [int(x) for x in pos.scores]})
             pos.eliminate(pos.current_player)
             moves.append(int(m))
             ply += 1
             continue
-        mover = pos.current_player
         if pos.gives_check(m):
             checks.append((ply, mover))
         points, cap, bonus, elim = pos.push(m)
@@ -105,7 +139,7 @@ def selfplay_game(task: dict) -> dict:
     return {"seed": task["seed"], "boards": np.stack(boards).astype(np.uint8), "ks": np.array(ks, dtype=np.int8),
             "globals": np.stack(gl).astype(np.float32), "scores": list(pos.scores),
             "reason": pos.game_over or "ply_cap", "plies": ply, "opening": n_open, "moves": moves,
-            "captures": captures, "checks": checks, "eliminations": elims}
+            "captures": captures, "checks": checks, "eliminations": elims, **log.d, "resigns": resigns}
 
 
 def match_game(task: dict) -> dict:
@@ -124,20 +158,30 @@ def match_game(task: dict) -> dict:
     rng = np.random.default_rng(task["opening_seed"])
     pos = E.Position.initial()
     ply = 0
+    moves, log, resigns = [], MoveLog(), []
     while pos.game_over is None and pos.turn < task["max_turn"]:
+        mover = pos.current_player
         if ply < task["opening_plies"]:
             ms = pos.legal_moves()
-            m = ms[int(rng.integers(len(ms)))]
+            res, m = None, ms[int(rng.integers(len(ms)))]
+            kind = "opening"
         else:
-            m = (cand if pos.current_player == seat else opps[pos.current_player]).best_move(pos)[0]
+            res = (cand if mover == seat else opps[mover]).best_move(pos)
+            m = res[0]
+            kind = "resign" if m == E.RESIGN else ("forced" if res[4] else "search")
+        log.add(mover, kind, res)
+        moves.append(int(m))
         if m == E.RESIGN:
+            resigns.append({"ply": ply, "seat": mover, "active": 4 - len(pos.eliminated),
+                            "scores": [int(x) for x in pos.scores]})
             pos.eliminate(pos.current_player)
         else:
             pos.push(m)
         ply += 1
     pw, res = _pairwise(pos.scores, seat)
     return {"seat": "RBYG"[seat], "scores": list(pos.scores), "pairwise": pw, "results": res,
-            "reason": pos.game_over or "ply_cap", "plies": ply}
+            "reason": pos.game_over or "ply_cap", "plies": ply, "moves": moves,
+            "opening_seed": list(task["opening_seed"]), **log.d, "resigns": resigns}
 
 
 def yardstick_block(task: dict) -> dict:
@@ -161,5 +205,5 @@ def yardstick_block(task: dict) -> dict:
 
     res = evaluate(None, games=4, sims=task["sims"], opponent=load_evaluator(task["mlp"]), opponent_name="mlp",
                    opening_plies=task["opening_plies"], seed=task["seed"], max_plies=task["max_plies"],
-                   record=True, bot_player=play)
+                   record=True, bot_player=play, bot_stats=lambda: player.stats)
     return {"records": res["records"], "maxn_seconds": float(np.mean(times)) if times else 0.0}

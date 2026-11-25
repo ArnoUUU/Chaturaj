@@ -33,17 +33,41 @@ from chaturaji.state import ChaturajiState
 from .mcts import MCTS, Node
 
 
+def _r4(x):
+    """Floats rounded to 4 decimals (numpy arrays and nested lists included); None stays None."""
+    if x is None:
+        return None
+    if isinstance(x, dict):
+        return {k: _r4(v) for k, v in x.items()}
+    if isinstance(x, (list, tuple, np.ndarray)):
+        return [_r4(v) for v in x]
+    if isinstance(x, (float, np.floating)):
+        return round(float(x), 4)
+    return x
+
+
+def _mcts_info(root: Node, idx: int, seat: str, by: str) -> dict:
+    """The move-info entry of an MCTS move: the root's visits and values, and the chosen
+    child's mean value (its visits include the resign child's pre-visit, as in choose())."""
+    n = max(float(root.child_n[idx]), 1.0)
+    return {"seat": seat, "by": by, "sims": MCTS.real_visits(root), "value": _r4(root.value),
+            "q": _r4(root.child_w[idx] / n)}
+
+
 def evaluate(evaluator, games: int = 4, sims: int = 16, selection: str = "puct",
              opponent=None, opponent_name: str = "random", max_plies: int = 300,
              seed: int = 0, opening_plies: int = 0, pool: list | None = None,
-             record: bool = False, bot_player=None) -> dict:
+             record: bool = False, bot_player=None, bot_stats=None) -> dict:
     """`opponent` is an MCTS evaluator for the three other seats, or None for random moves.
 
     `pool` (a list of (name, evaluator)) replaces `opponent` with a mixed field: each block
     of 4 games draws three pool members (repeats allowed) for the other seats, and the bot
     plays that lineup from every seat. `bot_player` (a function state -> Move, e.g. a max^n
-    search) plays the bot's seat instead of MCTS over `evaluator`. With `record`, every game (seat, opponents, scores,
-    result, moves) is returned under "records".
+    search) plays the bot's seat instead of MCTS over `evaluator`; `bot_stats` (a zero-argument
+    callable) is then called after each of its moves, and its dict goes into that move's entry.
+    With `record`, every game (seat, opponents, scores, result, moves, and "move_info": one
+    entry per ply with the seat, who chose it, and for searched moves the visit counts, root
+    values and the chosen child's mean value) is returned under "records".
 
     Model-vs-model games are deterministic (argmax search, no noise), so with
     `opening_plies` > 0 each block of 4 games shares one random opening of that many
@@ -65,7 +89,7 @@ def evaluate(evaluator, games: int = 4, sims: int = 16, selection: str = "puct",
             seat_opp = {c: pool_mcts[i] for c, i in zip(others, picks)}
         else:
             seat_opp = {c: (opponent_name, opp) for c in others}
-        moves_played = []
+        moves_played, move_info = [], []
         state = ChaturajiState.initial()
         plies = 0
         opening_rng = np.random.default_rng([seed, g // 4])
@@ -73,21 +97,37 @@ def evaluate(evaluator, games: int = 4, sims: int = 16, selection: str = "puct",
             moves = require_moves(state)
             move = moves[opening_rng.integers(len(moves))]
             moves_played.append(move.uci)
+            if record:
+                move_info.append({"seat": state.current_player(), "by": "opening"})
             state, _ = apply_move(state, move)
             plies += 1
         while not is_game_over(state) and plies < max_plies:
-            if state.current_player() == bot and bot_player is not None:
+            who = state.current_player()
+            if who == bot and bot_player is not None:
                 move = bot_player(state)
-            elif state.current_player() == bot:
+                if record:
+                    info = {"seat": who, "by": "bot"}
+                    if bot_stats is not None:
+                        info.update(_r4(bot_stats()))
+                    move_info.append(info)
+            elif who == bot:
                 root = mcts.search(Node(state))
-                move = root.moves[mcts.choose(root)]
-            elif seat_opp[state.current_player()][1] is not None:
-                m = seat_opp[state.current_player()][1]
+                idx = mcts.choose(root)
+                move = root.moves[idx]
+                if record:
+                    move_info.append(_mcts_info(root, idx, who, "bot"))
+            elif seat_opp[who][1] is not None:
+                m = seat_opp[who][1]
                 root = m.search(Node(state))
-                move = root.moves[m.choose(root)]
+                idx = m.choose(root)
+                move = root.moves[idx]
+                if record:
+                    move_info.append(_mcts_info(root, idx, who, "opponent"))
             else:
                 moves = require_moves(state)
                 move = moves[rng.integers(len(moves))]
+                if record:
+                    move_info.append({"seat": who, "by": "random"})
             moves_played.append(move.uci)   # "resign" for RESIGN
             state, _ = apply_action(state, move)
             plies += 1
@@ -107,7 +147,8 @@ def evaluate(evaluator, games: int = 4, sims: int = 16, selection: str = "puct",
                             "scores": dict(scores), "pairwise": round(sum(res) / 3, 3),
                             "results": {c: r for c, r in zip(others, res)},
                             "reason": game_over_reason(state) or "ply_cap", "plies": plies,
-                            "opening_plies": min(opening_plies, plies), "moves": moves_played})
+                            "opening_plies": min(opening_plies, plies), "moves": moves_played,
+                            "move_info": move_info})
     per_seat = {c: round(float(np.mean([s for s, b in zip(shares, seats) if b == c])), 3)
                 for c in TURN_ORDER if c in seats}
     per_seat_pair = {c: round(float(np.mean([s for s, b in zip(pair, seats) if b == c])), 3)

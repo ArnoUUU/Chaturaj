@@ -21,10 +21,22 @@ Checks (at the start, every `--check-min` minutes and at the end):
   vs_mcts       max^n (same depth) vs MCTS + MLP (the league run's final model, 32
                 simulations) in the other three seats (`--yard-games`), the fixed yardstick.
 
-Logged per game (logs/<label>/games.jsonl): seed, opening length, scores, ending, plies,
-every move, every capture of an active piece (ply, attacker, victim, points) and every
-check (ply, checker). Per iteration: losses, endings, mean game length, and the mean ply of
-the first elimination (`first_elim_ply`).
+Logged (everything is verbose on purpose; `python -m bot.run_data <label>` loads it into tables):
+  models/<label>/meta.json   run arguments, environment, config, "history" (one entry per
+                             iteration: losses and their spread, gradient norms, endings,
+                             game lengths (plies min/median/max), resignations, random
+                             moves, search depth/nodes/seconds, timings), "checks" (vs the
+                             best weights and vs MCTS + MLP), status.
+  logs/<label>/games.jsonl   every self-play game and every check game: seed, opening length,
+                             scores, ending, plies, moves (codes; RESIGN = 65535), and for
+                             self-play per ply: movers, kinds (opening / explore / search /
+                             forced / resign), root values, depths, nodes, seconds; the
+                             resignations (ply, seat, players still in, scores); captures of
+                             an active piece (ply, attacker, victim, points); checks; eliminations.
+                             Check games vs MCTS carry the same per-move info ("move_info").
+  logs/<label>/steps.csv     one row per optimiser step: iteration, step, global_step, loss,
+                             grad_norm, lr.
+  logs/<label>/log_*.jsonl   the iteration / check / done events as they were logged.
 
     python -m bot.selfplay_nnue --hours 5
     python -m bot.selfplay_nnue --init models/<nnue> --hours 1 --workers 8 --tag try
@@ -159,6 +171,12 @@ def run(args) -> str:
         d.mkdir(parents=True, exist_ok=True)
     log = registry.ChunkedLogger(label)
     games_log = open(ldir / "games.jsonl", "a", encoding="utf-8")
+    steps_path = ldir / "steps.csv"
+    steps_new = not steps_path.exists() or steps_path.stat().st_size == 0
+    steps_log = open(steps_path, "a", encoding="utf-8")
+    if steps_new:
+        steps_log.write("iteration,step,global_step,loss,grad_norm,lr\n")
+        steps_log.flush()
     meta = {"label": label, "kind": kind, "config": config, "params": registry.param_count(model),
             "args": vars(args), "environment": registry.environment_info("cpu"), "init": str(args.init),
             "history": [], "checks": [], "status": "running"}
@@ -220,7 +238,7 @@ def run(args) -> str:
     pool = ctx.Pool(args.workers)
     common = {"depth": args.depth, "qdepth": args.qdepth, "check_ext": args.check_ext, "width": args.width,
               "full_plies": args.full_plies, "discount": args.discount, "elim_bonus": args.elim_bonus,
-              "elim_horizon": args.elim_horizon, "max_turn": 400}
+              "elim_horizon": args.elim_horizon, "max_turn": 400, "resign": not args.no_resign}
     total_steps = 0
 
     def check(tag: str, it: int, final: bool = False) -> None:
@@ -292,6 +310,8 @@ def run(args) -> str:
         results = pool.map(W.selfplay_game, tasks)
         tg = time.time() - ti
         endings, plies, first_el, n_pos = Counter(), [], [], 0
+        n_claims = n_early = n_random = 0
+        s_depth, s_nodes, s_sec = [], [], []
         for gi, r in enumerate(results):
             scores = np.array(r["scores"], dtype=np.float32)
             held_out = bool(args.val_selfplay_every) and gi % args.val_selfplay_every == 0
@@ -305,10 +325,20 @@ def run(args) -> str:
             plies.append(r["plies"])
             if st["first_elim"] is not None:
                 first_el.append(st["first_elim"])
+            for rs in r["resigns"]:
+                n_claims += rs["active"] == 2
+                n_early += rs["active"] >= 3
+            for kind, d, nd, sec in zip(r["kinds"], r["depths"], r["nodes"], r["secs"]):
+                n_random += kind in ("opening", "explore")
+                if d is not None:
+                    s_depth.append(d)
+                    s_nodes.append(nd)
+                    s_sec.append(sec)
             games_log.write(json.dumps({"type": "selfplay", "iteration": it, "seed": r["seed"], "opening": r["opening"],
                                         "scores": r["scores"], "reason": r["reason"], "plies": r["plies"],
                                         "moves": r["moves"], "captures": r["captures"], "checks": r["checks"],
-                                        "eliminations": r.get("eliminations", [])}) + "\n")
+                                        "eliminations": r.get("eliminations", []),
+                                        **{k: r[k] for k in W.MOVE_FIELDS}, "resigns": r["resigns"]}) + "\n")
         games_log.flush()
         losses, gnorms = [], []
         if len(replay) >= args.min_buffer:
@@ -325,12 +355,20 @@ def run(args) -> str:
                 opt.step()
                 losses.append(loss.item())
                 total_steps += 1
+        if losses:                     # one row per optimiser step, written in one go
+            lr_now = opt.param_groups[0]["lr"]
+            first = total_steps - len(losses)
+            steps_log.write("".join(f"{it},{i + 1},{first + i + 1},{losses[i]:.6f},{gnorms[i]:.6f},{lr_now:.8g}\n"
+                                    for i in range(len(losses))))
+            steps_log.flush()
         prev = current
         current = save_current(f"it{it:05d}")
         if Path(prev).name.startswith("it") and prev != current:
             Path(prev).unlink(missing_ok=True)
+        te = time.time()
         vb = eval_loss(model, base_val_fn, len(base_val))
         vsp = eval_loss(model, val_replay.parts, len(val_replay))
+        eval_sec = time.time() - te
         last_iter = time.time() - ti
         entry = {"iteration": it, "hours": round(hours(), 3), "games": len(results), "positions": n_pos,
                  "buffer": len(replay), "selfplay_sec": round(tg, 1), "train_sec": round(last_iter - tg, 1),
@@ -341,7 +379,17 @@ def run(args) -> str:
                  "lr": opt.param_groups[0]["lr"], "steps": total_steps,
                  "grad_norm": round(float(np.mean(gnorms)), 4) if gnorms else None, "endings": dict(endings),
                  "mean_plies": round(float(np.mean(plies)), 1),
-                 "first_elim_ply": round(float(np.mean(first_el)), 1) if first_el else None}
+                 "plies_min": int(min(plies)), "plies_median": round(float(np.median(plies)), 1),
+                 "plies_max": int(max(plies)),
+                 "first_elim_ply": round(float(np.mean(first_el)), 1) if first_el else None,
+                 "loss_std": round(float(np.std(losses)), 5) if losses else None,
+                 "grad_norm_max": round(float(max(gnorms)), 4) if gnorms else None,
+                 "resigns": {"claims": n_claims, "early": n_early},
+                 "random_moves": n_random,
+                 "search": {"mean_depth": round(float(np.mean(s_depth)), 2) if s_depth else None,
+                            "mean_nodes": round(float(np.mean(s_nodes)), 1) if s_nodes else None,
+                            "mean_sec": round(float(np.mean(s_sec)), 4) if s_sec else None},
+                 "eval_sec": round(eval_sec, 1)}
         meta["history"].append(entry)
         meta["iteration"] = it
         log.log("iteration", **entry)
@@ -367,6 +415,7 @@ def run(args) -> str:
     plot_curves()
     log.log("done", label=label)
     games_log.close()
+    steps_log.close()
     print(f"done {label}", flush=True)
     return label
 
@@ -413,6 +462,8 @@ def parse_args(argv=None):
     ap.add_argument("--records", default=str(RECORDS))
     ap.add_argument("--base-selfplay", nargs="*", default=[DEFAULT_LEAGUE_GAMES])
     ap.add_argument("--cache", default="logs/nnue_cache.npz")
+    ap.add_argument("--no-resign", action="store_true",
+                    help="the mover may not resign (the default: resigning is an action, see the rules)")
     ap.add_argument("--seed", type=int, default=0)
     return ap.parse_args(argv)
 

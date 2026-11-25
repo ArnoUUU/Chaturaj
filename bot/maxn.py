@@ -429,7 +429,7 @@ def main(argv=None) -> None:
     res = evaluate(None, games=args.games, sims=args.sims, opponent=opp,
                    opponent_name="random" if opp is None else model_name(args.opponent),
                    max_plies=args.max_plies, seed=args.seed, opening_plies=args.opening_plies,
-                   record=bool(args.out), bot_player=play)
+                   record=bool(args.out), bot_player=play, bot_stats=lambda: player.stats)
     records = res.pop("records", [])
     if args.out:
         with open(args.out, "w", encoding="utf-8") as f:
