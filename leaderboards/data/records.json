@@ -1,0 +1,50 @@
+{
+ "all_time_high": {
+  "date": "2026-11-26",
+  "rating": 2956,
+  "uid": "91208070",
+  "username": "Articpolarbear"
+ },
+ "avg_series": [
+  [
+   "2026-11-26",
+   2956.0,
+   2723.1,
+   2512.1
+  ]
+ ],
+ "biggest_drop_1d": null,
+ "biggest_drop_7d": null,
+ "biggest_gain_1d": null,
+ "biggest_gain_7d": null,
+ "date": "2026-11-26",
+ "longest_reign": {
+  "days": 1,
+  "end": "2026-11-26",
+  "start": "2026-11-26",
+  "uid": "91208070",
+  "username": "Articpolarbear"
+ },
+ "most_days_at_number_one": {
+  "days": 1,
+  "uid": "91208070",
+  "username": "Articpolarbear"
+ },
+ "most_days_in_top10": {
+  "days": 1,
+  "uid": "91208070",
+  "username": "Articpolarbear"
+ },
+ "movers": {
+  "down": [],
+  "up": []
+ },
+ "number_one": {
+  "days": 1,
+  "end": "2026-11-26",
+  "start": "2026-11-26",
+  "uid": "91208070",
+  "username": "Articpolarbear"
+ },
+ "top_n": 100
+}

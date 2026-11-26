@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chaturaji Blitz Leaderboard</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1d1d1f; --muted: #6b6b73; --line: #e2e2e8; --card: #f5f5f8;
+    --accent: #2f6fde; --up: #1a8a4a; --down: #c23b3b; --hover: #eef3ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17171c; --fg: #ececf1; --muted: #9a9aa6; --line: #2e2e38; --card: #20202a;
+      --accent: #7aa7ff; --up: #4cc67f; --down: #ff7070; --hover: #252534;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17171c; --fg: #ececf1; --muted: #9a9aa6; --line: #2e2e38; --card: #20202a;
+    --accent: #7aa7ff; --up: #4cc67f; --down: #ff7070; --hover: #252534;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+  .tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); margin-bottom: 12px; flex-wrap: wrap; }
+  .tab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px;
+         color: var(--muted); font: inherit; cursor: pointer; }
+  .tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+  .panel[hidden] { display: none; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  th.l, td.l { text-align: left; }
+  td.name button { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; cursor: pointer; }
+  tr.row:hover td { background: var(--hover); }
+  .up { color: var(--up); } .down { color: var(--down); } .muted { color: var(--muted); }
+  .detail td { background: var(--card); white-space: normal; }
+  .note { color: var(--muted); font-size: 12px; margin: 10px 0 0; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 640px) { .cols { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border-radius: 8px; padding: 10px 12px; }
+  .card h2 { font-size: 14px; margin: 0 0 6px; }
+  .rec { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0;
+         border-bottom: 1px solid var(--line); }
+  .rec:last-child { border-bottom: 0; }
+  .rec .k { color: var(--muted); }
+  .rec .v { text-align: right; }
+  .legend { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .error { color: var(--down); }
+  svg text { fill: var(--muted); font-size: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title">Chaturaji Blitz Leaderboard</h1>
+  <div class="sub" id="sub">Loading...</div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-rank" aria-controls="panel-rank" aria-selected="true" data-tab="rank">Rankings</button>
+    <button class="tab" role="tab" id="tab-move" aria-controls="panel-move" aria-selected="false" data-tab="move">Movers</button>
+    <button class="tab" role="tab" id="tab-rec" aria-controls="panel-rec" aria-selected="false" data-tab="rec">Records</button>
+  </div>
+
+  <section class="panel" id="panel-rank" role="tabpanel" aria-labelledby="tab-rank">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Move</th><th class="l">Player</th><th>Rating</th>
+          <th>1d</th><th>7d</th><th>Peak</th><th class="l">Trend</th>
+        </tr></thead>
+        <tbody id="rank-body"></tbody>
+      </table>
+    </div>
+    <p class="note" id="rank-note"></p>
+    <p class="note" id="footer"></p>
+  </section>
+
+  <section class="panel" id="panel-move" role="tabpanel" aria-labelledby="tab-move" hidden>
+    <div class="cols">
+      <div class="card"><h2 class="up" id="up-title">Biggest risers</h2><div id="up-list"></div></div>
+      <div class="card"><h2 class="down" id="down-title">Biggest fallers</h2><div id="down-list"></div></div>
+    </div>
+    <p class="note">Rating change since the previous day on the board. Players who just re-entered have no change yet.</p>
+  </section>
+
+  <section class="panel" id="panel-rec" role="tabpanel" aria-labelledby="tab-rec" hidden>
+    <div class="cols">
+      <div class="card" id="rec-list"></div>
+      <div class="card"><h2>Average rating by day</h2><div id="avg-chart"></div><div class="legend" id="avg-legend"></div></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  // Where the daily JSON lives (raw.githubusercontent.com sends CORS headers).
+  const RAW_BASE = "https://raw.githubusercontent.com/ArnoUUU/Chaturaj/main/leaderboards/data/";
+  const BOARD_NAME = "Chaturaji Blitz";
+  const NS = "http://www.w3.org/2000/svg";
+
+  // ---- DOM helpers: every string goes through textContent ----
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (k === "class") n.className = v;
+      else if (k === "text") n.textContent = v;
+      else n.setAttribute(k, String(v));
+    }
+    for (const kid of kids.flat(Infinity)) {
+      if (kid === null || kid === undefined || kid === false) continue;
+      n.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+    }
+    return n;
+  }
+  function svg(tag, attrs) {
+    const n = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs || {})) n.setAttribute(k, String(v));
+    return n;
+  }
+  function signed(v) {
+    if (v === null || v === undefined) return "–";
+    if (v > 0) return "+" + v;
+    if (v < 0) return "−" + Math.abs(v);
+    return "0";
+  }
+  function cls(v) { return v > 0 ? "up" : v < 0 ? "down" : "muted"; }
+  function rankMove(v) {
+    if (v === null || v === undefined) return { text: "–", cls: "muted" };
+    if (v > 0) return { text: "▲" + v, cls: "up" };
+    if (v < 0) return { text: "▼" + Math.abs(v), cls: "down" };
+    return { text: "–", cls: "muted" };
+  }
+  function profileLink(username) {
+    return el("a", { href: "https://www.chess.com/member/" + encodeURIComponent(username),
+                     target: "_blank", rel: "noopener", text: username });
+  }
+
+  // ---- charts (inline SVG) ----
+  function sparkline(values, w = 90, h = 24) {
+    const s = svg("svg", { width: w, height: h, viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": "rating trend" });
+    if (values.length < 2) {
+      s.append(svg("circle", { cx: w / 2, cy: h / 2, r: 2, fill: "currentColor" }));
+      return s;
+    }
+    const lo = Math.min(...values), hi = Math.max(...values), span = (hi - lo) || 1;
+    const pts = values.map((v, i) => [
+      2 + (i / (values.length - 1)) * (w - 4),
+      h - 2 - ((v - lo) / span) * (h - 4),
+    ]);
+    s.append(svg("polyline", { points: pts.map(p => p.join(",")).join(" "), fill: "none",
+                               stroke: "var(--accent)", "stroke-width": 1.5 }));
+    return s;
+  }
+
+  // history: [[date, rank, rating], ...] on-board days only; gaps are drawn as breaks.
+  function progressionChart(history, peak) {
+    const W = 640, H = 200, pl = 44, pr = 12, pt = 10, pb = 26;
+    const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", role: "img",
+                           "aria-label": "rating over time" });
+    if (history.length === 0) return s;
+    const t0 = Date.parse(history[0][0]), t1 = Date.parse(history[history.length - 1][0]);
+    const span = Math.max(1, (t1 - t0) / 86400000);
+    const ratings = history.map(h => h[2]);
+    const lo = Math.min(...ratings), hi = Math.max(...ratings);
+    const pad = Math.max(5, Math.round((hi - lo) * 0.1));
+    const y0 = lo - pad, y1 = hi + pad;
+    const X = d => pl + ((Date.parse(d) - t0) / 86400000 / span) * (W - pl - pr);
+    const Y = r => pt + (1 - (r - y0) / ((y1 - y0) || 1)) * (H - pt - pb);
+
+    // grid + axis labels
+    for (const r of [lo, hi]) {
+      s.append(svg("line", { x1: pl, x2: W - pr, y1: Y(r), y2: Y(r), stroke: "var(--line)" }));
+      const t = svg("text", { x: 4, y: Y(r) + 3 });
+      t.textContent = String(r);
+      s.append(t);
+    }
+    if (peak !== null && peak !== undefined && peak >= y0 && peak <= y1) {
+      s.append(svg("line", { x1: pl, x2: W - pr, y1: Y(peak), y2: Y(peak), stroke: "var(--up)",
+                             "stroke-dasharray": "4 3" }));
+    }
+    // split into runs of consecutive days so a drop-off shows as a gap
+    const runs = [];
+    let cur = [];
+    for (const h of history) {
+      const prev = cur[cur.length - 1];
+      if (prev && (Date.parse(h[0]) - Date.parse(prev[0])) / 86400000 === 1) cur.push(h);
+      else { if (cur.length) runs.push(cur); cur = [h]; }
+    }
+    if (cur.length) runs.push(cur);
+    for (const run of runs) {
+      const pts = run.map(h => X(h[0]) + "," + Y(h[2])).join(" ");
+      s.append(svg("polyline", { points: pts, fill: "none", stroke: "var(--accent)", "stroke-width": 2 }));
+      for (const h of run) s.append(svg("circle", { cx: X(h[0]), cy: Y(h[2]), r: 2.5, fill: "var(--accent)" }));
+    }
+    const dates = svg("text", { x: pl, y: H - 6 });
+    dates.textContent = history[0][0] + " – " + history[history.length - 1][0];
+    s.append(dates);
+    return s;
+  }
+
+  function avgChart(series) {
+    const W = 360, H = 170, pl = 40, pr = 8, pt = 8, pb = 22;
+    const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", role: "img", "aria-label": "average rating by day" });
+    if (series.length === 0) return s;
+    const vals = series.flatMap(r => [r[1], r[3]]).filter(v => v !== null);
+    if (vals.length === 0) return s;
+    const lo = Math.min(...vals), hi = Math.max(...vals), span = (hi - lo) || 1;
+    const X = i => pl + (series.length === 1 ? 0 : (i / (series.length - 1)) * (W - pl - pr));
+    const Y = v => pt + (1 - (v - lo) / span) * (H - pt - pb);
+    const lines = [[1, "var(--accent)"], [3, "var(--muted)"]];
+    for (const [col, color] of lines) {
+      const pts = series.map((r, i) => r[col] === null ? null : X(i) + "," + Y(r[col])).filter(Boolean);
+      if (pts.length >= 2) s.append(svg("polyline", { points: pts.join(" "), fill: "none", stroke: color, "stroke-width": 1.8 }));
+    }
+    const top = svg("text", { x: 2, y: pt + 8 }); top.textContent = String(hi); s.append(top);
+    const bot = svg("text", { x: 2, y: H - pb }); bot.textContent = String(lo); s.append(bot);
+    const first = svg("text", { x: pl, y: H - 6 }); first.textContent = series[0][0]; s.append(first);
+    const last = svg("text", { x: W - pr, y: H - 6, "text-anchor": "end" }); last.textContent = series[series.length - 1][0]; s.append(last);
+    return s;
+  }
+
+  // ---- rendering ----
+  let DATE_LABEL = "this date";
+  function renderRankings(today, players) {
+    const body = document.getElementById("rank-body");
+    body.textContent = "";
+    for (const row of today.players) {
+      const rec = players[row.uid] || { history: [], change_1d: null, change_7d: null,
+                                        rank_change_1d: null, peak_rating: null };
+      const mv = rankMove(rec.rank_change_1d);
+      const toggle = el("button", { type: "button", "aria-expanded": "false" }, row.username);
+      const tr = el("tr", { class: "row" },
+        el("td", { text: String(row.rank) }),
+        el("td", { class: mv.cls, text: mv.text }),
+        el("td", { class: "l name" }, toggle),
+        el("td", { text: String(row.rating) }),
+        el("td", { class: cls(rec.change_1d), text: signed(rec.change_1d) }),
+        el("td", { class: cls(rec.change_7d), text: signed(rec.change_7d) }),
+        el("td", { text: rec.peak_rating === null ? "–" : String(rec.peak_rating) }),
+        el("td", { class: "l" }, sparkline(rec.history.slice(-30).map(h => h[2])))
+      );
+      const detail = el("tr", { class: "detail", hidden: "" },
+        el("td", { colspan: 8 },
+          el("div", { class: "muted", text: "Peak " + (rec.peak_rating ?? "–") +
+                       (rec.peak_rating_date ? " on " + rec.peak_rating_date : "") +
+                       " · best rank " + (rec.peak_rank ?? "–") +
+                       " · days on board " + (rec.days_on_board ?? 0) +
+                       " · times re-entered " + (rec.times_entered ?? 0) }),
+          progressionChart(rec.history, rec.peak_rating),
+          el("div", { class: "muted", text: "Profile: " }), profileLink(row.username)
+        )
+      );
+      toggle.addEventListener("click", () => {
+        const open = detail.hasAttribute("hidden");
+        if (open) detail.removeAttribute("hidden"); else detail.setAttribute("hidden", "");
+        toggle.setAttribute("aria-expanded", String(open));
+      });
+      body.append(tr, detail);
+    }
+  }
+
+  function renderMovers(records) {
+    const movers = records.movers || { up: [], down: [] };
+    for (const [id, list, sign] of [["up-list", movers.up, "up"], ["down-list", movers.down, "down"]]) {
+      const box = document.getElementById(id);
+      box.textContent = "";
+      if (!list.length) { box.append(el("div", { class: "muted", text: "None on " + DATE_LABEL + "." })); continue; }
+      for (const m of list) {
+        box.append(el("div", { class: "rec" },
+          el("span", {}, "#" + m.rank + " ", profileLink(m.username)),
+          el("span", { class: "v " + sign }, signed(m.change) + "  (" + m.rating + ")")));
+      }
+    }
+  }
+
+  function recRow(label, value) {
+    return el("div", { class: "rec" }, el("span", { class: "k", text: label }), el("span", { class: "v" }, value));
+  }
+  function who(x, suffix) {
+    if (!x) return "–";
+    return [profileLink(x.username), suffix ? " " + suffix : ""];
+  }
+  function renderRecords(records) {
+    const box = document.getElementById("rec-list");
+    box.textContent = "";
+    box.append(el("h2", { text: "Records" }));
+    const ath = records.all_time_high;
+    box.append(recRow("Highest rating", ath ? [ath.rating + " ", who(ath, "(" + ath.date + ")")] : "–"));
+    const n1 = records.number_one;
+    box.append(recRow("Current #1", n1 ? [who(n1), " · " + n1.days + " day" + (n1.days === 1 ? "" : "s")] : "–"));
+    const lr = records.longest_reign;
+    box.append(recRow("Longest reign at #1", lr ? [who(lr), " · " + lr.days + " days (" + lr.start + " to " + lr.end + ")"] : "–"));
+    const da = records.most_days_at_number_one;
+    box.append(recRow("Most days at #1", da ? [who(da), " · " + da.days] : "–"));
+    const dt = records.most_days_in_top10;
+    box.append(recRow("Most days in top 10", dt ? [who(dt), " · " + dt.days] : "–"));
+    for (const [key, label] of [["biggest_gain_1d", "Biggest 1-day gain"], ["biggest_drop_1d", "Biggest 1-day drop"],
+                                ["biggest_gain_7d", "Biggest 7-day gain"], ["biggest_drop_7d", "Biggest 7-day drop"]]) {
+      const r = records[key];
+      box.append(recRow(label, r ? [signed(r.rating) + " ", who(r, "(" + r.date + ")")] : "–"));
+    }
+    const series = records.avg_series || [];
+    const chart = document.getElementById("avg-chart");
+    chart.textContent = "";
+    chart.append(avgChart(series));
+    const legend = document.getElementById("avg-legend");
+    legend.textContent = "Blue: average rating of #1. Grey: average of the whole board. " +
+                         (series.length ? series.length + " days on record." : "No history yet.");
+  }
+
+  function renderHeader(today) {
+    DATE_LABEL = today.date;
+    document.getElementById("up-title").textContent = "Biggest risers on " + today.date;
+    document.getElementById("down-title").textContent = "Biggest fallers on " + today.date;
+    document.getElementById("title").textContent = BOARD_NAME + ": top " + today.top_n;
+    const sub = document.getElementById("sub");
+    sub.textContent = "As of " + today.date + " (UTC) · " + today.count + " players shown";
+    const note = document.getElementById("rank-note");
+    const names = list => list.length ? list.map(p => p.username).join(", ") : "none";
+    note.textContent = "Entered since yesterday: " + names(today.entered || []) +
+                       ". Left the board: " + names(today.left || []) + ".";
+    const foot = document.getElementById("footer");
+    if (today.coverage === "pool") {
+      foot.textContent = "Ranks 1-20 are the server's own board. Ranks 21-" + today.top_n +
+        " cover players we have seen (the pool): each is checked against the server's rank, " +
+        "so ranks shown are exact, but a strong player nobody has seen can be missing.";
+    } else {
+      foot.textContent = "Top 20 only on " + today.date + ": the rank check for ranks 21-" + today.top_n +
+        " did not complete, so those ranks and the rating history were not updated on " + today.date + ".";
+      foot.classList.add("error");
+    }
+    for (const w of today.warnings || []) {
+      foot.append(el("div", { class: "muted", text: "Note: " + w }));
+    }
+  }
+
+  function showTab(name) {
+    for (const t of document.querySelectorAll(".tab")) {
+      const on = t.dataset.tab === name;
+      t.setAttribute("aria-selected", String(on));
+      document.getElementById("panel-" + t.dataset.tab).hidden = !on;
+    }
+  }
+
+  function showError(err) {
+    const sub = document.getElementById("sub");
+    sub.textContent = "";
+    sub.append(el("span", { class: "error", text: "Could not load the leaderboard: " + err.message }));
+  }
+
+  async function load(name) {
+    const r = await fetch(RAW_BASE + name, { cache: "no-cache" });
+    if (!r.ok) throw new Error(name + " (HTTP " + r.status + ")");
+    return r.json();
+  }
+
+  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => showTab(t.dataset.tab)));
+
+  Promise.all([load("today.json"), load("players.json"), load("records.json")])
+    .then(([today, players, records]) => {
+      renderHeader(today);
+      renderRankings(today, players);
+      renderMovers(records);
+      renderRecords(records);
+    })
+    .catch(showError);
+})();
+</script>
+</body>
+</html>

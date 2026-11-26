@@ -1,0 +1,412 @@
+{
+ "board": "rt:chaturaji:blitz",
+ "count": 67,
+ "coverage": "pool",
+ "date": "2026-11-26",
+ "fetched_at": "2026-11-26T08:47:42+00:00",
+ "players": [
+  {
+   "rank": 1,
+   "rating": 2956,
+   "uid": "91208070",
+   "username": "Articpolarbear"
+  },
+  {
+   "rank": 2,
+   "rating": 2901,
+   "uid": "91873494",
+   "username": "IHaveTheSauce"
+  },
+  {
+   "rank": 3,
+   "rating": 2737,
+   "uid": "405776735",
+   "username": "Luxeix"
+  },
+  {
+   "rank": 4,
+   "rating": 2694,
+   "uid": "62241228",
+   "username": "PepeFumigaciones"
+  },
+  {
+   "rank": 5,
+   "rating": 2671,
+   "uid": "576236980",
+   "username": "OopsMyBad2"
+  },
+  {
+   "rank": 6,
+   "rating": 2670,
+   "uid": "338602827",
+   "username": "BAZOINGABAZOOKA"
+  },
+  {
+   "rank": 7,
+   "rating": 2656,
+   "uid": "470521096",
+   "username": "CrazyDoll95"
+  },
+  {
+   "rank": 8,
+   "rating": 2652,
+   "uid": "527453507",
+   "username": "King_Chessable"
+  },
+  {
+   "rank": 9,
+   "rating": 2651,
+   "uid": "170879117",
+   "username": "Rooktober"
+  },
+  {
+   "rank": 10,
+   "rating": 2643,
+   "uid": "184365981",
+   "username": "Seahawk_Fan_10"
+  },
+  {
+   "rank": 11,
+   "rating": 2620,
+   "uid": "309842439",
+   "username": "kiruba9999"
+  },
+  {
+   "rank": 12,
+   "rating": 2619,
+   "uid": "531908159",
+   "username": "KCCheeseChess"
+  },
+  {
+   "rank": 13,
+   "rating": 2609,
+   "uid": "38118290",
+   "username": "rojitto"
+  },
+  {
+   "rank": 14,
+   "rating": 2609,
+   "uid": "596314302",
+   "username": "EternalVoias"
+  },
+  {
+   "rank": 15,
+   "rating": 2596,
+   "uid": "161733851",
+   "username": "Clock_bht"
+  },
+  {
+   "rank": 16,
+   "rating": 2594,
+   "uid": "382161709",
+   "username": "NgoQKhai"
+  },
+  {
+   "rank": 17,
+   "rating": 2583,
+   "uid": "615886544",
+   "username": "Howar-L"
+  },
+  {
+   "rank": 18,
+   "rating": 2575,
+   "uid": "24356264",
+   "username": "Counterdefender"
+  },
+  {
+   "rank": 19,
+   "rating": 2574,
+   "uid": "360282235",
+   "username": "Prathu_19"
+  },
+  {
+   "rank": 20,
+   "rating": 2555,
+   "uid": "181705167",
+   "username": "lipeih1"
+  },
+  {
+   "rank": 21,
+   "rating": 2553,
+   "uid": "45984622",
+   "username": "Te7ris_4_Jeff"
+  },
+  {
+   "rank": 22,
+   "rating": 2552,
+   "uid": "65620732",
+   "username": "frankfrns"
+  },
+  {
+   "rank": 23,
+   "rating": 2550,
+   "uid": "50865406",
+   "username": "holapaloma2018"
+  },
+  {
+   "rank": 24,
+   "rating": 2550,
+   "uid": "229369763",
+   "username": "mittens1729"
+  },
+  {
+   "rank": 25,
+   "rating": 2549,
+   "uid": "179328563",
+   "username": "SenhorDasDrogas"
+  },
+  {
+   "rank": 26,
+   "rating": 2530,
+   "uid": "366124603",
+   "username": "Albert-Nguyen"
+  },
+  {
+   "rank": 27,
+   "rating": 2515,
+   "uid": "48428816",
+   "username": "BBMing"
+  },
+  {
+   "rank": 28,
+   "rating": 2509,
+   "uid": "50255676",
+   "username": "agm2920"
+  },
+  {
+   "rank": 31,
+   "rating": 2502,
+   "uid": "16031086",
+   "username": "Hapoel-TA"
+  },
+  {
+   "rank": 32,
+   "rating": 2497,
+   "uid": "47007262",
+   "username": "PositroniumAnn"
+  },
+  {
+   "rank": 33,
+   "rating": 2495,
+   "uid": "149245799",
+   "username": "AFX2012"
+  },
+  {
+   "rank": 35,
+   "rating": 2489,
+   "uid": "199762983",
+   "username": "KingRemiii"
+  },
+  {
+   "rank": 36,
+   "rating": 2482,
+   "uid": "139895711",
+   "username": "shadow1729"
+  },
+  {
+   "rank": 39,
+   "rating": 2472,
+   "uid": "39601340",
+   "username": "PlayingFor2nd"
+  },
+  {
+   "rank": 40,
+   "rating": 2469,
+   "uid": "506752097",
+   "username": "Fetihler-sultani-destan"
+  },
+  {
+   "rank": 41,
+   "rating": 2468,
+   "uid": "169123531",
+   "username": "copium8"
+  },
+  {
+   "rank": 42,
+   "rating": 2466,
+   "uid": "461785228",
+   "username": "alejocabrera2025"
+  },
+  {
+   "rank": 43,
+   "rating": 2463,
+   "uid": "339144363",
+   "username": "Freduraji"
+  },
+  {
+   "rank": 44,
+   "rating": 2463,
+   "uid": "76155734",
+   "username": "Nos-Gnourt"
+  },
+  {
+   "rank": 46,
+   "rating": 2456,
+   "uid": "50645954",
+   "username": "qilp"
+  },
+  {
+   "rank": 48,
+   "rating": 2456,
+   "uid": "586499870",
+   "username": "primemelonlove"
+  },
+  {
+   "rank": 49,
+   "rating": 2452,
+   "uid": "203606653",
+   "username": "Mjolnir"
+  },
+  {
+   "rank": 51,
+   "rating": 2448,
+   "uid": "43116058",
+   "username": "1okm2okm3okm4"
+  },
+  {
+   "rank": 52,
+   "rating": 2447,
+   "uid": "40726332",
+   "username": "dmytroilin"
+  },
+  {
+   "rank": 54,
+   "rating": 2445,
+   "uid": "56099334",
+   "username": "Logic-13"
+  },
+  {
+   "rank": 55,
+   "rating": 2445,
+   "uid": "35836472",
+   "username": "ajayjha25"
+  },
+  {
+   "rank": 57,
+   "rating": 2442,
+   "uid": "406746995",
+   "username": "Charles-Baird"
+  },
+  {
+   "rank": 58,
+   "rating": 2434,
+   "uid": "230536597",
+   "username": "Mmmm98CH"
+  },
+  {
+   "rank": 60,
+   "rating": 2432,
+   "uid": "314256505",
+   "username": "TheDonutDude"
+  },
+  {
+   "rank": 62,
+   "rating": 2430,
+   "uid": "16298960",
+   "username": "GMeddiewendler"
+  },
+  {
+   "rank": 63,
+   "rating": 2424,
+   "uid": "528820085",
+   "username": "Taran0915"
+  },
+  {
+   "rank": 65,
+   "rating": 2422,
+   "uid": "7361235",
+   "username": "simbothepinup"
+  },
+  {
+   "rank": 67,
+   "rating": 2420,
+   "uid": "12148482",
+   "username": "dbaralic"
+  },
+  {
+   "rank": 69,
+   "rating": 2417,
+   "uid": "21556802",
+   "username": "Oberh"
+  },
+  {
+   "rank": 71,
+   "rating": 2412,
+   "uid": "301690219",
+   "username": "TheDarkAxolotl"
+  },
+  {
+   "rank": 76,
+   "rating": 2400,
+   "uid": "91999678",
+   "username": "Apaar27"
+  },
+  {
+   "rank": 81,
+   "rating": 2392,
+   "uid": "202697157",
+   "username": "Jonnie7"
+  },
+  {
+   "rank": 82,
+   "rating": 2391,
+   "uid": "170163381",
+   "username": "Arcticpolarbear67"
+  },
+  {
+   "rank": 83,
+   "rating": 2390,
+   "uid": "428656929",
+   "username": "Xyperflex"
+  },
+  {
+   "rank": 84,
+   "rating": 2390,
+   "uid": "7943390",
+   "username": "djoletoro"
+  },
+  {
+   "rank": 85,
+   "rating": 2388,
+   "uid": "1568092",
+   "username": "ajitroyal"
+  },
+  {
+   "rank": 86,
+   "rating": 2387,
+   "uid": "527183109",
+   "username": "RemovedUsername-26050202"
+  },
+  {
+   "rank": 90,
+   "rating": 2379,
+   "uid": "277816237",
+   "username": "Pamplemouse17"
+  },
+  {
+   "rank": 96,
+   "rating": 2371,
+   "uid": "467237342",
+   "username": "Rayquaza0309"
+  },
+  {
+   "rank": 98,
+   "rating": 2370,
+   "uid": "48656108",
+   "username": "Kirilovski"
+  },
+  {
+   "rank": 99,
+   "rating": 2368,
+   "uid": "93288496",
+   "username": "IShowSevereAutism"
+  },
+  {
+   "rank": 100,
+   "rating": 2367,
+   "uid": "88051712",
+   "username": "Slayer950"
+  }
+ ],
+ "top_n": 100
+}
