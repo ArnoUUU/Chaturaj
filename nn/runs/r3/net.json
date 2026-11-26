@@ -1,0 +1,61 @@
+{
+ "positions": 60172,
+ "val_positions": 6034,
+ "games": 480,
+ "best_val": 0.9673,
+ "h": 32,
+ "hidden": [
+  32,
+  32
+ ],
+ "head": "points",
+ "globals": 36,
+ "gamma": 0.97,
+ "aux": 0.1,
+ "wd": 0.0001,
+ "lr": 0.001,
+ "params": 57733,
+ "seconds": 8.0,
+ "log": [
+  {
+   "epoch": 0,
+   "train": 0.9921,
+   "val": 0.9673,
+   "val_bce": 0.4485,
+   "val_mse": 5.188
+  },
+  {
+   "epoch": 1,
+   "train": 0.7573,
+   "val": 0.9987,
+   "val_bce": 0.4621,
+   "val_mse": 5.366
+  },
+  {
+   "epoch": 2,
+   "train": 0.5886,
+   "val": 1.0558,
+   "val_bce": 0.4833,
+   "val_mse": 5.725
+  },
+  {
+   "epoch": 3,
+   "train": 0.5088,
+   "val": 1.1182,
+   "val_bce": 0.5121,
+   "val_mse": 6.062
+  },
+  {
+   "epoch": 4,
+   "train": 0.4677,
+   "val": 1.1677,
+   "val_bce": 0.5443,
+   "val_mse": 6.235
+  }
+ ],
+ "data": [
+  "/home/user/Chaturaj/nn/runs/r0/pos.bin",
+  "/home/user/Chaturaj/nn/runs/r1/pos.bin",
+  "/home/user/Chaturaj/nn/runs/r2/pos.bin"
+ ]
+}

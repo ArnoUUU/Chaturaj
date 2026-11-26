@@ -1,0 +1,67 @@
+{
+ "positions": 193342,
+ "val_positions": 23055,
+ "games": 1440,
+ "best_val": 0.8184,
+ "h": 32,
+ "hidden": [
+  32,
+  32
+ ],
+ "head": "points",
+ "globals": 36,
+ "gamma": 0.97,
+ "aux": 0.1,
+ "wd": 0.0001,
+ "lr": 0.001,
+ "params": 57733,
+ "seconds": 55.0,
+ "log": [
+  {
+   "epoch": 0,
+   "train": 0.9033,
+   "val": 0.8184,
+   "val_bce": 0.4216,
+   "val_mse": 3.969
+  },
+  {
+   "epoch": 1,
+   "train": 0.7084,
+   "val": 0.8645,
+   "val_bce": 0.4335,
+   "val_mse": 4.31
+  },
+  {
+   "epoch": 2,
+   "train": 0.6248,
+   "val": 0.9054,
+   "val_bce": 0.4468,
+   "val_mse": 4.586
+  },
+  {
+   "epoch": 3,
+   "train": 0.5884,
+   "val": 0.9404,
+   "val_bce": 0.4599,
+   "val_mse": 4.806
+  },
+  {
+   "epoch": 4,
+   "train": 0.5682,
+   "val": 0.9679,
+   "val_bce": 0.466,
+   "val_mse": 5.019
+  }
+ ],
+ "data": [
+  "nn/runs/r0/pos.bin",
+  "nn/runs/r1/pos.bin",
+  "nn/runs/r2/pos.bin",
+  "nn/runs/r3/pos.bin",
+  "nn/runs/r4/pos.bin",
+  "nn/runs/r5/pos.bin",
+  "nn/runs/r6/pos.bin",
+  "nn/runs/r7/pos.bin",
+  "nn/runs/r8/pos.bin"
+ ]
+}

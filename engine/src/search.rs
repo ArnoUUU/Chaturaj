@@ -37,6 +37,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+use crate::features::globals_for;
 use crate::nnue::{AccStack, Net, NUM_OUTPUTS};
 use crate::rules::{splitmix, Move, Position};
 
@@ -110,6 +111,8 @@ pub struct Searcher {
     pub elim_bonus: f64,
     pub elim_horizon: u32,
     pub resign: bool,
+    /// Also try resigning at the root with three or more players left (on by default).
+    pub resign_multi: bool,
     tt: HashMap<u64, Entry>,
     nodes: u64,
     deadline: Option<Instant>,
@@ -126,7 +129,7 @@ impl Searcher {
             return Err("give a time budget or a fixed depth".into());
         }
         Ok(Searcher { net, time_ms, depth, max_depth, qdepth, tt_size, check_ext, width, full_plies, discount, elim_bonus,
-                      elim_horizon: elim_horizon.max(1), resign, tt: HashMap::new(), nodes: 0,
+                      elim_horizon: elim_horizon.max(1), resign, resign_multi: true, tt: HashMap::new(), nodes: 0,
                       deadline: None })
     }
 
@@ -249,7 +252,9 @@ impl Searcher {
 
     fn evaluate(&self, pos: &Position, acc: &mut AccStack) -> Utilities {
         let k = pos.current_player();
-        utilities_from_logits(&acc.logits(k, &pos.globals(k)), k)
+        let mut g = Vec::with_capacity(self.net.n_globals);
+        globals_for(pos, k, self.net.n_globals, &mut g);
+        utilities_from_logits(&acc.logits(k, &g), k)
     }
 
     /// Utilities of each child after `moves`: exact for finished games, otherwise from one
@@ -265,7 +270,7 @@ impl Searcher {
                 let k = pos.current_player();
                 boards.push(pos.board);
                 ks.push(k);
-                globals.extend_from_slice(&pos.globals(k));
+                globals_for(pos, k, self.net.n_globals, &mut globals);
                 live.push(i);
             }
             pos.pop().expect("pop");
@@ -405,7 +410,7 @@ impl Searcher {
         }
         // root, three or more players left: resigning is tried after the moves (no width
         // selection, not counted among the kids). Skipped after a move that already wins.
-        if root && self.resign && !won && pos.active_count() >= 3 {
+        if root && self.resign && self.resign_multi && !won && pos.active_count() >= 3 {
             if depth == 1 && self.tick() {
                 return None;
             }

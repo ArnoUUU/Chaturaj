@@ -49,6 +49,7 @@ SAVE_DIR = ROOT / "games" / "played"
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 STATIC_FILES = {"play.css": "text/css", "play.js": "application/javascript"}
 UNIFORM = "uniform"
+GREEDY_PREFIX = "greedy:"          # greedy:greedy, greedy:greedy-trade, greedy:naive (bot/greedy.py)
 HUMAN = "human"
 PLAYERS_DIR = ROOT / "scraper" / "data" / "players"
 FALLBACK_CLOCKS = ["1|5", "1|0", "3|2", "5|0", "10|5", "0.5|2"]
@@ -114,13 +115,16 @@ def list_bots() -> dict:
     for row in _index_rows():
         options.append({"value": row["label"], "label": f"Model: {row['label']}"})
     options.append({"value": UNIFORM, "label": "Uniform (no model, weak)"})
+    from bot.greedy import PRESETS
+    for name in PRESETS:
+        options.append({"value": GREEDY_PREFIX + name, "label": f"Greedy: {name} (alpha-beta, no network)"})
     # the default bot is a file path or 'uniform'; pick the option that names the same file
     default_value = UNIFORM
     target = default_bot()
     if target != UNIFORM:
         target_path = Path(target).resolve()
         for opt in options:
-            if opt["value"] in (HUMAN, UNIFORM):
+            if opt["value"] in (HUMAN, UNIFORM) or opt["value"].startswith(GREEDY_PREFIX):
                 continue
             try:
                 if find_model(opt["value"]).resolve() == target_path:
@@ -142,7 +146,7 @@ class EngineBank:
     def get(self, ref: str):
         with self._lock:
             if ref not in self._evals:
-                if ref == UNIFORM:
+                if ref == UNIFORM or ref.startswith(GREEDY_PREFIX):
                     self._evals[ref] = UniformEvaluator()
                 else:
                     from bot.evaluate import load_evaluator
@@ -153,6 +157,8 @@ class EngineBank:
     def name(self, ref: str) -> str:
         if ref == UNIFORM:
             return "Uniform"
+        if ref.startswith(GREEDY_PREFIX):
+            return "Greedy " + ref[len(GREEDY_PREFIX):]
         from bot.evaluate import model_name
         from bot.registry import find_model
         return model_name(find_model(ref))
@@ -163,6 +169,11 @@ def parse_seat_value(value, color: str) -> str | None:
     v = str(HUMAN if value is None else value).strip()
     if v in ("", HUMAN):
         return None
+    if v.startswith(GREEDY_PREFIX):
+        from bot.greedy import PRESETS
+        if v[len(GREEDY_PREFIX):] not in PRESETS:
+            raise ValueError(f"unknown greedy bot for {_NAMES[color]}: {v}")
+        return v
     if v != UNIFORM:
         from bot.registry import find_model
         try:
@@ -486,6 +497,9 @@ class Session:
                 if job is None:
                     self.changed.wait(0.5)
                     continue
+            if job["ref"].startswith(GREEDY_PREFIX):
+                self._greedy_turn(job)
+                continue
             # loading a model can take a while: keep it outside the lock
             mcts = self._searcher(job["ref"])
             root = job["root"] or Node(job["state"])
@@ -509,6 +523,31 @@ class Session:
                     self._engine_resign(job["color"], {"sims": int(mcts.last_simulations)})
                 else:
                     self._play(job["color"], root.moves[i], {"sims": int(mcts.last_simulations)})
+
+    def _greedy_turn(self, job: dict) -> None:
+        """A greedy bot (bot/greedy.py) plays: paranoid alpha-beta within the move budget."""
+        from bot.greedy import Bot
+        bots = self.__dict__.setdefault("_greedy_bots", {})
+        ref = job["ref"]
+        if ref not in bots:
+            bots[ref] = Bot(ref[len(GREEDY_PREFIX):], time_ms=100, max_depth=8)
+        bot = bots[ref]
+        bot.time_ms = max(50.0, job["budget"] * 1000)
+        bot.depth = None
+        started = time.monotonic()
+        action = bot.best_move(job["state"])
+        with self.lock:
+            if self.closed or self.paused or self.version != job["version"] or self.over():
+                return
+            self.engine_info[job["color"]] = {
+                "bot": self._seat_name(job["color"]), "sims": bot.stats["nodes"], "new_sims": bot.stats["nodes"],
+                "seconds": round(time.monotonic() - started, 2), "budget": round(job["budget"], 2),
+                "values": [], "depth": bot.stats["depth"]}
+            self.root, self.root_owner = None, job["ref"]
+            if isinstance(action, Resign):
+                self._engine_resign(job["color"], {"sims": bot.stats["nodes"]})
+            else:
+                self._play(job["color"], action, {"sims": bot.stats["nodes"]})
 
     def _engine_resign(self, color: str, extra: dict | None = None) -> None:
         """A bot resigns for `color` (under the lock): charged like a move, logged as

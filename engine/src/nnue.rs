@@ -56,6 +56,13 @@ pub struct Net {
     pub out: Layer,
     feature: Vec<u16>, // [p][code - 1][square]
     max_width: usize,
+    /// Points head (nn/train.py): the output layer gives each seat's expected future points
+    /// F (mover first) and logit(i above j) = beta * ((s_i + F_i) - (s_j + F_j)), with the
+    /// current scores s from the globals. None: the output layer gives the 6 logits.
+    pub points_beta: Option<f32>,
+    /// Global inputs after the accumulators: the 16 of `Position::globals`, or more
+    /// (`features::extended`), read off the first layer's width.
+    pub n_globals: usize,
 }
 
 /// Dot product written as 8 independent lanes so it compiles to SIMD (AVX2 + FMA).
@@ -109,7 +116,8 @@ impl Net {
         if ft_w.len() != NUM_FEATURES * h || ft_b.len() != h {
             return Err(format!("feature transformer must be ({}, {}), got {} / {}", NUM_FEATURES, h, ft_w.len(), ft_b.len()));
         }
-        let mut width = 4 * h + NUM_GLOBALS;
+        let n_globals = layers.first().map_or(out.n_in, |l| l.n_in).saturating_sub(4 * h).max(NUM_GLOBALS);
+        let mut width = 4 * h + n_globals;
         let mut max_width = width;
         for (i, l) in layers.iter().enumerate() {
             if l.n_in != width {
@@ -118,7 +126,7 @@ impl Net {
             width = l.n_out;
             max_width = max_width.max(width);
         }
-        if out.n_in != width || out.n_out != NUM_OUTPUTS {
+        if out.n_in != width || (out.n_out != NUM_OUTPUTS && out.n_out != 4) {
             return Err(format!("output layer must be ({}, {}), got ({}, {})", NUM_OUTPUTS, width, out.n_out, out.n_in));
         }
         let mut feature = vec![0u16; 4 * NUM_CODES * 64];
@@ -129,7 +137,24 @@ impl Net {
                 }
             }
         }
-        Ok(Net { h, ft_w, ft_b, layers, out, feature, max_width })
+        Ok(Net { h, ft_w, ft_b, layers, out, feature, max_width, points_beta: None, n_globals })
+    }
+
+    /// The 6 pairwise logits from the output layer's values (see `points_beta`).
+    #[inline]
+    fn finish(&self, raw: &[f32], globals: &[f32]) -> [f32; NUM_OUTPUTS] {
+        let mut o = [0.0f32; NUM_OUTPUTS];
+        match self.points_beta {
+            None => o.copy_from_slice(&raw[..NUM_OUTPUTS]),
+            Some(beta) => {
+                let v: [f32; 4] = std::array::from_fn(|i| 30.0 * globals[4 + i] + raw[i]);
+                const PAIRS: [(usize, usize); 6] = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)];
+                for (n, &(i, j)) in PAIRS.iter().enumerate() {
+                    o[n] = beta * (v[i] - v[j]);
+                }
+            }
+        }
+        o
     }
 
     pub fn num_params(&self) -> usize {
@@ -200,7 +225,8 @@ impl Net {
                 *dst = src.clamp(0.0, 1.0);
             }
         }
-        x[4 * h..4 * h + NUM_GLOBALS].copy_from_slice(&globals[..NUM_GLOBALS]);
+        let ng = self.n_globals;
+        x[4 * h..4 * h + ng].copy_from_slice(&globals[..ng]);
         let (mut cur, mut nxt) = (x, y);
         for l in &self.layers {
             let input = &cur[..l.n_in];
@@ -212,10 +238,10 @@ impl Net {
         }
         let mut out = [0.0f32; NUM_OUTPUTS];
         let input = &cur[..self.out.n_in];
-        for (o, v) in out.iter_mut().enumerate() {
+        for (o, v) in out.iter_mut().enumerate().take(self.out.n_out) {
             *v = dot(&self.out.w[o * self.out.n_in..(o + 1) * self.out.n_in], input) + self.out.b[o];
         }
-        out
+        self.finish(&out, globals)
     }
 
     /// Multiply-adds of one forward pass (hidden + output layers).
@@ -227,7 +253,8 @@ impl Net {
     /// back to back (4 * h each), `globals` their 16 globals each.
     pub fn forward_batch(&self, accs: &[f32], ks: &[usize], globals: &[f32]) -> Vec<[f32; NUM_OUTPUTS]> {
         let (h, n) = (self.h, ks.len());
-        let w0 = 4 * h + NUM_GLOBALS;
+        let ng = self.n_globals;
+        let w0 = 4 * h + ng;
         let mut x = vec![0.0f32; n * w0];
         for (b, &k) in ks.iter().enumerate() {
             let acc = &accs[b * 4 * h..(b + 1) * 4 * h];
@@ -238,7 +265,7 @@ impl Net {
                     *dst = src.clamp(0.0, 1.0);
                 }
             }
-            row[4 * h..].copy_from_slice(&globals[b * NUM_GLOBALS..(b + 1) * NUM_GLOBALS]);
+            row[4 * h..].copy_from_slice(&globals[b * ng..(b + 1) * ng]);
         }
         let mut width = w0;
         for l in &self.layers {
@@ -257,10 +284,10 @@ impl Net {
         (0..n)
             .map(|b| {
                 let mut o = [0.0f32; NUM_OUTPUTS];
-                for (i, v) in o.iter_mut().enumerate() {
+                for (i, v) in o.iter_mut().enumerate().take(self.out.n_out) {
                     *v = yt[i * n + b] + self.out.b[i];
                 }
-                o
+                self.finish(&o, &globals[b * ng..(b + 1) * ng])
             })
             .collect()
     }

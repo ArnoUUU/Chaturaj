@@ -10,6 +10,8 @@
 //! - `search.rs`: the max^n search over both (a port of bot/maxn.py), exposed as
 //!   `chaturaji_engine.MaxN`. bot/maxn.py uses it automatically.
 
+pub mod features;
+pub mod greedy;
 pub mod nnue;
 pub mod rules;
 pub mod search;

@@ -1,0 +1,65 @@
+{
+ "positions": 147811,
+ "val_positions": 16521,
+ "games": 1120,
+ "best_val": 0.8416,
+ "h": 32,
+ "hidden": [
+  32,
+  32
+ ],
+ "head": "points",
+ "globals": 36,
+ "gamma": 0.97,
+ "aux": 0.1,
+ "wd": 0.0001,
+ "lr": 0.001,
+ "params": 57733,
+ "seconds": 18.2,
+ "log": [
+  {
+   "epoch": 0,
+   "train": 0.9108,
+   "val": 0.8416,
+   "val_bce": 0.4272,
+   "val_mse": 4.144
+  },
+  {
+   "epoch": 1,
+   "train": 0.6989,
+   "val": 0.8937,
+   "val_bce": 0.4328,
+   "val_mse": 4.609
+  },
+  {
+   "epoch": 2,
+   "train": 0.6012,
+   "val": 0.9488,
+   "val_bce": 0.4533,
+   "val_mse": 4.955
+  },
+  {
+   "epoch": 3,
+   "train": 0.5571,
+   "val": 0.9768,
+   "val_bce": 0.4684,
+   "val_mse": 5.085
+  },
+  {
+   "epoch": 4,
+   "train": 0.5331,
+   "val": 1.0335,
+   "val_bce": 0.4845,
+   "val_mse": 5.49
+  }
+ ],
+ "data": [
+  "/home/user/Chaturaj/nn/runs/r0/pos.bin",
+  "/home/user/Chaturaj/nn/runs/r1/pos.bin",
+  "/home/user/Chaturaj/nn/runs/r2/pos.bin",
+  "/home/user/Chaturaj/nn/runs/r3/pos.bin",
+  "/home/user/Chaturaj/nn/runs/r4/pos.bin",
+  "/home/user/Chaturaj/nn/runs/r5/pos.bin",
+  "/home/user/Chaturaj/nn/runs/r6/pos.bin"
+ ]
+}

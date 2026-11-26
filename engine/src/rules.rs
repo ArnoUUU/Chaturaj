@@ -30,16 +30,16 @@ pub const BISHOP: usize = 1;
 pub const KNIGHT: usize = 2;
 pub const ROOK: usize = 3;
 pub const PAWN: usize = 4;
-const PIECE_POINTS: [i32; 5] = [3, 5, 3, 5, 1]; // K B N R P
+pub const PIECE_POINTS: [i32; 5] = [3, 5, 3, 5, 1]; // K B N R P
 const DEAD_KING_POINTS: i32 = 3;
 const LAST_STANDING_PER_DEAD_KING: i32 = 3;
 const REPETITION_POINTS: i32 = 2;
 
-const KNIGHT_OFFSETS: [(i32, i32); 8] = [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)];
-const KING_OFFSETS: [(i32, i32); 8] = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)];
-const ROOK_DIRS: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
-const BISHOP_DIRS: [(i32, i32); 4] = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
-const PAWN_DIRECTION: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)]; // R up, B right, Y down, G left
+pub const KNIGHT_OFFSETS: [(i32, i32); 8] = [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)];
+pub const KING_OFFSETS: [(i32, i32); 8] = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)];
+pub const ROOK_DIRS: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
+pub const BISHOP_DIRS: [(i32, i32); 4] = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
+pub const PAWN_DIRECTION: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)]; // R up, B right, Y down, G left
 
 #[inline]
 pub fn code(owner: usize, ty: usize) -> u8 {
@@ -89,7 +89,7 @@ pub fn is_promotion_square(color: usize, sq: usize) -> bool {
     }
 }
 
-fn pawn_capture_offsets(color: usize) -> [(i32, i32); 2] {
+pub fn pawn_capture_offsets(color: usize) -> [(i32, i32); 2] {
     let (dr, dc) = PAWN_DIRECTION[color];
     if dr != 0 {
         [(dr, -1), (dr, 1)]
