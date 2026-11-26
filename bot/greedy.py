@@ -262,8 +262,10 @@ class Bot:
         return placement_value(eliminate(state, state.current_player()).scores, me)
 
     @staticmethod
-    def _key(state: ChaturajiState, flags):
-        return (tuple(tuple(row) for row in state.board), state.turn % 4, min(state.turn // 4, 30),
+    def _key(me: str, state: ChaturajiState, flags):
+        # `me` is part of the key: values are from the searching seat's view, and one Bot may
+        # play several seats (the GUI and match scripts share one per preset)
+        return (me, tuple(tuple(row) for row in state.board), state.turn % 4, min(state.turn // 4, 30),
                 tuple(state.scores[c] for c in TURN_ORDER), tuple(sorted(state.eliminated)), flags)
 
     def _tick(self):
@@ -336,7 +338,7 @@ class Bot:
         if depth <= 0:
             return self._quiesce(me, state, alpha, beta, flags, self.p.qdepth)
         self._tick()
-        key = self._key(state, flags)
+        key = self._key(me, state, flags)
         ent = self.tt.get(key)
         tt_move = None
         a0, b0 = alpha, beta
